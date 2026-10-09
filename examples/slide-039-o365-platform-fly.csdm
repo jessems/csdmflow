@@ -1,0 +1,102 @@
+title "O365 Platform (Fly)"
+layout row
+subtitle "SaaS with On Prem/Cloud Exchange Servers and Active Directory"
+
+# not modelled: legend, domain colour key, "Updated" date, footnote
+# ("*All platform apps would have a dependency to the platform host prod environment")
+
+BC manage-tech: Manage Technology
+BC offer-tech: Offer Technology
+
+BA o365: O365 E5
+BA teams: Teams
+BA sharepoint: SharePoint Online
+BA exchange: Exchange
+BA ad: Active Directory
+
+SI o365-prod: O365 Prod
+SI teams-saas: Teams SaaS
+SI sharepoint-saas: SharePoint SaaS
+SI exchange-prod: Exchange On Prem Prod
+SI exchange-dev: Exchange On Prem Dev
+SI ad-prod: Active Directory 2022 Prod
+
+BSO teams-bso: Teams
+BSO sharepoint-sites: SharePoint Sites
+BSO outlook: Outlook
+BS messaging: Direct Messaging Services
+BS file-sharing: File Sharing Services
+BS email: Email Services
+
+TMSO aad-admin: Azure Active Directory Administration
+TMSO exchange-admin: Exchange Administration
+TMSO windows-admin: Windows Server Admin
+TMS identity: Identity Access Services
+TMS app-mgmt: Application Mgmt Services
+TMS compute: Compute Services
+
+DCG windows-group: Windows Exchange Servers
+CI(Application) exchange-app: Exchange
+CI(Windows Server) windows: Exchange01, Exchange02
+
+SP tech-portfolio: Technology Portfolio
+SP comm-portfolio: Communication
+
+manage-tech -> o365
+# strategic: purple connector Manage Technology <-> Identity Access, continued by a
+# second purple line down the TMS column to Compute Services; all three TMS
+manage-tech -> identity
+manage-tech -> app-mgmt
+manage-tech -> compute
+# strategic: one purple connector from Offer Technology runs down the BS column
+# behind Direct Messaging and File Sharing (glued to Email Services); all three
+offer-tech -> messaging
+offer-tech -> file-sharing
+offer-tech -> email
+
+# platform host
+teams -> o365
+sharepoint -> o365
+exchange -> o365
+teams -> teams-saas
+sharepoint -> sharepoint-saas
+exchange -> exchange-prod
+exchange -> exchange-dev
+ad -> ad-prod
+
+teams-saas -> o365-prod
+sharepoint-saas -> o365-prod
+exchange-prod -> o365-prod
+# "Sends Data to" is one dash-dot connector glued to Teams SaaS that runs up the
+# instance column behind Exchange and SharePoint SaaS; read as all three
+ad-prod -> teams-saas : Sends Data to
+ad-prod -> sharepoint-saas : Sends Data to
+ad-prod -> exchange-prod : Sends Data to
+
+teams-bso -> teams-saas
+sharepoint-sites -> sharepoint-saas
+outlook -> exchange-prod
+teams-bso -> messaging
+sharepoint-sites -> file-sharing
+outlook -> email
+# one dashed connector Direct Messaging -> Communication runs behind the BS column
+messaging -> comm-portfolio
+file-sharing -> comm-portfolio
+email -> comm-portfolio
+
+aad-admin -> ad-prod
+aad-admin -> identity
+exchange-admin -> exchange-app
+exchange-admin -> app-mgmt
+windows-admin -> windows-group
+windows-admin -> compute
+windows-group -> windows
+# the blue service-mapping connector starts at the Dev back card and runs behind
+# Application Exchange to the Windows servers stack; read as the stack -> app -> servers
+exchange-prod -> exchange-app
+exchange-dev -> exchange-app
+exchange-app -> windows
+
+identity -> tech-portfolio
+app-mgmt -> tech-portfolio
+compute -> tech-portfolio

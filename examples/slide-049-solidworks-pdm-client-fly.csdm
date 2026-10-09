@@ -1,0 +1,78 @@
+title "SolidWorks PDM and SolidWorks Client (Fly)"
+layout reach 1 2
+subtitle "Client Server Example for Manufacturing industry"
+
+BC manage-tech: Manage Technology
+BC manage-products: Manage Products
+BA solidworks-pdm: SolidWorks Product Data Mgmt
+SI pdm-prod: SolidWorks PDM Prod
+TMSO solidworks-admin: SolidWorks Administration
+TMS app-mgmt: Application Mgmt Services
+# slide shows "*SolidWorks"
+BSO solidworks-bso: SolidWorks
+BS prototyping: Product Prototyping Services
+
+TMSO db-admin-so: Database Administration
+TMS db-admin: Database Administration
+
+CI(Database) sql-db: Microsoft SQL Database
+CI(Application) archive-app: SolidWorks Archive Server App
+CI(Application) license-app: License Server App
+CI(Windows Server) win-sql: Windows Server
+CI(Windows Server) win-archive: Windows Server
+CI(Windows Server) win-license: Windows Server
+CI(Network Router) router: Network Router
+CI(Network Switch) switch: Network Switch
+
+DCG net-routers: Network Routers
+DCG win-servers: Windows Servers
+TMSO network-admin: Network Administration
+TMSO windows-admin: Windows Administration
+TMS network-services: Network Services
+TMS compute: Compute/Hosting Services
+
+# not modelled: Service Desk, Database Support Team, Network Support Team, Windows Support Team;
+#   note "references from Business and Tech Mgmt Services to Service Portfolios are not depicted"; legends
+
+manage-products -> solidworks-pdm
+solidworks-pdm -> pdm-prod
+solidworks-admin -> pdm-prod
+solidworks-admin -> app-mgmt
+solidworks-bso -> pdm-prod
+solidworks-bso -> prototyping
+
+# service map (checked in deck XML): three blue connectors leave the SI. One is bound to the License app.
+# One runs straight behind the Archive app to its Windows Server. One is an elbow that crosses between
+# the SQL DB and Archive app (it looks like an Archive->SQL link in the image) and runs down behind the
+# SQL DB to its Windows Server. Read as SI -> each app CI -> its server, as on the Run slide (47).
+pdm-prod -> sql-db
+pdm-prod -> archive-app
+pdm-prod -> license-app
+sql-db -> win-sql
+archive-app -> win-archive
+license-app -> win-license
+# slide draws one blue line from the router through all three servers
+router -> win-sql
+router -> win-archive
+router -> win-license
+
+db-admin-so -> sql-db
+db-admin-so -> db-admin
+win-servers -> win-sql
+win-servers -> win-archive
+win-servers -> win-license
+net-routers -> router
+net-routers -> switch
+network-admin -> net-routers
+network-admin -> network-services
+windows-admin -> win-servers
+windows-admin -> compute
+
+# strategic (purple): Manage Technology provided by the four TMS along the left-hand line. In the deck XML the
+# connectors are chained (Manage Technology -> DB Admin, Network Services -> DB Admin, Network Services -> Compute);
+# App Mgmt is not bound but the line runs through it. Modelled as the BC provided by all four.
+manage-tech -> app-mgmt
+manage-tech -> db-admin
+manage-tech -> network-services
+manage-tech -> compute
+manage-products -> prototyping

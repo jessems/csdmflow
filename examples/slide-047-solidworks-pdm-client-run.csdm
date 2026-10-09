@@ -1,0 +1,56 @@
+title "SolidWorks PDM and SolidWorks Client (Run)"
+layout reach 1 2
+subtitle "Client Server Example for Manufacturing industry"
+
+BA solidworks-pdm: SolidWorks Product Data Mgmt
+SI pdm-prod: SolidWorks PDM Prod
+TMSO solidworks-admin: SolidWorks Administration
+TMS app-mgmt: Application Mgmt Services
+BSO solidworks-bso: SolidWorks
+BS eng-design: Engineering Design Services
+
+CI(Database) sql-db: Microsoft SQL Database
+CI(Application) archive-app: SolidWorks Archive Server App
+CI(Application) license-app: License Server App
+CI(Windows Server) win-sql: Windows Server
+CI(Windows Server) win-archive: Windows Server
+CI(Windows Server) win-license: Windows Server
+CI(Network Router) router: Network Router
+CI(Network Switch) switch: Network Switch
+
+DCG net-routers: Network Routers
+DCG win-servers: Windows Servers
+TMSO network-admin: Network Administration
+TMSO windows-admin: Windows Administration
+TMS network-services: Network Services
+TMS compute: Compute/Hosting Services
+
+# not modelled: Service Desk (BSO support group), Network Support Team, Windows Support Team; legends
+
+solidworks-pdm -> pdm-prod
+solidworks-admin -> pdm-prod
+solidworks-admin -> app-mgmt
+solidworks-bso -> pdm-prod
+solidworks-bso -> eng-design
+
+pdm-prod -> sql-db
+pdm-prod -> archive-app
+pdm-prod -> license-app
+# app CIs are drawn stacked on their Windows Server (hosted on)
+sql-db -> win-sql
+archive-app -> win-archive
+license-app -> win-license
+# slide draws one blue line from the router through all three servers
+router -> win-sql
+router -> win-archive
+router -> win-license
+
+win-servers -> win-sql
+win-servers -> win-archive
+win-servers -> win-license
+net-routers -> router
+net-routers -> switch
+network-admin -> net-routers
+network-admin -> network-services
+windows-admin -> win-servers
+windows-admin -> compute

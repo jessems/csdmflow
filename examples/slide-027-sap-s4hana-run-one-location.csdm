@@ -1,0 +1,91 @@
+title "SAP S/4HANA (Run)"
+layout tiers
+subtitle "On Premise Systems – One Location, Production only"
+
+# not modelled: legend, domain colour key, "Updated" date, callout note on muted infrastructure TMS/TMSO
+
+BA erp: SAP S/4HANA ERP
+BA finance: SAP Finance
+BA tm: SAP Transportation Mgmt
+
+SI erp-prod: SAP S/4HANA ERP Prod
+SI transport-prod: SAP S/4HANA TransPort Mgmt Prod
+SI finance-prod: SAP Finance Prod
+SI tm-prod: SAP Transportation Mgmt Prod
+
+BSO finance-reporting: SAP Finance Group Reporting
+BSO tm-support: SAP Transportation Mgmt Support
+BS accounting: Accounting Services
+BS fleet: Fleet and Logistic Services
+
+CI(Application) fiori: SAP Fiori Apps Odata Services
+CI(Application) backend: Backend Apps ABAP
+CI(Application) hana: HANA Database
+CI(Infrastructure) network-gear: Network Gear (Switches/Routers)
+CI(Infrastructure) front-end: Front End Server(s)
+CI(Infrastructure) back-end: Back End Server(s)
+CI(Infrastructure) db-servers: Database Server(s)
+CI(Infrastructure) storage: Storage
+
+TMSO sap-admin: SAP Administration
+TMSO network-admin: Network Administration
+TMSO server-admin: Server Administration
+TMSO db-admin: Database Administration
+TMSO storage-admin: Storage Administration
+TMS app-mgmt: App Mgmt Services
+TMS network: Network Services
+TMS hosting: Hosting Services
+TMS database: Database Services
+TMS storage-svc: Storage Services
+
+# platform host: platform apps reference the host app
+finance -> erp
+tm -> erp
+erp -> erp-prod
+erp -> transport-prod
+finance -> finance-prod
+tm -> tm-prod
+
+finance-prod -> erp-prod
+tm-prod -> transport-prod
+
+finance-reporting -> finance-prod
+tm-support -> tm-prod
+finance-reporting -> accounting
+tm-support -> fleet
+
+# service mapping (blue elbow connectors share one bus line; endpoints confirmed
+# from the deck XML): both host instances map to all three application CIs,
+# the platform-app instances only to Fiori (Finance Prod's stem is hidden
+# behind its green Depends On line)
+erp-prod -> fiori
+erp-prod -> backend
+erp-prod -> hana
+transport-prod -> fiori
+transport-prod -> backend
+transport-prod -> hana
+finance-prod -> fiori
+tm-prod -> fiori
+fiori -> front-end : Runs On
+backend -> back-end : Runs On
+hana -> db-servers : Runs On
+front-end -> network-gear
+db-servers -> storage
+
+# SAP Administration "Contains" is one connector glued to Transportation Mgmt
+# Prod that runs behind all four instance boxes; read as containing all four
+sap-admin -> erp-prod
+sap-admin -> transport-prod
+sap-admin -> finance-prod
+sap-admin -> tm-prod
+sap-admin -> app-mgmt
+network-admin -> network-gear
+network-admin -> network
+server-admin -> front-end
+server-admin -> back-end
+server-admin -> db-servers
+server-admin -> hosting
+db-admin -> db-servers
+db-admin -> database
+storage-admin -> storage
+storage-admin -> storage-svc

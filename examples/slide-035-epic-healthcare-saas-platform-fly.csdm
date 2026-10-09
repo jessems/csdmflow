@@ -1,0 +1,71 @@
+title "EPIC Healthcare SaaS Platform (Fly)"
+layout tiers
+
+# not modelled: legend, domain colour key, footnote note ("*Represents the
+# various available applications ..."); "*" footnote markers dropped from names
+
+BC manage-tech: Manage Technology
+BC health-records: Manage Health Records
+BC patient-care: Deliver Patient Care
+
+BA ehr: EPIC EHR
+BA mychart: EPIC MyChart
+BA clinicals: EPIC Clinicals
+BA pharmacy: EPIC Pharmacy
+
+SI epic-saas: Epic SaaS
+SI mychart-saas: EPIC My Chart SaaS
+SI clinicals-saas: EPIC Clinicals SaaS
+SI pharmacy-saas: Pharmacy SaaS
+
+TMSO epic-admin: Epic Administration
+TMS app-mgmt: Application Mgmt Services
+
+BSO mychart-bso: EPIC My Chart
+BSO clinicals-bso: EPIC Clinicals
+BSO pharmacy-bso: EPIC Pharmacy
+BS patient: Patient Services
+BS pharma: Pharmaceutical Services
+
+SP tech-portfolio: Technology Portfolio
+SP patient-portfolio: Patient Health Portfolio
+SP health-delivery: Health Delivery Systems
+
+health-records -> ehr
+health-records -> mychart
+patient-care -> clinicals
+patient-care -> pharmacy
+
+# strategic (Provided by::Provides)
+manage-tech -> app-mgmt
+patient-care -> pharma
+
+# platform host
+mychart -> ehr
+clinicals -> ehr
+pharmacy -> ehr
+ehr -> epic-saas
+mychart -> mychart-saas
+clinicals -> clinicals-saas
+pharmacy -> pharmacy-saas
+
+mychart-saas -> epic-saas
+clinicals-saas -> epic-saas
+pharmacy-saas -> epic-saas
+
+epic-admin -> epic-saas
+epic-admin -> mychart-saas
+epic-admin -> clinicals-saas
+epic-admin -> pharmacy-saas
+epic-admin -> app-mgmt
+
+mychart-bso -> mychart-saas
+clinicals-bso -> clinicals-saas
+pharmacy-bso -> pharmacy-saas
+mychart-bso -> patient
+clinicals-bso -> patient
+pharmacy-bso -> pharma
+
+app-mgmt -> tech-portfolio
+patient -> patient-portfolio
+pharma -> health-delivery

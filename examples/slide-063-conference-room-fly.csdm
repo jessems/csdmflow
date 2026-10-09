@@ -1,0 +1,67 @@
+title "Conference Room (Fly)"
+layout tiers
+
+# not modelled: domain legend, relationship-style legend
+
+BC manage-tech: Manage Technology
+BC manage-comms: Manage Communication and Collaboration
+BC manage-facility: Manage Facility
+
+BA zoom-ba: Zoom
+# Accurent EMS appears twice on the slide as separate BA boxes (the second,
+# above Mitel, has no capability line).
+BA accurent-ems-ba: Accurent EMS
+BA accurent-ems-ba-2: Accurent EMS
+
+SI zoom-si: Zoom
+SI accurent-ems-si: Accurent EMS
+SI mitel: Mitel
+
+TMSO zoom-admin: Zoom Administration
+TMS app-mgmt: Application Mgmt Services
+
+BSO zoom-bso: Zoom
+BSO conf-room-loc-1: Conference Room Location 1
+BSO conf-room-scheduling: Conference Room Scheduling
+BSO conf-room-telco: Conference Room Telco
+
+BS comm-services: Communication Services
+BS conference-services: Conference Services
+BS voip: VOIP Services
+
+SP technology-services: Technology Services
+SP communications: Communications
+SP facility: Facility
+
+# Business capabilities
+manage-comms -> zoom-ba
+manage-comms -> accurent-ems-ba
+manage-tech -> app-mgmt
+manage-comms -> comm-services
+manage-comms -> conference-services
+manage-facility -> voip
+
+# Applications
+zoom-ba -> zoom-si
+accurent-ems-ba -> accurent-ems-si
+accurent-ems-ba-2 -> mitel
+
+# Technical management
+zoom-admin -> zoom-si
+zoom-admin -> app-mgmt
+app-mgmt -> technology-services
+
+# Business service offerings
+zoom-bso -> zoom-si
+conf-room-loc-1 -> zoom-si
+conf-room-scheduling -> accurent-ems-si
+conf-room-telco -> mitel
+zoom-bso -> comm-services
+zoom-bso -> conference-services
+conf-room-loc-1 -> conference-services
+conf-room-scheduling -> conference-services
+conf-room-telco -> voip
+
+# Business services -> portfolios (Communication Services has no portfolio line on the slide)
+conference-services -> communications
+voip -> facility

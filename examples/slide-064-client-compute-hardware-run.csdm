@@ -1,0 +1,36 @@
+title "Client Compute Hardware (Run)"
+layout tiers
+
+# not modelled: Product Models (MacBook Pro 2019, Lenovo ThinkPad, Dell Inspiron),
+#   Contracts (Apple, Lenovo, Desktops), Manufacturers (Apple, Lenovo, Dell),
+#   "Desktop Support" tags on both offerings (support group), location "Paris",
+#   Domains legend
+
+TMS desktop-os: Desktop OS Services
+TMSO apple-os-admin: Apple OS Administration
+TMSO pc-windows-admin: PC Windows Administration
+
+BS client-endpoint: Client Endpoint Services
+BSO laptop: Laptop
+BSO desktop: Desktop
+
+CI laptop-123: Laptop 123
+CI laptop-456: Laptop 456
+CI desktop-123: Desktop 123
+CI desktop-456: Desktop 456
+
+apple-os-admin -> desktop-os
+pc-windows-admin -> desktop-os
+apple-os-admin -> laptop-123
+apple-os-admin -> laptop-456
+pc-windows-admin -> desktop-123
+pc-windows-admin -> desktop-456
+
+laptop -> client-endpoint : Reference
+desktop -> client-endpoint : Reference
+
+# Offerings depend directly on the CIs (no Service Instance on this slide).
+laptop -> laptop-123 : Depends on
+laptop -> laptop-456 : Depends on
+desktop -> desktop-123 : Depends on
+desktop -> desktop-456 : Depends on

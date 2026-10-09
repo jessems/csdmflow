@@ -1,0 +1,10 @@
+node_modules/
+.DS_Store
+# reference slide images and decks are copyrighted third-party material — keep them local
+.slides/
+*.pptx
+*.pdf
+# render output next to sources
+examples/*.svg
+examples/*.png
+examples/*.gen.gf

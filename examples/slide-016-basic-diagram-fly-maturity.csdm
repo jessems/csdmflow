@@ -1,0 +1,99 @@
+title "Basic Diagram Fly Maturity"
+# not modelled: App/Software/Hardware Product models, Vendor and SLA tags, domain legend,
+# explanatory notes
+
+BC leaf-aa: Leaf Capability AA
+
+BA app-a: Application A
+BA app-b: Application B
+BA app-c: Application C SaaS
+
+SI app-a-prod: App A PROD
+SI app-b-prod: App B PROD
+SI app-c-prod: App C SaaS Prod
+
+TMSO app-a-support: App A Support
+TMSO app-b-support: App B Support
+TMSO windows-admin: Windows Administration
+TMSO sql-support: SQL Support
+TMSO network-support: Network Support
+
+TMS app-mgmt: App Mgmt Services
+TMS compute: Compute/ Hosting
+TMS database: Database Services
+TMS network: Network Services
+
+DCG win-servers: All Win Servers
+DCG mssql-apps: MSSQL Apps
+DCG network-gear: Network Gear
+
+CI(Application) appa-ci: AppA@server123
+CI(Application) appb-ci: AppB@server456
+CI(Windows Server) server123: Server123
+CI(Windows Server) server456: Server456
+CI(Database) mssql123: MSSQL@server123
+CI(Database) mssql456: MSSQL@server456
+CI(Switch) switch1001: Switch1001
+CI(Router) router01: Router 01
+
+BSO example-a1: Example A
+BSO example-a2: Example A
+BSO example-b: Example B
+
+BS service-1: Service #1
+BS service-2: Service #2
+
+SP portfolio-a: Service Portfolio A
+SP portfolio-b: Service Portfolio B
+
+app-a -> app-a-prod
+app-b -> app-b-prod
+app-c -> app-c-prod
+
+app-a-support -> app-a-prod
+app-b-support -> app-b-prod
+app-a-support -> app-mgmt
+app-b-support -> app-mgmt
+
+windows-admin -> win-servers
+windows-admin -> compute
+sql-support -> mssql-apps
+sql-support -> database
+network-support -> network-gear
+network-support -> network
+
+win-servers -> server123
+win-servers -> server456
+mssql-apps -> mssql123
+mssql-apps -> mssql456
+network-gear -> switch1001
+network-gear -> router01
+
+example-a1 -> app-c-prod
+example-a2 -> app-b-prod
+example-b -> app-a-prod
+example-a1 -> service-1
+example-a2 -> service-1
+example-b -> service-2
+service-1 -> portfolio-a
+# slide shows no portfolio link for Service #2
+app-mgmt -> portfolio-b
+
+# strategic (purple, Provided by::Provides)
+leaf-aa -> service-1
+leaf-aa -> service-2
+
+# service mapping (blue)
+app-a-prod -> appa-ci
+app-b-prod -> appb-ci
+appa-ci -> server123 : Runs On
+appb-ci -> server456 : Runs On
+server123 -> mssql123
+# Server456 -> MSSQL@server456 passes behind MSSQL@server123 (arrowhead only at MSSQL@server456)
+server456 -> mssql456
+# a single connector MSSQL@server456 -> Router 01 passes behind Switch1001, so it looks
+# like a MSSQL -> Switch -> Router chain; Switch1001 has no blue link of its own
+# deck vectors: this connector is attached to Router 01 but runs exactly along the
+# centre line behind Switch1001, which has no mapping of its own -> read as a chain
+mssql456 -> switch1001
+switch1001 -> router01

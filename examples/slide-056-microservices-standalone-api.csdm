@@ -1,0 +1,41 @@
+title "Microservices: stand-alone API (shared)"
+
+BC manage-finances: Manage Finances
+BA currency: Currency Conversion
+BA tax-calc: Tax calculation
+
+SI tax-prod: Tax Calc 2021 Prod
+SI phone-ordering: Phone Ordering
+SI order-mgmt: Order Management
+SI services-mgmt: Services Management
+
+TMSO devops: DevOps Engineering
+TMS app-mgmt: Application Mgmt Services
+TMSO tax-admin: Tax Calc Admin Americas
+TMS api: API Services
+
+CI(Application) tax-java: Tax Calc Java
+CI(Server) server123: Server123
+
+# not modelled: Software Product Model "Tax Calc 2021" (dashed References bound to the Tax Calc SI in deck XML);
+#   footnote on undepicted portfolios/offerings; legends
+
+manage-finances -> currency
+manage-finances -> tax-calc
+tax-calc -> tax-prod
+
+devops -> phone-ordering
+devops -> order-mgmt
+devops -> services-mgmt
+devops -> app-mgmt
+tax-admin -> tax-prod
+tax-admin -> api
+
+# slide draws the consuming SIs -> Tax Calc SI as an orange line labelled "Contains";
+# CSDM SI->SI is Depends On, so the inferred label is used
+phone-ordering -> tax-prod
+order-mgmt -> tax-prod
+services-mgmt -> tax-prod
+
+tax-prod -> tax-java
+tax-java -> server123

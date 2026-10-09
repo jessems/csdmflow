@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1089 588.4" width="1089" height="588.4" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs>
+<marker id="arw-e9ebed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e9ebed"/></marker>
+<marker id="arw-f0ac45" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0ac45"/></marker>
+<marker id="arw-73c26a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#73c26a"/></marker>
+<linearGradient id="gf-bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#112c40"/><stop offset="1" stop-color="#204242"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="1089" height="588.4" fill="url(#gf-bg)"/>
+<text x="30" y="56" font-size="30" font-weight="700" fill="#ffffff">EPIC Healthcare SaaS Platform (Run)</text>
+<text x="889" y="44" font-size="14" font-weight="700" fill="#ffffff">Domains</text>
+<rect x="889" y="56" width="18" height="10" fill="#5dbfcd"/>
+<text x="915" y="65" font-size="11" fill="#ffffff">Design and Planning</text>
+<rect x="889" y="72" width="18" height="10" fill="#f0ac45"/>
+<text x="915" y="81" font-size="11" fill="#ffffff">Service Delivery</text>
+<rect x="889" y="88" width="18" height="10" fill="#73c26a"/>
+<text x="915" y="97" font-size="11" fill="#ffffff">Service Consumption</text>
+<rect x="649" y="30" width="220" height="55" fill="none" stroke="#ffffff" stroke-width="1"/>
+<path d="M 663 39.42857142857143 L 663 69.28571428571428" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<text x="673" y="50" font-size="10" fill="#ffffff">Relationship</text>
+<path d="M 773 39.42857142857143 L 773 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arw-e9ebed)"/>
+<text x="783" y="50" font-size="10" fill="#ffffff">References</text>
+<text x="30" y="82" font-size="15" font-weight="600" fill="#ffffff">SaaS with no infrastructure Healthcare industry</text>
+<path d="M 254 181.6 L 254 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<path d="M 422 181.6 L 422 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<path d="M 590 181.6 L 590 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<path d="M 758 181.6 L 758 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<path d="M 366 272.4 L 310 272.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 254 335.2 L 254 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 590 307.2 L 590 335.2 L 512 335.2 A 6 6 0 0 0 500 335.2 L 428 335.2 A 6 6 0 0 0 416 335.2 L 254 335.2" fill="none" stroke="#f0ac45" stroke-width="2"/>
+<path d="M 758 307.2 L 758 335.2 L 680 335.2 A 6 6 0 0 0 668 335.2 L 610 335.2 A 6 6 0 0 0 598 335.2 L 512 335.2 A 6 6 0 0 0 500 335.2 L 428 335.2 A 6 6 0 0 0 416 335.2 L 254 335.2" fill="none" stroke="#f0ac45" stroke-width="2"/>
+<path d="M 86 363.2 L 86 272.4 L 198 272.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 86 363.2 L 86 343.2 L 422 343.2 L 422 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 86 363.2 L 86 343.2 L 500 343.2 A 6 6 0 0 1 512 343.2 L 604 343.2 L 604 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 86 363.2 L 86 343.2 L 500 343.2 A 6 6 0 0 1 512 343.2 L 668 343.2 A 6 6 0 0 1 680 343.2 L 772 343.2 L 772 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 478 398 L 506 398 L 506 272.4 L 478 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
+<path d="M 646 398 L 674 398 L 674 272.4 L 646 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
+<path d="M 814 398 L 842 398 L 842 272.4 L 814 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
+<path d="M 366 146.8 L 310 146.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 268 209.6 L 268 181.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 576 181.6 L 576 209.6 L 428 209.6 A 6 6 0 0 0 416 209.6 L 268 209.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 744 181.6 L 744 209.6 L 596 209.6 A 6 6 0 0 0 584 209.6 L 428 209.6 A 6 6 0 0 0 416 209.6 L 268 209.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 86 432.8 L 86 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 422 432.8 L 422 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 590 432.8 L 590 523.6 L 478 523.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 758 432.8 L 758 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<circle cx="86" cy="343.2" r="2.5" fill="#f0ac45"/>
+<circle cx="422" cy="343.2" r="2.5" fill="#f0ac45"/>
+<circle cx="604" cy="343.2" r="2.5" fill="#f0ac45"/>
+<rect x="198" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="254" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="254" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="254" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC EHR</text>
+<rect x="366" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="422" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="422" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="422" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC MyChart</text>
+<rect x="534" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="590" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="590" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="590" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
+<rect x="702" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="758" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="758" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="758" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Pharmacy</text>
+<rect x="198" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="254" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="254" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Epic SaaS</text>
+<rect x="366" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="422" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="422" y="277.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC My Chart</text>
+<text x="422" y="290.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SaaS</text>
+<rect x="534" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="590" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="590" y="277.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
+<text x="590" y="290.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SaaS</text>
+<rect x="702" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="758" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="758" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Pharmacy SaaS</text>
+<rect x="30" y="363.2" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="86" y="382.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="86" y="396.3" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
+<text x="86" y="409.7" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Epic</text>
+<text x="86" y="423.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Administration</text>
+<rect x="366" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="422" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="422" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
+<text x="422" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC My Chart</text>
+<rect x="534" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="590" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="590" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
+<text x="590" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
+<rect x="702" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="758" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="758" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
+<text x="758" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Pharmacy</text>
+<rect x="30" y="488.8" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="86" y="508.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="86" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
+<text x="86" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Application Mgmt</text>
+<text x="86" y="548.7" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
+<rect x="366" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="422" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="422" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Patient Services</text>
+<rect x="702" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="758" y="515.2" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="758" y="528.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Pharmaceutical</text>
+<text x="758" y="542" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
+<text x="260" y="213.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Consumes</text>
+<text x="428" y="213.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Consumes</text>
+<text x="596" y="213.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Consumes</text>
+<text x="764" y="213.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Consumes</text>
+<text x="338" y="266.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff">Depends On</text>
+<text x="260" y="330.2" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Depends On</text>
+<text x="142" y="266.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff">Contains</text>
+<text x="254" y="337.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff">Contains</text>
+<text x="345" y="337.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff">Contains</text>
+<text x="429" y="337.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff">Contains</text>
+<text x="512" y="339.2" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Depends On</text>
+<text x="680" y="339.2" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Depends On</text>
+<text x="848" y="339.2" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">Depends On</text>
+<text x="338" y="140.8" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff">References</text>
+<text x="274" y="204.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">References</text>
+<text x="92" y="464.8" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">References</text>
+<text x="428" y="464.8" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">References</text>
+<text x="534" y="517.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff">References</text>
+<text x="764" y="464.8" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff">References</text>
+</svg>

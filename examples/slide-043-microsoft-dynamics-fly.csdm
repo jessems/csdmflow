@@ -1,0 +1,29 @@
+title "Microsoft Dynamics (Fly)"
+
+BC manage-tech: Manage Technology
+BC manage-cust: Manage Customer Relations
+BA dynamics: Microsoft Dynamics
+SI dynamics-prod: MS Dynamics Prod
+TMSO dynamics-admin: Dynamics Admin
+TMS app-mgmt: Application Mgmt Services
+BSO crm: Dynamics CRM
+BSO reports: Dynamics Reports
+BS crs: Customer Relationship Services
+CI infra: Infrastructure CIs
+SP tech-portfolio: Technology Portfolio
+SP cust-portfolio: Customer Mgmt Portfolio
+
+manage-tech -> dynamics
+manage-cust -> dynamics
+dynamics -> dynamics-prod
+dynamics-admin -> dynamics-prod
+dynamics-admin -> app-mgmt
+crm -> dynamics-prod
+reports -> dynamics-prod
+crm -> crs
+reports -> crs
+dynamics-prod -> infra
+app-mgmt -> tech-portfolio
+crs -> cust-portfolio
+manage-tech -> app-mgmt
+manage-cust -> crs

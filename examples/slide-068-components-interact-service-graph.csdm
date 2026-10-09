@@ -1,0 +1,86 @@
+title "How the components interact: Service Graph"
+
+# Same model as slide 67, now populated through Service Graph connectors.
+# not modelled: discovery/Service Graph source box (SolarWinds, Tanium, SCCM)
+#   feeding the CI frame, "Ven" and "SLA" tags on the Tech Mgmt Service
+#   Offerings, "Installed Software" callout and legend, green frame around the
+#   discovered CIs, Domains legend, "References data on record" legend
+# Unlike slide 67 there is no Portfolio B -> Compute/Hosting line here.
+
+BC leaf-aa: Leaf Capability AA
+BA app-a: Application A
+BA app-b: Application B
+BA app-c: Application C
+
+SI app-a-prod: App A PROD
+SI app-b-prod: App B PROD
+
+BSO example-a: Example A
+BSO example-b: Example B
+BS bs-1: Service #1
+SP portfolio-a: Portfolio A
+SP portfolio-b: Portfolio B
+
+TMS app-mgmt: App Mgmt Services
+TMSO app-a-support: App A Support
+TMSO app-b-support: App B Support
+
+TMS compute: Compute/Hosting
+TMSO windows-admin: Windows Administration
+DCG all-win: All Win Servers
+TMS database: Database Services
+TMSO sql-support: SQL Support
+DCG mssql-apps: MSSQL Apps
+TMS network: Network Services
+TMSO network-support: Network Support
+DCG network-gear: Network Gear
+
+CI(Application) appb-123: AppB@server123
+CI(Application) appb-456: AppB@server456
+CI(Server) server123: Server123
+CI(Server) server456: Server456
+CI(Database) mssql-123: MSSQL@server123
+CI(Database) mssql-456: MSSQL@server456
+CI(Switch) switch1001: Switch1001
+CI(Router) router01: Router 01
+
+leaf-aa -> app-a
+leaf-aa -> app-b
+leaf-aa -> app-c
+app-a -> app-a-prod
+app-b -> app-b-prod
+
+# Portfolio A has a solid arrow into the Business Capability (not a standard CSDM pair; kept as shown).
+portfolio-a -> leaf-aa
+bs-1 -> portfolio-a
+example-a -> bs-1
+example-b -> bs-1
+example-a -> app-b-prod
+example-b -> app-a-prod
+
+app-a-support -> app-mgmt
+app-b-support -> app-mgmt
+app-a-support -> app-a-prod
+app-b-support -> app-b-prod
+
+windows-admin -> compute
+windows-admin -> all-win
+all-win -> server123
+all-win -> server456
+sql-support -> database
+sql-support -> mssql-apps
+mssql-apps -> mssql-123
+mssql-apps -> mssql-456
+network-support -> network
+network-support -> network-gear
+network-gear -> switch1001
+network-gear -> router01
+
+# Service mapping
+app-b-prod -> appb-123
+app-b-prod -> appb-456
+appb-123 -> server123 : Runs On
+# Unlike slide 67, AppB@server456 has no Runs On line to Server456 here.
+# Arrows from each server into its database instance, labelled "Runs::Runs On".
+server123 -> mssql-123 : Runs::Runs On
+server456 -> mssql-456 : Runs::Runs On

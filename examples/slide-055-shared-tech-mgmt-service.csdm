@@ -1,0 +1,67 @@
+title "Shared Tech Mgmt Service Example"
+layout row
+subtitle "Active Directory (LDAP) sends data to other applications"
+
+BC dir-mgmt: Directory Service Management
+BA netiq: NetIQ eDirectory
+BA ms-ad: MS Active Directory
+BA openldap: OpenLDAP
+
+SI azure-ad: Azure Active Directory
+SI ad-prod: Active Directory 2022 Prod
+SI box-prod: Box Prod
+SI sn-prod: SN Prod
+SI exchange-prod: MS Exchange 2016 Prod
+SI sap-prod: SAP Prod
+
+TMSO ad-admin: Active Directory Administration
+TMS identity: Identity Mgmt
+TMSO windows-admin: Windows Administration
+TMS compute: Compute/Hosting Services
+
+BSO box: Box
+BS file-sharing: File Sharing
+
+CI(Application) webproxy: WebProxy@serverabc
+CI(Application) adfs: ADFS@server123
+CI(Application) ds1: DS1@server456
+CI(Application) aad-connect: Azure AD-Connect@server789
+# slide labels these "Infrastructure"
+CI(Server) serverabc: Serverabc
+CI(Server) server123: Server123
+CI(Server) server456: Server456
+CI(Server) server789: Server789
+
+# not modelled: SLA and Support tags on the TMSO, "Dynamic CI groups can be added here" note,
+#   footnote on undepicted portfolios/offerings, Manage Technical/Design/Consume legend
+
+dir-mgmt -> netiq
+dir-mgmt -> ms-ad
+dir-mgmt -> openldap
+ms-ad -> azure-ad
+ms-ad -> ad-prod
+
+ad-admin -> azure-ad
+ad-admin -> ad-prod
+ad-admin -> identity
+
+ad-prod -> box-prod : Sends Data to
+ad-prod -> sn-prod : Sends Data to
+ad-prod -> exchange-prod : Sends Data to
+ad-prod -> sap-prod : Sends Data to
+
+box -> box-prod
+box -> file-sharing
+
+ad-prod -> webproxy
+ad-prod -> adfs
+ad-prod -> ds1
+ad-prod -> aad-connect
+webproxy -> serverabc : Runs on
+adfs -> server123 : Runs on
+ds1 -> server456 : Runs on
+aad-connect -> server789 : Runs on
+
+# slide draws Contains only to Serverabc
+windows-admin -> serverabc
+windows-admin -> compute

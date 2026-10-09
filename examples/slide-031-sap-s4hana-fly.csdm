@@ -1,0 +1,106 @@
+title "SAP S/4HANA (Fly)"
+layout reach 2 0
+subtitle "On Premise Systems – One Location, Production only"
+
+# not modelled: legend, domain colour key, "Updated" date
+
+BC manage-tech: Manage Technology
+BC erp-cap: Enterprise Resource Planning
+BC manage-fin: Manage Finances
+BC manage-log: Manage Logistics
+
+BA erp: SAP S/4HANA ERP
+BA finance: SAP Finance
+BA tm: SAP Transportation Mgmt
+
+SI erp-prod: SAP S/4HANA ERP Prod
+SI transport-prod: SAP S/4HANA Transport Mgmt Prod
+SI finance-prod: SAP Finance Prod
+SI tm-prod: SAP Transportation Mgmt
+
+BS other-services: Other related services (TBD)
+BSO other-offerings: Other related offerings (TBD)
+BSO finance-reporting: SAP Finance Group Reporting
+BSO tm-support: SAP Transportation Mgmt Support
+BS accounting: Accounting Services
+BS fleet: Fleet and Logistics Services
+SP tech-portfolio: Technology
+SP fin-portfolio: Financial Mgmt Portfolio
+SP log-portfolio: Logistics and Procurement
+
+CI(Application) fiori: SAP Fiori Apps Odata Services
+CI(Application) backend: Backend Apps ABAP
+CI(Application) hana: HANA Database
+CI(Infrastructure) network-gear: Network Gear (Switches/Routers)
+CI(Infrastructure) front-end: Front End Server(s)
+CI(Infrastructure) back-end: Back End Server(s)
+CI(Infrastructure) db-servers: Database Server(s)
+CI(Infrastructure) storage: Storage (Sans/NAS/Cloud)
+
+TMSO sap-admin: SAP Administration
+TMS app-mgmt: App Mgmt Services
+TMSO various-offerings: Various Support/Admin Offerings TBD
+TMS various-tms: Various Tech Mgmt Services TBD
+DCG groups: Various Groups by Query TBD
+
+# strategic (Provided by::Provides)
+manage-tech -> app-mgmt
+manage-tech -> various-tms
+erp-cap -> other-services
+manage-fin -> accounting
+manage-log -> fleet
+
+erp-cap -> erp
+manage-fin -> finance
+manage-log -> tm
+
+# platform host
+finance -> erp
+tm -> erp
+erp -> erp-prod
+finance -> finance-prod
+tm -> tm-prod
+
+finance-prod -> erp-prod
+tm-prod -> transport-prod
+
+other-offerings -> other-services
+other-offerings -> erp-prod
+finance-reporting -> finance-prod
+tm-support -> tm-prod
+finance-reporting -> accounting
+tm-support -> fleet
+accounting -> fin-portfolio
+fleet -> log-portfolio
+
+# service mapping: blue elbow connectors share one bus; per the deck XML only
+# ERP Prod maps to all three application CIs, Finance Prod and Transportation
+# Mgmt map to Fiori, Transport Mgmt Prod has none
+erp-prod -> fiori
+erp-prod -> backend
+erp-prod -> hana
+finance-prod -> fiori
+tm-prod -> fiori
+fiori -> front-end
+backend -> back-end : Runs On
+hana -> db-servers
+front-end -> network-gear
+db-servers -> storage
+
+# SAP Administration "Contains" is one connector glued to Transportation Mgmt
+# that runs behind all four instance boxes; read as containing all four
+sap-admin -> erp-prod
+sap-admin -> transport-prod
+sap-admin -> finance-prod
+sap-admin -> tm-prod
+sap-admin -> app-mgmt
+various-offerings -> groups
+groups -> network-gear
+groups -> front-end
+groups -> back-end
+groups -> db-servers
+groups -> storage
+various-offerings -> various-tms
+# dashed References: App Mgmt joins Various TMS's line, which runs to Technology
+app-mgmt -> tech-portfolio
+various-tms -> tech-portfolio

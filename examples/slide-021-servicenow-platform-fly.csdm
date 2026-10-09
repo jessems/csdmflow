@@ -1,0 +1,132 @@
+title "ServiceNow Platform (Fly)"
+layout tiers
+subtitle "SaaS with no infrastructure"
+# not modelled: Dev/QA stacked environment cards behind each Service Instance, legend,
+# row labels, "Reviewed" date, *EA/*IRM footnotes
+
+BC erp: Enterprise Resource Planning
+BC manage-tech: Manage Technology
+BC manage-risk: Manage Enterprise Risk
+BC manage-hr: Manage Human Resources
+BC manage-finances: Manage Finances
+
+BA sn-platform: ServiceNow Platform
+BA event-mgmt: ServiceNow Event Mgmt
+BA incident-mgmt: SN Incident Mgmt
+BA eam: ServiceNow *EAM
+BA irm: ServiceNow *IRM
+BA esm: Employee Service Mgmt
+BA fsm: Finance Service Mgmt
+
+SI au-prod: Australia Prod
+SI event-prod: *Event Mgmt Prod
+SI incident-prod: Incident Mgmt Prod
+SI ea-prod: *EA Prod
+SI irm-prod: Integrated Risk Mgmt Prod
+SI esm-prod: Employee Service Mgmt
+SI fsm-prod: Financial Service Mgmt Prod
+
+TMSO sn-admin: ServiceNow Administration
+TMSO sys-monitoring: System Monitoring
+TMS platform-instances: Platform Service Instances
+TMS monitoring: Monitoring Services
+
+BSO incident-bso: SN Incident Mgmt
+BSO apm-bso: SN Application Portfolio Mgmt
+BSO irm-bso: SN Integrated Risk Mgmt
+BSO onboarding: SN Onboarding
+BSO finance-bso: SN Finance Service Mgmt
+
+# End User Services is drawn orange on the slide but labelled Business Service
+BS end-user: End User Services
+BS ea-services: Enterprise Architectural Services
+BS risk: Risk Management Services
+BS hr: HR Services
+BS financial: Financial Services
+
+SP strategy: Strategy and Vision
+SP technology: Technology
+SP service-mgmt: Service Mgmt Portfolio
+SP risk-portfolio: Enterprise Risk Portfolio
+SP hr-portfolio: Human Resources
+SP financials: Financials
+
+# capability -> application (Provided by). ERP and Manage Technology each have their own
+# connector into ServiceNow Platform; they merge into one arrowhead on the slide.
+erp -> sn-platform
+manage-tech -> sn-platform
+manage-tech -> event-mgmt
+manage-tech -> incident-mgmt
+manage-tech -> eam
+manage-risk -> irm
+manage-hr -> esm
+manage-finances -> fsm
+
+# app -> platform host (dashed References)
+event-mgmt -> sn-platform
+incident-mgmt -> sn-platform
+eam -> sn-platform
+irm -> sn-platform
+esm -> sn-platform
+fsm -> sn-platform
+
+sn-platform -> au-prod
+event-mgmt -> event-prod
+incident-mgmt -> incident-prod
+eam -> ea-prod
+irm -> irm-prod
+esm -> esm-prod
+fsm -> fsm-prod
+
+# host service instance relationship (each app instance depends on the platform host)
+event-prod -> au-prod
+incident-prod -> au-prod
+ea-prod -> au-prod
+irm-prod -> au-prod
+esm-prod -> au-prod
+fsm-prod -> au-prod
+
+# one Contains bus from ServiceNow Administration (arrow into Australia Prod) with a stub up to
+# every app instance. Unlike slide 19, the bus also has a stub to *Event Mgmt Prod, where it
+# overlaps System Monitoring's own Contains arrow; kept as sn-admin -> event-prod (ambiguous).
+sn-admin -> au-prod
+sn-admin -> event-prod
+sn-admin -> incident-prod
+sn-admin -> ea-prod
+sn-admin -> irm-prod
+sn-admin -> esm-prod
+sn-admin -> fsm-prod
+sys-monitoring -> event-prod
+sn-admin -> platform-instances
+sys-monitoring -> monitoring
+
+incident-bso -> incident-prod
+apm-bso -> ea-prod
+irm-bso -> irm-prod
+onboarding -> esm-prod
+finance-bso -> fsm-prod
+incident-bso -> end-user
+apm-bso -> ea-services
+irm-bso -> risk
+onboarding -> hr
+finance-bso -> financial
+
+platform-instances -> technology
+monitoring -> technology
+# drawn as a solid line on the slide (other References are dashed)
+end-user -> service-mgmt
+risk -> risk-portfolio
+hr -> hr-portfolio
+financial -> financials
+# Strategy and Vision portfolio has no connections on the slide
+
+# strategic (purple, Provided by::Provides). Manage Technology -> Monitoring Services is
+# drawn twice: one line down the left, one down the right that runs behind End User
+# Services (its "Provided by::Provides" label sits beside End User Services, which has
+# no strategic link of its own).
+erp -> platform-instances
+manage-tech -> monitoring
+manage-tech -> ea-services
+manage-risk -> risk
+manage-hr -> hr
+manage-finances -> financial

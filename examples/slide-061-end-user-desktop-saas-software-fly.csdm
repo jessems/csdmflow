@@ -1,0 +1,74 @@
+title "End User Desktop and SaaS Software (Fly)"
+layout tiers
+
+# not modelled: Domains legend, relationship-style legend,
+#   footnote "** TBD by your business naming structure of your services"
+#   (the ** markers on Business Service names are dropped)
+
+BC manage-tech: Manage Technology
+BC create-docs: Create Documentation
+BC create-content: Create Content
+BC conduct-research: Conduct Research
+BC communicate: Communicate and Collaborate
+BC manage-finances: Manage Finances
+BC manage-hr: Manage Human Resources
+
+CI(Computer) users-computer: User's Computer
+
+BSO acrobat: Adobe Acrobat
+BSO ms-office: Microsoft Office - Std
+BSO chrome: Google Chrome
+BSO teams: Teams
+# * on the slide marks the SaaS offerings (accessed from rather than installed on the computer)
+BSO clockify: Clockify Time Tracker
+BSO monitask: Monitask Desktop Monitoring
+
+BS client-computing: Client Computing
+BS doc-content: Documentation and Content Services (TBD)
+BS desktop-software: Desktop Software Services (TBD)
+BS direct-messaging: Direct Messaging Services (TBD)
+BS payroll: Payroll Services (TBD)
+BS employee-mgmt: Employee Mgmt Services (TBD)
+
+SP technology-service: Technology Service
+SP end-user: End User Services
+SP financial: Financial Services Portfolio
+SP hr-services: Human Resource Services
+
+# Strategic (Provided by::Provides). Create Documentation has no line of its own:
+# the purple connector starting at Create Content runs behind Create
+# Documentation and Adobe Acrobat down to Documentation and Content Services.
+manage-tech -> client-computing
+create-content -> doc-content
+conduct-research -> desktop-software
+communicate -> direct-messaging
+manage-finances -> payroll
+manage-hr -> employee-mgmt
+
+# The slide draws a dashed References arrow from the CI box to Client Computing
+# (not a CSDM pair; kept as shown).
+users-computer -> client-computing : References
+acrobat -> doc-content
+ms-office -> doc-content
+chrome -> desktop-software
+teams -> direct-messaging
+clockify -> payroll
+monitask -> employee-mgmt
+
+# One dotted arrow runs from Monitask straight through every offering into the
+# CI, labelled "*Installed on / *Accessed from"; read as each offering -> CI.
+acrobat -> users-computer : Installed on / Accessed from
+ms-office -> users-computer : Installed on / Accessed from
+chrome -> users-computer : Installed on / Accessed from
+teams -> users-computer : Installed on / Accessed from
+clockify -> users-computer : Installed on / Accessed from
+monitask -> users-computer : Installed on / Accessed from
+
+client-computing -> technology-service
+doc-content -> end-user
+desktop-software -> end-user
+# Desktop Software Services also has a dotted reference to the Technology Service portfolio.
+desktop-software -> technology-service
+direct-messaging -> end-user
+payroll -> financial
+employee-mgmt -> hr-services

@@ -1,0 +1,71 @@
+title "O365 Platform (Run)"
+layout row
+subtitle "SaaS with On Prem/Cloud Exchange Servers and Active Directory"
+
+# not modelled: legend, domain colour key, "Updated" date; undirected dashed
+# lines chaining the three TMS boxes (Identity - App Mgmt - Compute)
+
+BA o365: O365 E5
+BA teams: Teams
+BA sharepoint: SharePoint Online
+BA exchange: Exchange
+BA ad: Active Directory
+
+SI teams-saas: Teams SaaS
+SI sharepoint-saas: SharePoint SaaS
+SI exchange-prod: Exchange Prod
+SI exchange-dev: Exchange Dev
+SI ad-prod: Active Directory 2022 Prod
+
+BSO teams-bso: Teams
+BSO sharepoint-sites: SharePoint Sites
+BSO outlook: Outlook
+
+BS messaging: Direct Messaging Services
+BS file-sharing: File Sharing Services
+BS email: Email Services
+
+TMSO aad-admin: Azure Active Directory Administration
+TMSO exchange-admin: Exchange Administration
+TMSO windows-admin: Windows Server Admin
+
+TMS identity: Identity Access Services
+TMS app-mgmt: Application Mgmt Services
+TMS compute: Compute Services
+
+DCG windows-group: Windows Exchange Servers
+CI(Application) exchange-app: Exchange
+CI(Windows Server) windows: Exchange01, Exchange02
+
+teams -> o365
+sharepoint -> o365
+exchange -> o365
+teams -> teams-saas
+sharepoint -> sharepoint-saas
+exchange -> exchange-prod
+# Exchange Prod is a stacked card with a "Dev" back card; Dev edges mirror the stack
+exchange -> exchange-dev
+ad -> ad-prod
+teams-bso -> teams-saas
+sharepoint-sites -> sharepoint-saas
+outlook -> exchange-prod
+teams-bso -> messaging
+sharepoint-sites -> file-sharing
+outlook -> email
+aad-admin -> ad-prod
+aad-admin -> identity
+exchange-admin -> exchange-app
+exchange-admin -> app-mgmt
+windows-admin -> windows-group
+windows-admin -> compute
+windows-group -> windows
+# the blue service-mapping connector starts at the Dev back card and runs behind
+# Application Exchange to the Windows servers stack; read as the stack -> app -> servers
+exchange-prod -> exchange-app
+exchange-dev -> exchange-app
+exchange-app -> windows
+# "Sends Data to" is one dash-dot connector glued to Teams SaaS that runs up the
+# instance column behind Exchange Prod and SharePoint SaaS; read as all three
+ad-prod -> teams-saas : Sends Data to
+ad-prod -> sharepoint-saas : Sends Data to
+ad-prod -> exchange-prod : Sends Data to

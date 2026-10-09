@@ -1,0 +1,83 @@
+title "SAP S/4HANA (Run)"
+layout tiers
+subtitle "On Premise Systems – Multiple Locations, Production only"
+
+# not modelled: legend, domain colour key, "Updated" date, two "depends on your
+# reporting needs / combine or separate offerings by location?" notes, callout note
+# (infrastructure TMS/TMSO not depicted on this slide)
+# Stacked boxes on the slide (front card + back card) are modelled as separate
+# entities; only the front cards carry drawn connectors, back-card edges mirror them.
+# Slide inconsistency: the SAP Transportation Mgmt Prod stack reads "EMEA" on both
+# cards, and the SAP Transport BSO front card has no location (back card "EMEA");
+# the unlabelled variants are assumed to be US, mirroring the SAP Finance stacks.
+
+BA erp: SAP S/4HANA ERP
+BA finance: SAP Finance Mgmt
+BA tm: SAP Transportation Mgmt
+
+SI erp-prod-emea: SAP S/4HANA ERP Prod EMEA
+SI transport-prod-us: S/4HANA Trans Mgmt Prod US
+SI finance-prod-us: SAP Finance Prod US
+SI finance-prod-emea: SAP Finance Prod EMEA
+SI tm-prod-emea: SAP Transportation Mgmt Prod EMEA
+SI tm-prod-us: SAP Transportation Mgmt Prod US
+
+BSO finance-reporting-us: SAP Finance Group Reporting US
+BSO finance-reporting-emea: SAP Finance Group Reporting EMEA
+BSO transport-us: SAP Transport US
+BSO transport-emea: SAP Transport EMEA
+BS accounting: Accounting Services
+BS fleet: Fleet and Logistics Mgmt Services
+
+CI(Application) fiori-emea: Front End SAP Fiori Apps Odata Services
+CI(Application) backend-emea: Backend Apps ABAP
+CI(Application) hana-emea: HANA Database
+CI(Infrastructure) infra-emea: Infrastructure CIs (Servers / Network Gear / Storage)
+CI(Application) fiori-us: Front End SAP Fiori Apps Odata Services
+CI(Application) backend-us: Backend Apps ABAP
+CI(Application) hana-us: HANA Database
+CI(Infrastructure) infra-us: Infrastructure CIs (Servers / Network Gear / Storage)
+
+TMSO sap-admin-emea: SAP Administration EMEA
+TMSO sap-admin-us: SAP Administration US
+TMS app-mgmt: App Mgmt Services
+
+# platform host
+finance -> erp
+tm -> erp
+erp -> erp-prod-emea
+erp -> transport-prod-us
+finance -> finance-prod-us
+finance -> finance-prod-emea
+tm -> tm-prod-emea
+tm -> tm-prod-us
+
+finance-prod-us -> erp-prod-emea
+finance-prod-emea -> erp-prod-emea
+tm-prod-emea -> transport-prod-us
+tm-prod-us -> transport-prod-us
+
+finance-reporting-us -> finance-prod-us
+finance-reporting-emea -> finance-prod-emea
+transport-us -> tm-prod-us
+transport-emea -> tm-prod-emea
+finance-reporting-us -> accounting
+finance-reporting-emea -> accounting
+transport-us -> fleet
+transport-emea -> fleet
+
+# each stack is drawn as one blue connector from the instance to the
+# Infrastructure CIs box, running behind Fiori / Backend / HANA; read as a chain
+erp-prod-emea -> fiori-emea
+fiori-emea -> backend-emea
+backend-emea -> hana-emea
+hana-emea -> infra-emea
+transport-prod-us -> fiori-us
+fiori-us -> backend-us
+backend-us -> hana-us
+hana-us -> infra-us
+
+sap-admin-emea -> erp-prod-emea
+sap-admin-us -> transport-prod-us
+sap-admin-emea -> app-mgmt
+sap-admin-us -> app-mgmt

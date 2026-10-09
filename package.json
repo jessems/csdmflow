@@ -1,0 +1,15 @@
+{
+  "name": "csdmflow",
+  "version": "0.1.0",
+  "description": "Text-to-diagram for CSDM service models: write entities and relationships, get a laid-out diagram.",
+  "bin": { "csdmflow": "bin/csdmflow.js" },
+  "main": "src/csdm.js",
+  "files": ["bin", "src"],
+  "scripts": {
+    "test": "node test/smoke.js",
+    "compare": "node tools/compare.js",
+    "images": "node tools/readme-images.js"
+  },
+  "engines": { "node": ">=18" },
+  "keywords": ["csdm", "cmdb", "servicenow", "diagram", "diagrams-as-code", "svg"]
+}

@@ -1,0 +1,16 @@
+title "Hello, CSDM"
+
+BA crm: Customer Portal
+SI crm-prod: Customer Portal Prod
+TMSO portal-admin: Portal Administration
+TMS app-mgmt: Application Mgmt Services
+BSO self-service: Self Service
+BS customer-care: Customer Care
+CI(Linux Server) web: web01, web02
+
+crm -> crm-prod
+portal-admin -> crm-prod
+portal-admin -> app-mgmt
+self-service -> crm-prod
+self-service -> customer-care
+crm-prod -> web

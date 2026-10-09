@@ -1,0 +1,61 @@
+title "Location and Environment"
+layout tiers
+subtitle "Platform Host/App Example for Insurance software - multiple locations and environments"
+
+BC manage-claims: Manage Claims
+BA claims-center: GuideWire Claims Center
+BA policy-center: GuideWire Policy Center
+BA billing-center: GuideWire Billing Center
+BA suite-host: Guidewire Insurance Suite (Host)
+
+SI suite-si: GuideWire Insurance Suite
+SI cc-dev-uk: GuideWire Claims Center DEV UK
+SI cc-dev-ny: GuideWire Claims Center DEV NY
+SI cc-emea: GuideWire Claims Center EMEA
+SI cc-ny-prod: GuideWire Claims Center NY PROD
+
+TMSO dev-global: Guidewire Development Global
+TMSO support-emea: Guidewire Support EMEA
+TMSO support-us: Guidewire Support US
+TMS app-mgmt: Application Mgmt Services
+
+BSO cp-emea: Claims Processing EMEA
+BSO cp-us: Claims Processing US
+BS claims-processing: Claims Processing Services
+
+# not modelled: "Environment Based Services" inset (Technology Service -> Prod/Non Prod/DR),
+#   "Location Based Service" inset (Service -> Location 1/2/3), note on Service Portfolio references; legends
+
+manage-claims -> claims-center
+# slide draws three dashed References lines, all starting at Claims Center: to Suite (Host), Billing Center
+# and Policy Center. Transcribed as drawn; CSDM would more naturally have each app reference the host.
+claims-center -> suite-host
+claims-center -> billing-center
+claims-center -> policy-center
+
+claims-center -> cc-emea
+claims-center -> cc-ny-prod
+
+# light-blue "Depends" lines: one curve from each Claims Center SI to the Insurance Suite SI
+cc-dev-uk -> suite-si
+cc-dev-ny -> suite-si
+cc-emea -> suite-si
+cc-ny-prod -> suite-si
+
+# orange Contains lines (checked in deck XML): Development Global has four elbow connectors bound to all four
+# Claims Center SIs. Support EMEA -> EMEA and Support US -> NY PROD. In the image they merge into one bus.
+dev-global -> cc-dev-uk
+dev-global -> cc-dev-ny
+dev-global -> cc-emea
+dev-global -> cc-ny-prod
+support-emea -> cc-emea
+support-us -> cc-ny-prod
+dev-global -> app-mgmt
+support-emea -> app-mgmt
+support-us -> app-mgmt
+
+# green Depends lines merge into one bus in the image; deck XML geometry confirms EMEA BSO -> EMEA SI, US BSO -> NY PROD SI
+cp-emea -> cc-emea
+cp-us -> cc-ny-prod
+cp-emea -> claims-processing
+cp-us -> claims-processing

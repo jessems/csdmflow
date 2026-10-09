@@ -1,0 +1,69 @@
+title "Microservices: Element of a larger Application (Fly)"
+subtitle "Decomposed Monolith"
+
+# not modelled: Product Model Customer Manager, Product Model Tax Calc 2021,
+#   Product Model Currency Convosoft v3 (each referenced by its Service Instance),
+#   Domains legend
+
+BC sales: Sales
+BA phone-order: Phone Order Management
+BA online-sales: Online Sales Management
+
+SP sales-portfolio: Sales
+BS online-sales-bs: Online Sales
+BSO online-ordering: Online Ordering
+
+SI online-order-prod: Online Order Prod
+SI customer-manager-prod: Customer Manager Prod
+SI currency-conv: Currency Conv v3
+SI tax-calc-prod: Tax Calc 2021 Prod
+
+TMS app-mgmt: Application Mgmt Services
+TMSO online-ordering-admin: Online Ordering Admin
+TMS cloud-hosting: Cloud Hosting
+TMSO aws-windows-admin: AWS Windows Administration
+DCG aws-windows-server: AWS Windows Server
+
+CI(Application) customerone: CustomerOne
+# Two separate "Tax Calc Java" application CIs: one under Currency Conv v3,
+# one under Tax Calc 2021 Prod.
+CI(Application) tax-calc-java-1: Tax Calc Java
+CI(Application) tax-calc-java-2: Tax Calc Java
+CI server456: Server456
+CI server123: Server123
+
+sales -> phone-order
+sales -> online-sales
+# Phone Order Management has no Consumes line on the slide.
+online-sales -> online-order-prod
+online-ordering -> online-order-prod
+online-ordering -> online-sales-bs
+online-sales-bs -> sales-portfolio
+
+# Microservice decomposition: unlabelled dashed arrows from the parent Service
+# Instance to each microservice (Depends On inferred).
+online-order-prod -> customer-manager-prod
+online-order-prod -> currency-conv
+online-order-prod -> tax-calc-prod
+
+online-ordering-admin -> app-mgmt
+# One "Contains" connector runs from the offering straight through Customer
+# Manager Prod and Currency Conv v3 to Tax Calc 2021 Prod (two Contains labels
+# along it); read as the offering containing all three microservices.
+online-ordering-admin -> customer-manager-prod
+online-ordering-admin -> currency-conv
+online-ordering-admin -> tax-calc-prod
+
+customer-manager-prod -> customerone
+currency-conv -> tax-calc-java-1
+tax-calc-prod -> tax-calc-java-2
+
+aws-windows-admin -> cloud-hosting
+aws-windows-admin -> aws-windows-server
+# One connector runs DCG -> through Server456 -> Server123; read as the group containing both servers.
+aws-windows-server -> server456
+aws-windows-server -> server123
+
+customerone -> server456 : Runs On
+tax-calc-java-1 -> server123 : Runs On
+tax-calc-java-2 -> server123 : Runs On

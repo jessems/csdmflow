@@ -1,0 +1,75 @@
+title "LogicMonitor and ServiceNow (Fly)"
+subtitle "SaaS with Integration to 3rd Party System"
+# not modelled: legend, "Updated" date, "Platform Host" heading, version footnote
+
+BC manage-tech: Manage Technology
+
+BA sn-platform: ServiceNow Platform
+BA event-mgmt: ServiceNow Event Mgmt
+BA incident-mgmt: SN Incident Mgmt
+BA logicmonitor: LogicMonitor
+
+SI yokohama-prod: SN Yokohama Prod
+SI event-prod: SN Event Mgmt Prod
+SI incident-prod: SN Incident Prod
+SI lm-prod: LogicMonitor Prod
+
+TMSO sn-admin: ServiceNow Administration
+TMSO sys-monitoring: System Monitoring
+# slide reads "Various Tech Offerings Offerings" (duplicated word)
+TMSO various-tmso: Various Tech Offerings
+TMS app-mgmt: Application Mgmt Services
+TMS monitoring: Monitoring Services
+TMS various-tms: Various Tech Mgmt Services
+
+CI(Application) mid-app: java@server123
+CI(Windows Server) mid-server: MID Server 01
+CI infra: Infrastructure CIs
+
+BSO incident-bso: SN Incident Mgmt
+BS service-mgmt: Service Mgmt Services
+# drawn as a Business Service box named "Technology Portfolio"; unconnected on this slide
+BS tech-portfolio: Technology Portfolio
+SP end-user: End User Services
+
+manage-tech -> sn-platform
+manage-tech -> event-mgmt
+manage-tech -> incident-mgmt
+manage-tech -> logicmonitor
+
+event-mgmt -> sn-platform
+incident-mgmt -> sn-platform
+
+sn-platform -> yokohama-prod
+event-mgmt -> event-prod
+incident-mgmt -> incident-prod
+logicmonitor -> lm-prod
+
+event-prod -> yokohama-prod
+event-prod -> incident-prod : Creates Incident
+# SG Connector (Service Graph Connector/API)
+lm-prod -> event-prod : Sends data to
+
+sn-admin -> yokohama-prod
+sn-admin -> app-mgmt
+sys-monitoring -> event-prod
+sys-monitoring -> lm-prod
+sys-monitoring -> monitoring
+various-tmso -> infra
+various-tmso -> various-tms
+
+event-prod -> mid-app
+mid-app -> mid-server : Runs On
+mid-server -> event-prod : Sends data to
+infra -> mid-server : Sends data from
+
+incident-bso -> incident-prod
+incident-bso -> service-mgmt
+service-mgmt -> end-user
+
+# strategic (purple, Provides::Provided By). The left purple line runs from Manage Technology
+# past Application Mgmt Services and ends in an arrow at Various Tech Mgmt Services.
+# A "References the Technology Portfolio" label appears with no line drawn.
+manage-tech -> various-tms
+manage-tech -> monitoring
+manage-tech -> service-mgmt

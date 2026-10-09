@@ -1,0 +1,46 @@
+title "Printers/Copiers Example"
+
+# not modelled: "Used on the Incident Record" callout (Service / Offering / CI
+#   arrows to the Business Service, an offering and the CI), domain legend,
+#   note that Business Capabilities are not depicted, note that the Dynamic CI
+#   Group could also be related to a Business Service Offering
+
+SP end-user-portfolio: End User Services Portfolio
+SP tech-portfolio: Technology Services Portfolio
+
+BS print-copy: Print and Copy Services
+BSO std-laser: Std Laser Printers
+BSO exec-desktop: Executive Desktop Printers
+BSO managed-copiers: Managed Copiers
+
+SI print-server: Print Server
+BA hp-print-mgmt: HP Print Mgmt Admin
+
+TMS print-mgmt: Print Management Services
+TMSO print-server-admin: Print Server Admin
+TMS tms-tbd: TBD
+TMSO printer-admin: Printer Administration
+DCG printers: Printers (by location, brand, support)
+CI printer: Printer Name
+
+print-copy -> end-user-portfolio
+std-laser -> print-copy
+exec-desktop -> print-copy
+managed-copiers -> print-copy
+
+print-mgmt -> tech-portfolio
+print-server-admin -> print-mgmt
+print-server-admin -> print-server
+
+hp-print-mgmt -> print-server
+managed-copiers -> print-server
+# Orange "Depends On" connector from Std Laser Printers only (the white line
+# crossing it belongs to Executive Desktop Printers).
+std-laser -> print-server
+
+printer-admin -> tms-tbd
+printer-admin -> printers
+printers -> printer
+# White "Contains" connector from Executive Desktop Printers down into the
+# Dynamic CI Group (BSO -> DCG is not a standard CSDM pair; kept as shown).
+exec-desktop -> printers : Contains

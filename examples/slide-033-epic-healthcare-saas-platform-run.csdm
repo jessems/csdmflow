@@ -1,0 +1,52 @@
+title "EPIC Healthcare SaaS Platform (Run)"
+layout tiers
+subtitle "SaaS with no infrastructure Healthcare industry"
+
+# not modelled: legend, domain colour key, "Updated" date, footnote note
+# ("*Represents the various available applications ..."); the "*" footnote
+# markers are dropped from the platform-app names
+
+BA ehr: EPIC EHR
+BA mychart: EPIC MyChart
+BA clinicals: EPIC Clinicals
+BA pharmacy: EPIC Pharmacy
+
+SI epic-saas: Epic SaaS
+SI mychart-saas: EPIC My Chart SaaS
+SI clinicals-saas: EPIC Clinicals SaaS
+SI pharmacy-saas: Pharmacy SaaS
+
+TMSO epic-admin: Epic Administration
+TMS app-mgmt: Application Mgmt Services
+
+BSO mychart-bso: EPIC My Chart
+BSO clinicals-bso: EPIC Clinicals
+BSO pharmacy-bso: EPIC Pharmacy
+BS patient: Patient Services
+BS pharma: Pharmaceutical Services
+
+# platform host
+mychart -> ehr
+clinicals -> ehr
+pharmacy -> ehr
+ehr -> epic-saas
+mychart -> mychart-saas
+clinicals -> clinicals-saas
+pharmacy -> pharmacy-saas
+
+mychart-saas -> epic-saas
+clinicals-saas -> epic-saas
+pharmacy-saas -> epic-saas
+
+epic-admin -> epic-saas
+epic-admin -> mychart-saas
+epic-admin -> clinicals-saas
+epic-admin -> pharmacy-saas
+epic-admin -> app-mgmt
+
+mychart-bso -> mychart-saas
+clinicals-bso -> clinicals-saas
+pharmacy-bso -> pharmacy-saas
+mychart-bso -> patient
+clinicals-bso -> patient
+pharmacy-bso -> pharma

@@ -1,0 +1,32 @@
+title "Salesforce (Fly)"
+subtitle "SaaS application"
+
+BC market: Market to Customers
+BC manage-cust: Manage Customer Relations
+BA salesforce: Salesforce
+SI salesforce-si: Salesforce
+TMSO salesforce-admin: Salesforce Admin
+TMS app-mgmt: Application Mgmt Services
+BSO salesforce-bso: Salesforce
+# slide shows "*Reports"; asterisk refers to the footnote below
+BSO salesforce-reports: Salesforce Reports
+BS crs: Customer Relationship Services
+SP tech-portfolio: Technology Portfolio
+SP cust-portfolio: Customer Mgmt Portfolio
+
+# not modelled: footnote "not all business services have multiple offerings. This is an example."; legends
+
+market -> salesforce
+manage-cust -> salesforce
+salesforce -> salesforce-si
+salesforce-admin -> salesforce-si
+salesforce-admin -> app-mgmt
+salesforce-bso -> salesforce-si
+salesforce-reports -> salesforce-si
+salesforce-bso -> crs
+salesforce-reports -> crs
+app-mgmt -> tech-portfolio
+crs -> cust-portfolio
+# strategic (purple) lines as drawn on the slide
+market -> app-mgmt
+manage-cust -> crs
