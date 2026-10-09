@@ -509,7 +509,7 @@ function compileCsdm(source) {
     const label = r.label !== null ? r.label : r.sem.label;
     const lab = label ? ` : ${label}` : '';
     const k = r.sem.kind;
-    const op = k === 'ref' ? '-.->' : k === 'map' ? '---' : k === 'strategic' ? '<-->' : '-->';
+    const op = k === 'ref' ? '-.->' : k === 'strategic' ? '<-->' : '-->';
     let attrs = k;
     if (k === 'rel' && opts.linecolors === 'domain') attrs = relLineClass(ents.get(r.from), ents.get(r.to));
     if (k === 'strategic') {

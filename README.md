@@ -125,7 +125,7 @@ You can write the arrow either way round — it is flipped to the CSDM direction
 | `BSO` → `BS`, `TMSO` → `TMS`, `TMS`/`BS` → `SP` | dashed **References** |
 | `TMSO` → `SI` / `DCG` / `CI` | **Contains** (orange) |
 | `DCG` → `CI` | **Query based Contains** (orange) |
-| `SI` → `CI`, `CI` → `CI` | blue service-mapping line |
+| `SI` → `CI`, `CI` → `CI` | blue service-mapping arrow, pointing down the chain |
 | `SI` → `SI` | **Depends On** (orange) |
 | `BC` → `TMS` / `BS` | purple **Provided by::Provides**, routed around the outside |
 | any pair labelled `: Sends data to` (or `Sends data from`, `Receives data from`) | dash-dot **data flow** |

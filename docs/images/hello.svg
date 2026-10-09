@@ -20,12 +20,12 @@
 <text x="265" y="50" font-size="10" fill="#ffffff">Relationship</text>
 <path d="M 365 39.42857142857143 L 365 69.28571428571428" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <text x="375" y="50" font-size="10" fill="#ffffff">Service Mapping</text>
-<path d="M 475 39.42857142857143 L 475 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arw-e9ebed)"/>
+<path d="M 475 39.42857142857143 L 475 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <text x="485" y="50" font-size="10" fill="#ffffff">References</text>
 <path d="M 458 181.6 L 458 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
 <path d="M 328 272.4 L 402 272.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 588 272.4 L 514 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
-<path d="M 458 307.2 L 458 363.2" fill="none" stroke="#69aeef" stroke-width="2"/>
+<path d="M 458 307.2 L 458 363.2" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <path d="M 216 272.4 L 142 272.4" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <path d="M 644 307.2 L 644 363.2" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <rect x="402" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>

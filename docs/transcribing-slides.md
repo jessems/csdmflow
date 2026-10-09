@@ -71,7 +71,7 @@ to the CSDM direction automatically):
 | TMSO>TMS | References | dashed |
 | TMSO>SI, TMSO>DCG, TMSO>CI | Contains | solid |
 | DCG>CI | Query based Contains | solid |
-| SI>CI, CI>CI | (none) | blue service-mapping line |
+| SI>CI, CI>CI | (none) | blue service-mapping arrow |
 | SI>SI | Depends On | solid |
 | TMS>SP, BS>SP | References | dashed |
 | BC>TMS, BC>BS | Provided by::Provides | purple strategic |

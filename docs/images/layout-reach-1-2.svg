@@ -20,7 +20,7 @@
 <text x="792" y="50" font-size="10" fill="#ffffff">Relationship</text>
 <path d="M 892 39.42857142857143 L 892 69.28571428571428" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <text x="902" y="50" font-size="10" fill="#ffffff">Service Mapping</text>
-<path d="M 1002 39.42857142857143 L 1002 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arw-e9ebed)"/>
+<path d="M 1002 39.42857142857143 L 1002 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <text x="1012" y="50" font-size="10" fill="#ffffff">References</text>
 <text x="30" y="82" font-size="15" font-weight="600" fill="#ffffff">Client Server Example for Manufacturing industry</text>
 <path d="M 644 195 L 644 251" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
@@ -33,15 +33,15 @@
 <path d="M 272 751 L 272 779 L 830 779 L 830 751" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 142 709.5 L 173 709.5 A 6 6 0 0 1 185 709.5 L 216 709.5" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 142 570.5 L 216 570.5" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
-<path d="M 644 334 L 644 390" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 644 334 L 644 362 L 830 362 L 830 390" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 644 334 L 644 362 L 458 362 L 458 390" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 644 473 L 644 529" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 830 473 L 830 529" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 458 473 L 458 529" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 700 709.5 L 737 709.5 L 737 570.5 L 700 570.5" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 644 668 L 644 648 L 731 648 A 6 6 0 0 1 743 648 L 844 648 L 844 612" fill="none" stroke="#69aeef" stroke-width="2"/>
-<path d="M 588 695.5 L 458 695.5 L 458 612" fill="none" stroke="#69aeef" stroke-width="2"/>
+<path d="M 644 334 L 644 390" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 644 334 L 644 362 L 830 362 L 830 390" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 644 334 L 644 362 L 458 362 L 458 390" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 644 473 L 644 529" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 830 473 L 830 529" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 458 473 L 458 529" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 700 709.5 L 737 709.5 L 737 570.5 L 700 570.5" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 644 668 L 644 648 L 731 648 A 6 6 0 0 1 743 648 L 844 648 L 844 612" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 588 695.5 L 458 695.5 L 458 612" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <path d="M 86 334 L 86 390" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <path d="M 1072 292.5 L 1146 292.5" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <path d="M 86 751 L 86 807" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>

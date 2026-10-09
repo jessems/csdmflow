@@ -3,8 +3,8 @@
 <marker id="arw-e9ebed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e9ebed"/></marker>
 <marker id="arw-f0ac45" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0ac45"/></marker>
 <marker id="arw-73c26a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#73c26a"/></marker>
-<marker id="arw-a974e8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a974e8"/></marker>
 <marker id="arw-69aeef" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#69aeef"/></marker>
+<marker id="arw-a974e8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a974e8"/></marker>
 <linearGradient id="gf-bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#112c40"/><stop offset="1" stop-color="#204242"/></linearGradient>
 </defs>
 <rect x="0" y="0" width="1086" height="881.6" fill="url(#gf-bg)"/>
@@ -25,7 +25,7 @@
 <text x="780" y="50" font-size="10" fill="#ffffff">Relationship</text>
 <path d="M 660 94.42857142857143 L 660 124.28571428571428" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <text x="670" y="105" font-size="10" fill="#ffffff">Service Mapping</text>
-<path d="M 770 94.42857142857143 L 770 124.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arw-e9ebed)"/>
+<path d="M 770 94.42857142857143 L 770 124.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <text x="780" y="105" font-size="10" fill="#ffffff">References</text>
 <path d="M 688 223.6 L 688 279.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
 <path d="M 874 223.6 L 874 314.4 L 744 314.4" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
@@ -33,7 +33,7 @@
 <path d="M 558 440 L 632 440" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 818 440 L 744 440" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
 <path d="M 874 530.8 L 874 502.8 L 787 502.8 A 6 6 0 0 0 775 502.8 L 688 502.8 L 688 474.8" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
-<path d="M 744 454 L 781 454 L 781 565.6 L 744 565.6" fill="none" stroke="#69aeef" stroke-width="2"/>
+<path d="M 744 454 L 781 454 L 781 565.6 L 744 565.6" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <path d="M 446 440 L 372 440" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <path d="M 930 440 L 954 440 A 6 6 0 0 1 966 440 L 967 440 L 967 691.2 L 966 691.2 A 6 6 0 0 0 954 691.2 L 930 691.2" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <path d="M 874 600.4 L 874 656.4" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>

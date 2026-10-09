@@ -17,111 +17,113 @@
 <rect x="649" y="30" width="220" height="55" fill="none" stroke="#ffffff" stroke-width="1"/>
 <path d="M 663 39.42857142857143 L 663 69.28571428571428" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
 <text x="673" y="50" font-size="10" fill="#ffffff">Relationship</text>
-<path d="M 773 39.42857142857143 L 773 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#arw-e9ebed)"/>
+<path d="M 773 39.42857142857143 L 773 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <text x="783" y="50" font-size="10" fill="#ffffff">References</text>
 <text x="30" y="82" font-size="15" font-weight="600" fill="#ffffff">SaaS with no infrastructure Healthcare industry</text>
+<path d="M 86 181.6 L 86 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
 <path d="M 254 181.6 L 254 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
 <path d="M 422 181.6 L 422 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
 <path d="M 590 181.6 L 590 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
-<path d="M 758 181.6 L 758 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
-<path d="M 366 272.4 L 310 272.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
-<path d="M 254 335.2 L 254 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
-<path d="M 590 307.2 L 590 335.2 L 512 335.2 A 6 6 0 0 0 500 335.2 L 428 335.2 A 6 6 0 0 0 416 335.2 L 254 335.2" fill="none" stroke="#f0ac45" stroke-width="2"/>
-<path d="M 758 307.2 L 758 335.2 L 680 335.2 A 6 6 0 0 0 668 335.2 L 610 335.2 A 6 6 0 0 0 598 335.2 L 512 335.2 A 6 6 0 0 0 500 335.2 L 428 335.2 A 6 6 0 0 0 416 335.2 L 254 335.2" fill="none" stroke="#f0ac45" stroke-width="2"/>
-<path d="M 86 363.2 L 86 272.4 L 198 272.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
-<path d="M 86 363.2 L 86 343.2 L 422 343.2 L 422 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
-<path d="M 86 363.2 L 86 343.2 L 500 343.2 A 6 6 0 0 1 512 343.2 L 604 343.2 L 604 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
-<path d="M 86 363.2 L 86 343.2 L 500 343.2 A 6 6 0 0 1 512 343.2 L 668 343.2 A 6 6 0 0 1 680 343.2 L 772 343.2 L 772 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 198 272.4 L 142 272.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 86 363.2 L 86 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 422 307.2 L 422 335.2 L 344 335.2 A 6 6 0 0 0 332 335.2 L 260 335.2 A 6 6 0 0 0 248 335.2 L 86 335.2" fill="none" stroke="#f0ac45" stroke-width="2"/>
+<path d="M 590 307.2 L 590 335.2 L 512 335.2 A 6 6 0 0 0 500 335.2 L 442 335.2 A 6 6 0 0 0 430 335.2 L 344 335.2 A 6 6 0 0 0 332 335.2 L 260 335.2 A 6 6 0 0 0 248 335.2 L 86 335.2" fill="none" stroke="#f0ac45" stroke-width="2"/>
+<path d="M 86 363.2 L 86 343.2 L 254 343.2 L 254 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 86 363.2 L 86 343.2 L 332 343.2 A 6 6 0 0 1 344 343.2 L 436 343.2 L 436 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 86 363.2 L 86 343.2 L 332 343.2 A 6 6 0 0 1 344 343.2 L 500 343.2 A 6 6 0 0 1 512 343.2 L 604 343.2 L 604 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 310 398 L 338 398 L 338 272.4 L 310 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
 <path d="M 478 398 L 506 398 L 506 272.4 L 478 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
 <path d="M 646 398 L 674 398 L 674 272.4 L 646 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
-<path d="M 814 398 L 842 398 L 842 272.4 L 814 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
-<path d="M 366 146.8 L 310 146.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
-<path d="M 268 209.6 L 268 181.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
-<path d="M 576 181.6 L 576 209.6 L 428 209.6 A 6 6 0 0 0 416 209.6 L 268 209.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4"/>
-<path d="M 744 181.6 L 744 209.6 L 596 209.6 A 6 6 0 0 0 584 209.6 L 428 209.6 A 6 6 0 0 0 416 209.6 L 268 209.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 198 146.8 L 142 146.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 100 209.6 L 100 181.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 408 181.6 L 408 209.6 L 260 209.6 A 6 6 0 0 0 248 209.6 L 100 209.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4"/>
+<path d="M 576 181.6 L 576 209.6 L 428 209.6 A 6 6 0 0 0 416 209.6 L 260 209.6 A 6 6 0 0 0 248 209.6 L 100 209.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4"/>
 <path d="M 86 432.8 L 86 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
-<path d="M 422 432.8 L 422 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
-<path d="M 590 432.8 L 590 523.6 L 478 523.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
-<path d="M 758 432.8 L 758 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 254 432.8 L 254 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 422 432.8 L 422 523.6 L 310 523.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 590 432.8 L 590 488.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<circle cx="86" cy="335.2" r="2.5" fill="#f0ac45"/>
+<circle cx="86" cy="335.2" r="2.5" fill="#f0ac45"/>
 <circle cx="86" cy="343.2" r="2.5" fill="#f0ac45"/>
-<circle cx="422" cy="343.2" r="2.5" fill="#f0ac45"/>
-<circle cx="604" cy="343.2" r="2.5" fill="#f0ac45"/>
+<circle cx="254" cy="343.2" r="2.5" fill="#f0ac45"/>
+<circle cx="436" cy="343.2" r="2.5" fill="#f0ac45"/>
+<rect x="30" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="86" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="86" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="86" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC EHR</text>
 <rect x="198" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
 <text x="254" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
 <text x="254" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
-<text x="254" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC EHR</text>
+<text x="254" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC MyChart</text>
 <rect x="366" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
 <text x="422" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
 <text x="422" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
-<text x="422" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC MyChart</text>
+<text x="422" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
 <rect x="534" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
 <text x="590" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
 <text x="590" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
-<text x="590" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
-<rect x="702" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
-<text x="758" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
-<text x="758" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
-<text x="758" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Pharmacy</text>
+<text x="590" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Pharmacy</text>
+<rect x="30" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="86" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="86" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Epic SaaS</text>
 <rect x="198" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
-<text x="254" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
-<text x="254" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Epic SaaS</text>
+<text x="254" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="254" y="277.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC My Chart</text>
+<text x="254" y="290.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SaaS</text>
 <rect x="366" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="422" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
-<text x="422" y="277.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC My Chart</text>
+<text x="422" y="277.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
 <text x="422" y="290.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SaaS</text>
 <rect x="534" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
-<text x="590" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
-<text x="590" y="277.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
-<text x="590" y="290.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SaaS</text>
-<rect x="702" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
-<text x="758" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
-<text x="758" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Pharmacy SaaS</text>
+<text x="590" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="590" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Pharmacy SaaS</text>
 <rect x="30" y="363.2" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
 <text x="86" y="382.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="396.3" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
 <text x="86" y="409.7" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Epic</text>
 <text x="86" y="423.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Administration</text>
+<rect x="198" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="254" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="254" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
+<text x="254" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC My Chart</text>
 <rect x="366" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
 <text x="422" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
 <text x="422" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
-<text x="422" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC My Chart</text>
+<text x="422" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
 <rect x="534" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
 <text x="590" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
 <text x="590" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
-<text x="590" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Clinicals</text>
-<rect x="702" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
-<text x="758" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
-<text x="758" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
-<text x="758" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Pharmacy</text>
+<text x="590" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">EPIC Pharmacy</text>
 <rect x="30" y="488.8" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="86" y="508.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
 <text x="86" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Application Mgmt</text>
 <text x="86" y="548.7" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
-<rect x="366" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
-<text x="422" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
-<text x="422" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Patient Services</text>
-<rect x="702" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
-<text x="758" y="515.2" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
-<text x="758" y="528.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Pharmaceutical</text>
-<text x="758" y="542" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
-<text x="249" y="212.4" text-anchor="end" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
+<rect x="198" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="254" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="254" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Patient Services</text>
+<rect x="534" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="590" y="515.2" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="590" y="528.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Pharmaceutical</text>
+<text x="590" y="542" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
+<text x="81" y="212.4" text-anchor="end" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
+<text x="259" y="201.2" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
 <text x="427" y="201.2" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
-<text x="595" y="201.2" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
-<text x="763" y="212.4" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
-<text x="338" y="268.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
-<text x="329.6" y="331.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
-<text x="142" y="268.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
-<text x="254" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
-<text x="345" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
-<text x="429" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="595" y="212.4" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
+<text x="170" y="268.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
+<text x="186.8" y="331.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
+<text x="585" y="324.0" text-anchor="end" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
+<text x="81" y="338.0" text-anchor="end" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="170" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="261" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="448.6" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="349.5" y="291.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke" transform="rotate(90 349.5 291.2)">Depends On</text>
 <text x="517.5" y="291.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke" transform="rotate(90 517.5 291.2)">Depends On</text>
-<text x="685.5" y="291.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke" transform="rotate(90 685.5 291.2)">Depends On</text>
-<text x="847" y="338.0" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
-<text x="338" y="142.8" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
-<text x="506" y="205.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="679" y="338.0" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
+<text x="170" y="142.8" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="338" y="205.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
 <text x="91" y="463.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
-<text x="427" y="463.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
-<text x="534" y="519.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
-<text x="763" y="463.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="259" y="463.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="366" y="519.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="595" y="463.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
 </svg>
