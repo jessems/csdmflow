@@ -254,7 +254,6 @@ function place(model) {
       if (own.length) putInCol(e, -1, median(own), SI);
       else putInRow(e, 0, -1); // platform host: above the applications that reference it
     }
-    for (const e of ofType('BC')) putInRow(e, 0, colWant(e, -1, 'BA'));
   } else {
     ofType('SI').forEach((e, i) => occupy(e, SI, i));
     // applications sit over their own instance; a platform host (no instance of
@@ -263,20 +262,30 @@ function place(model) {
       const own = placedCols(nbrs(e, 'SI'));
       putInRow(e, BA, own.length ? median(own) : colWant(e, nextCol(), 'BA', 'SI'));
     }
-    for (const e of ofType('BC')) putInRow(e, BC, colWant(e, nextCol(), 'BA'));
   }
   const appLo = 0;
   const appHi = Math.max(0, nextCol() - 1);
 
+  // --- no instances at all (e.g. end-user software, slide 61): the business
+  // offerings anchor the columns, services and portfolios go below them ---
+  const noInstances = ofType('SI').length === 0;
+  if (noInstances) {
+    const seeds = ofType('BSO').length ? ofType('BSO') : ofType('BS');
+    const seedRow = ofType('BSO').length ? SI + 1 : SI + 2;
+    seeds.forEach((e, i) => occupy(e, seedRow, i));
+    for (const e of ofType('BS').filter(b => !pos.has(b.id))) putInRow(e, SI + 2, colWant(e, nextCol(), 'BSO'));
+    for (const e of ofType('SP').filter(sp => nbrs(sp, 'BS').length)) putInRow(e, SI + 3, colWant(e, nextCol(), 'BS'));
+  }
+
   // --- consumption, reach 0: offerings tier under their instance, then down ---
-  if (cReach === 0) {
+  if (cReach === 0 && !noInstances) {
     for (const e of ofType('BSO')) putInRow(e, SI + 1, colWant(e, nextCol(), 'SI'));
     for (const e of ofType('BS')) putInRow(e, SI + 2, colWant(e, nextCol(), 'BSO'));
     for (const e of ofType('SP').filter(sp => nbrs(sp, 'BS').length)) putInRow(e, SI + 3, colWant(e, nextCol(), 'BS'));
   }
 
   // --- infrastructure: below the instances (and below a stacked consumption tier) ---
-  const ciTop = (cReach === 0 || stackRows) && pos.size ? Math.max(...rows()) + 1 : SI + 1;
+  const ciTop = (cReach === 0 || stackRows || noInstances) && pos.size ? Math.max(...rows()) + 1 : SI + 1;
   // Service mapping runs downward on the reference slides: each hop from the
   // instance (app -> server -> database -> switch ...) is one row lower, and
   // CIs at the same depth spread sideways under their parent. A hop between
@@ -308,6 +317,15 @@ function place(model) {
   // CIs only reachable via groups or other CIs: shelf below the mapped tree
   const treeBottom = Math.max(ciTop - 1, ...cis.filter(e => pos.has(e.id)).map(e => pos.get(e.id).row));
   let pending = ofType('CI').filter(e => !pos.has(e.id));
+  // CIs that hang off offerings or services instead of an instance (laptops an
+  // offering depends on, a computer software is installed on): one row below
+  // what points at them, like a mapping hop
+  for (const e of pending) {
+    const others = nbrs(e).filter(n => n.type !== 'CI' && n.type !== 'DCG' && pos.has(n.id));
+    if (!others.length || placedCols(nbrs(e, 'SI', 'CI')).length) continue;
+    putInRow(e, median(placedRows(others)) + 1, median(placedCols(others)));
+  }
+  pending = pending.filter(e => !pos.has(e.id));
   while (pending.length) {
     const ready = pending.filter(e => placedCols(nbrs(e, 'SI', 'CI')).length);
     for (const e of ready.length ? ready : [pending[0]]) {
@@ -319,7 +337,7 @@ function place(model) {
   const hi = Math.max(...cols());
 
   // --- consumption, reach 1-2: flank to the right of the app zone ---
-  if (cReach > 0) {
+  if (cReach > 0 && !noInstances) {
     const bsoCol = hi + 1;
     for (const e of ofType('BSO')) putInCol(e, bsoCol, rowWant(e, SI, 'SI'), SI);
     if (cReach === 2) {
@@ -378,6 +396,15 @@ function place(model) {
     const p = tms ? pos.get(tms.id) : { row: SI, col: lo - 1 };
     if (dReach === 2) putInCol(e, p.col - 1, p.row, SI);
     else putInCol(e, p.col, p.row + 1, p.row + 1);
+  }
+
+  // --- capabilities: above their applications, else above whatever they are
+  // strategically linked to (business or tech services) ---
+  for (const e of ofType('BC')) {
+    const viaBA = placedCols(nbrs(e, 'BA'));
+    const any = placedCols(nbrs(e));
+    const want = median(viaBA.length ? viaBA : any);
+    putInRow(e, stackRows ? 0 : BC, want === null ? nextCol() : want);
   }
 
   // anything of an unexpected shape that is still unplaced

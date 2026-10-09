@@ -903,16 +903,22 @@ function labelCandidates(req, size, lines) {
   return out;
 }
 
-// Two-line split for long labels, balancing line lengths; null if one word.
-function splitLabel(text) {
+// Split a long label into n lines, balancing line lengths; null if too few words.
+function splitLabel(text, n) {
   const words = text.split(' ');
-  if (words.length < 2) return null;
+  if (words.length < n) return null;
   let best = null;
-  for (let i = 1; i < words.length; i++) {
-    const a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
-    if (!best || Math.max(a.length, b.length) < Math.max(best[0].length, best[1].length)) best = [a, b];
-  }
-  return best;
+  const walk = (start, left, acc) => {
+    if (left === 1) {
+      const lines = [...acc, words.slice(start).join(' ')];
+      const worst = Math.max(...lines.map(l => l.length));
+      if (!best || worst < best.worst) best = { lines, worst };
+      return;
+    }
+    for (let i = start + 1; i <= words.length - left + 1; i++) walk(i, left - 1, [...acc, words.slice(start, i).join(' ')]);
+  };
+  walk(0, n, []);
+  return best.lines;
 }
 
 function placeLabels(requests, model, paths) {
@@ -949,11 +955,13 @@ function placeLabels(requests, model, paths) {
   for (const req of order) {
     let best = null;
     const small = Math.round(LABEL_SIZE * 0.85 * 10) / 10;
-    const two = splitLabel(req.text);
+    const two = splitLabel(req.text, 2);
+    const three = splitLabel(req.text, 3);
     const tries = [[LABEL_SIZE, [req.text]]];
     if (two) tries.push([LABEL_SIZE, two]);
     tries.push([small, [req.text]]);
     if (two) tries.push([small, two]);
+    if (three) tries.push([small, three]);
     for (const [size, lines] of tries) {
       for (const c of labelCandidates(req, size, lines)) {
         const sc = cost(c, req) + (lines.length > 1 ? 25 : 0);
