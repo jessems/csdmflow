@@ -50,6 +50,9 @@ const RELS = {
   'BC>BS': { label: 'Provided by::Provides', kind: 'strategic' },
 };
 
+// Relationship names that mean a data flow (ServiceNow "Sends data to::Receives data from").
+const DATA_FLOW = /^(sends data (to|from)|receives data from)\b/i;
+
 const THEMES = {
   dark: {
     background: '#112c40 #204242',
@@ -152,6 +155,9 @@ function parseCsdm(source) {
       sem = RELS[`${b.type}>${a.type}`];
     }
     r.sem = sem || { label: '', kind: 'rel', unknown: true };
+    // data flows ("Sends data to::Receives data from") have their own line
+    // style on the reference slides, whatever the two types are
+    if (r.label && DATA_FLOW.test(r.label)) r.sem = { label: r.label, kind: 'data' };
   }
   return { opts, ents, rels };
 }
@@ -465,18 +471,20 @@ function compileCsdm(source) {
   out.push(`linkclass rel-delivery stroke=${theme.lines.delivery}`);
   out.push(`linkclass rel-consumption stroke=${theme.lines.consumption}`);
   out.push(`linkclass ref stroke=${theme.edge} dashed=yes`);
+  out.push(`linkclass data stroke=${theme.edge} dash=dashdot`);
   out.push(`linkclass map stroke=${theme.map}`);
   out.push(`linkclass strategic stroke=${theme.strategic} both=yes`);
   if (kinds.has('strategic')) out.push('key "Strategic Relationship (Provides)" strategic');
   if (kinds.has('rel')) out.push('key "Relationship" rel');
   if (kinds.has('map')) out.push('key "Service Mapping" map');
   if (kinds.has('ref')) out.push('key "References" ref');
+  if (kinds.has('data')) out.push('key "Sends data to" data');
 
   // Strategic edges go around the outside, on the side their far end sits.
   const center = (nCols - 1) / 2;
   // Edges route in declaration order, and earlier edges claim the best ports:
   // main relationships and mappings first, references next, strategic last.
-  const rank = { rel: 0, map: 1, ref: 2, strategic: 3 };
+  const rank = { rel: 0, map: 1, ref: 2, data: 2, strategic: 3 };
   const routed = [...rels].sort((x, y) => rank[x.sem.kind] - rank[y.sem.kind] || x.ln - y.ln);
   for (const r of routed) {
     const a = gfId(r.from), b = gfId(r.to);

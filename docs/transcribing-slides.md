@@ -76,6 +76,10 @@ to the CSDM direction automatically):
 | TMS>SP, BS>SP | References | dashed |
 | BC>TMS, BC>BS | Provided by::Provides | purple strategic |
 
+A dash-dot line labelled "Sends data to" is a data flow: write it with that
+label (`ad-prod -> sap-prod : Sends data to`) and it gets the dash-dot style,
+whatever the two types are.
+
 Any other pair still renders (unlabeled, with a warning). Add `: Label` when the
 slide shows a label for it (e.g. `Runs on`, `Sends Data to`).
 

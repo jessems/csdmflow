@@ -263,6 +263,10 @@ function nodeExtent(n) {
   return { x0: n.x, y0: n.y, x1: n.x + n.w + nv * variantDx(), y1: n.y + n.h + nv * variantDy() };
 }
 
+// Line patterns: `-.->` gives dash; {dash=dashdot} a dash-dot (data flows).
+const DASHES = { dash: '6 4', dashdot: '9 4 2 4' };
+const dashAttr = d => (d ? ` stroke-dasharray="${DASHES[d] || DASHES.dash}"` : '');
+
 function darken(hex, f) {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex);
   if (!m) return hex;
@@ -425,7 +429,8 @@ function route(model, geom, warnings) {
     const src = nodes.get(e.from);
     const cls = src.cls ? model.classes.get(src.cls) : null;
     const color = e.attrs.stroke || (cls ? cls.stroke : geom.edgeColor);
-    return { color, dashed: e.dashed };
+    const dashed = e.attrs.dash && e.attrs.dash !== 'none' ? e.attrs.dash : (e.dashed ? 'dash' : false);
+    return { color, dashed };
   };
   const styleKey = st => `${st.color}|${st.dashed}`;
 
@@ -1113,7 +1118,7 @@ function renderSvg(source) {
       const x = kx + 14 + (i % perRow) * Math.round(140 * kk);
       const ky = ky0 + Math.floor(i / perRow) * rowHK;
       const c = k.style.stroke || geom.edgeColor;
-      const dash = k.style.dashed === 'yes' ? ' stroke-dasharray="4 3"' : '';
+      const dash = k.style.dash ? dashAttr(k.style.dash) : k.style.dashed === 'yes' ? dashAttr('dash') : '';
       const both = k.style.both === 'yes';
       out.push(`<path d="M ${x} ${ky + 12 * kk} L ${x} ${ky + 50 * kk}" stroke="${esc(c)}" stroke-width="2"${dash} marker-end="url(#${markerId(c)})"${both ? ` marker-start="url(#${markerId(c)})"` : ''}/>`);
       const words = wrapGreedy(k.text, 150 * kk);
@@ -1145,7 +1150,7 @@ function renderSvg(source) {
   // edges under nodes? No — boxes are opaque; draw edges first is safer either way.
   paths.forEach((p, idx) => {
     const d = pathD(p.points, allVSegs, idx);
-    const dash = p.style.dashed ? ' stroke-dasharray="6 4"' : '';
+    const dash = dashAttr(p.style.dashed);
     const marker = (p.arrow ? ` marker-end="url(#${markerId(p.style.color)})"` : '') +
       (p.arrowStart ? ` marker-start="url(#${markerId(p.style.color)})"` : '');
     out.push(`<path d="${d}" fill="none" stroke="${esc(p.style.color)}" stroke-width="${STROKE_W}"${dash}${marker}/>`);

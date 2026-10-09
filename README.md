@@ -128,6 +128,7 @@ You can write the arrow either way round — it is flipped to the CSDM direction
 | `SI` → `CI`, `CI` → `CI` | blue service-mapping line |
 | `SI` → `SI` | **Depends On** (orange) |
 | `BC` → `TMS` / `BS` | purple **Provided by::Provides**, routed around the outside |
+| any pair labelled `: Sends data to` (or `Sends data from`, `Receives data from`) | dash-dot **data flow** |
 
 Any other pair still draws, unlabelled, with a warning — a hint that either the
 model or the table needs a look.
