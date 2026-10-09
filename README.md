@@ -44,7 +44,7 @@ You need [Node.js](https://nodejs.org) 18 or newer. There are no other
 dependencies.
 
 ```sh
-git clone <this repo> csdmflow
+git clone https://github.com/jessems/csdmflow.git
 cd csdmflow
 node bin/csdmflow.js examples/hello.csdm      # writes examples/hello.svg
 ```
@@ -237,6 +237,10 @@ node bin/csdmflow.js <file.csdm|file.gf> [-o out.svg] [--png] [--emit-gf]
   itself can only be matched approximately.
 - The relationship table follows the conventions of the reference deck; review
   it against your own CSDM practice before relying on the labels.
+
+## License
+
+[0BSD](LICENSE) — do anything you like with it, no attribution required.
 
 ## Not affiliated
 
