@@ -787,62 +787,167 @@ function buildDrawing(model, placed) {
   }
 
   // Edge labels: one per edge, except edges merged into the same trunk or
-  // bus with the same label share a single label on the shared part.
-  const labels = [];
+  // bus with the same label share a single label. Each label is then placed
+  // by scoring candidate spots along its own line (see placeLabels).
+  const requests = [];
   const labelSeen = new Set();
-  const segLen = sg => sg.o === 'v' ? Math.abs(sg.y2 - sg.y1) : Math.abs(sg.x2 - sg.x1);
   for (const p of placed) {
     const text = p.edge.label;
     if (!text) continue;
     const inGroup = groups.get(p.trunkKey);
-    let seg;
+    let segs = toSegs(p.points);
     if (inGroup && inGroup.length > 1 && inGroup.every(m => m.edge.label === text)) {
       const k = 'in|' + p.trunkKey + '|' + text;
       if (labelSeen.has(k)) continue;
       labelSeen.add(k);
-      const trunk = paths.find(q => q.arrow && q.points.length === 2 &&
-        q.points[1] === p.points[p.points.length - 1]);
-      seg = trunk ? toSegs(trunk.points)[0] : null;
-      if (seg && segLen(seg) < 50) {
-        const joints = inGroup.map(m => m.points[m.points.length - 2]);
-        const far = trunk.points[0];
-        if (seg.o === 'v') {
-          labels.push({ text, x: far.x + 6, y: far.y - 5, anchor: 'start', rotate: false });
-          continue;
-        }
-        const vs = inGroup.flatMap(m => toSegs(m.points)).filter(sg => sg.o === 'v');
-        if (vs.length) {
-          const v = vs.reduce((a, b) => (segLen(b) > segLen(a) ? b : a));
-          labels.push({ text, x: v.x - 7, y: (Math.min(v.y1, v.y2) + Math.max(v.y1, v.y2)) / 2, anchor: 'middle', rotate: true });
-          continue;
-        }
-      }
+      // shared label: any segment of any member (the trunk is part of each)
+      segs = inGroup.flatMap(m => toSegs(m.points));
     }
-    if (!seg && p.edge.attrs.via) {
-      const laneSegs = toSegs(p.points).filter(sg => sg.o === 'v');
-      seg = laneSegs.reduce((a, b) => (segLen(b) > segLen(a) ? b : a), laneSegs[0]);
-    }
-    if (!seg) {
-      const segs = toSegs(p.points);
-      seg = segs.reduce((a, b) => (segLen(b) > segLen(a) + 0.5 ? b : a), segs[0]);
-    }
-    if (!seg) continue;
-    if (seg.o === 'h') {
-      labels.push({ text, x: (seg.x1 + seg.x2) / 2, y: seg.y - 6, anchor: 'middle', rotate: false });
-    } else {
-      const outer = !!p.edge.attrs.via && segLen(seg) > text.length * LABEL_CHAR_W + 20;
-      labels.push(outer
-        ? { text, x: seg.x + (p.edge.attrs.via === 'left' ? 6 : -6), y: (seg.y1 + seg.y2) / 2, anchor: 'middle', rotate: true }
-        : { text, x: seg.x + 6, y: (seg.y1 + seg.y2) / 2 + 4, anchor: 'start', rotate: false });
-    }
+    requests.push({ text, segs, via: p.edge.attrs.via || null, members: inGroup && inGroup.length > 1 ? inGroup : [p] });
   }
+  const labels = placeLabels(requests, model, paths);
 
   return { paths, dots, labels };
 }
 
 // ---------------------------------------------------------------------------
+// Label placement: score candidate spots, pick the cheapest, greedily
+// ---------------------------------------------------------------------------
+
+const LABEL_GAP = 4; // distance between a line and its label
+
+function rectsOverlap(a, b, m = 0) {
+  return a.x0 < b.x1 - m && a.x1 > b.x0 + m && a.y0 < b.y1 - m && a.y1 > b.y0 + m;
+}
+function overlapArea(a, b) {
+  const w = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0);
+  const h = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+  return w > 0 && h > 0 ? w * h : 0;
+}
+function segHitsRect(sg, r) {
+  if (sg.o === 'h') {
+    const lo = Math.min(sg.x1, sg.x2), hi = Math.max(sg.x1, sg.x2);
+    return sg.y > r.y0 && sg.y < r.y1 && hi > r.x0 && lo < r.x1;
+  }
+  const lo = Math.min(sg.y1, sg.y2), hi = Math.max(sg.y1, sg.y2);
+  return sg.x > r.x0 && sg.x < r.x1 && hi > r.y0 && lo < r.y1;
+}
+
+function labelCandidates(req, size, lines) {
+  const k = size / LABEL_SIZE;
+  const w = Math.max(...lines.map(t => t.length)) * LABEL_CHAR_W * k;
+  const h = size + (lines.length - 1) * size * 1.15;
+  const wrapped = lines.length > 1 ? { lines } : {};
+  const out = [];
+  const len = sg => (sg.o === 'h' ? Math.abs(sg.x2 - sg.x1) : Math.abs(sg.y2 - sg.y1));
+  const segs = [...req.segs].sort((a, b) => len(b) - len(a));
+  segs.forEach((sg, si) => {
+    const L = len(sg);
+    if (L < 8) return;
+    for (const [fi, f] of [0.5, 0.3, 0.7, 0.15, 0.85].entries()) {
+      const rank = si * 4 + fi;
+      if (sg.o === 'h') {
+        const x = Math.min(sg.x1, sg.x2) + L * f;
+        for (const [side, y] of [['above', sg.y - LABEL_GAP - (h - size)], ['below', sg.y + LABEL_GAP + size * 0.8]]) {
+          const overhang = Math.max(0, w - L) / 2;
+          out.push({ text: req.text, ...wrapped, x, y, anchor: 'middle', rotate: false, size, rank: rank + (side === 'below' ? 1 : 0), overhang });
+        }
+      } else {
+        const y = Math.min(sg.y1, sg.y2) + L * f + size * 0.3 - (h - size) / 2;
+        out.push({ text: req.text, ...wrapped, x: sg.x + LABEL_GAP + 1, y, anchor: 'start', rotate: false, size, rank, overhang: 0 });
+        out.push({ text: req.text, ...wrapped, x: sg.x - LABEL_GAP - 1, y, anchor: 'end', rotate: false, size, rank: rank + 1, overhang: 0 });
+        // long vertical runs (outer channels) can carry the label along the line
+        if (lines.length === 1 && L > w + 20) {
+          const yc = Math.min(sg.y1, sg.y2) + L * f;
+          const xr = req.via === 'right' ? sg.x - LABEL_GAP - 1 : sg.x + LABEL_GAP + size * 0.8;
+          out.push({ text: req.text, x: xr, y: yc, anchor: 'middle', rotate: true, size, rank: rank + (req.via ? 0 : 3), overhang: 0 });
+        }
+      }
+    }
+  });
+  return out;
+}
+
+// Two-line split for long labels, balancing line lengths; null if one word.
+function splitLabel(text) {
+  const words = text.split(' ');
+  if (words.length < 2) return null;
+  let best = null;
+  for (let i = 1; i < words.length; i++) {
+    const a = words.slice(0, i).join(' '), b = words.slice(i).join(' ');
+    if (!best || Math.max(a.length, b.length) < Math.max(best[0].length, best[1].length)) best = [a, b];
+  }
+  return best;
+}
+
+function placeLabels(requests, model, paths) {
+  const nodes = [...model.nodes.values()].map(n => ({ x0: n.x, y0: n.y, x1: n.x + n.w, y1: n.y + n.h }));
+  const allSegs = paths.flatMap(p => toSegs(p.points));
+  // keep labels off arrowheads: a small box around every arrow tip
+  const tips = [];
+  for (const p of paths) {
+    const ends = [];
+    if (p.arrow) ends.push(p.points[p.points.length - 1]);
+    if (p.arrowStart) ends.push(p.points[0]);
+    for (const e of ends) tips.push({ x0: e.x - 9, y0: e.y - 7, x1: e.x + 9, y1: e.y + 7 });
+  }
+  const placedLabels = [];
+  const cost = (c, req) => {
+    const r = labelRect(c);
+    let score = c.rank * 2 + c.overhang * 3;
+    if (c.size < LABEL_SIZE) score += 40;
+    if (r.x0 < 2 || r.y0 < 2) score += 2000;
+    for (const n of nodes) { const a = overlapArea(r, n); if (a > 0) score += 1000 + a; }
+    for (const o of placedLabels) { const a = overlapArea(r, o); if (a > 0) score += 1000 + a; }
+    for (const t of tips) if (rectsOverlap(r, t)) score += 120;
+    // lines through the text: other edges' lines cost more than its own
+    for (const sg of allSegs) {
+      if (!segHitsRect(sg, r)) continue;
+      score += req.segs.some(t => t.o === sg.o && (t.o === 'h' ? t.y === sg.y : t.x === sg.x)) ? 30 : 150;
+    }
+    return score;
+  };
+  // tightest first: requests whose longest segment is shortest
+  const longest = req => Math.max(...req.segs.map(sg => (sg.o === 'h' ? Math.abs(sg.x2 - sg.x1) : Math.abs(sg.y2 - sg.y1))));
+  const order = [...requests].sort((a, b) => longest(a) - longest(b));
+  const result = new Map();
+  for (const req of order) {
+    let best = null;
+    const small = Math.round(LABEL_SIZE * 0.85 * 10) / 10;
+    const two = splitLabel(req.text);
+    const tries = [[LABEL_SIZE, [req.text]]];
+    if (two) tries.push([LABEL_SIZE, two]);
+    tries.push([small, [req.text]]);
+    if (two) tries.push([small, two]);
+    for (const [size, lines] of tries) {
+      for (const c of labelCandidates(req, size, lines)) {
+        const sc = cost(c, req) + (lines.length > 1 ? 25 : 0);
+        if (!best || sc < best.sc) best = { c, sc };
+      }
+      if (best && best.sc < 1000) break; // first variant without collisions wins
+    }
+    if (!best) continue;
+    placedLabels.push(labelRect(best.c));
+    result.set(req, best.c);
+  }
+  return requests.filter(r => result.has(r)).map(r => result.get(r));
+}
+
+// ---------------------------------------------------------------------------
 // SVG rendering with hop bridges
 // ---------------------------------------------------------------------------
+
+// Approximate bounding box of an edge label as drawn.
+function labelRect(l) {
+  const size = l.size || LABEL_SIZE;
+  const lines = l.lines || [l.text];
+  const w = Math.max(...lines.map(t => t.length)) * LABEL_CHAR_W * (size / LABEL_SIZE);
+  const h = size + (lines.length - 1) * size * 1.15;
+  if (l.rotate) return { text: l.text, x0: l.x - h * 0.8, y0: l.y - w / 2, x1: l.x + h * 0.2, y1: l.y + w / 2 };
+  const x0 = l.anchor === 'start' ? l.x : l.anchor === 'end' ? l.x - w : l.x - w / 2;
+  // y is the baseline of the first line
+  return { text: l.text, x0, y0: l.y - size * 0.8, x1: x0 + w, y1: l.y - size * 0.8 + h };
+}
 
 function esc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -900,9 +1005,9 @@ function renderSvg(source) {
 
   // grow the canvas so edge labels near the border are not clipped
   for (const l of labels) {
-    const w = l.text.length * LABEL_CHAR_W;
-    const right = l.rotate ? l.x + LABEL_SIZE : l.anchor === 'start' ? l.x + w : l.x + w / 2;
-    geom.width = Math.max(geom.width, Math.ceil(right + MARGIN / 2));
+    const r = labelRect(l);
+    geom.width = Math.max(geom.width, Math.ceil(r.x1 + MARGIN / 2));
+    geom.height = Math.max(geom.height, Math.ceil(r.y1 + MARGIN / 2));
   }
 
   // collect vertical segments for hop computation
@@ -1017,13 +1122,18 @@ function renderSvg(source) {
     out.push(`<text x="${fmt(n.cx)}" y="${fmt(n.y - 7)}" text-anchor="middle" font-size="13" font-weight="700" fill="${geom.labelColor}">${esc(nt.text)}</text>`);
   }
 
+  // a halo in the background colour keeps labels legible where lines pass
+  const halo = bg ? bg[0] : '#ffffff';
   for (const l of labels) {
     const tr = l.rotate ? ` transform="rotate(90 ${fmt(l.x)} ${fmt(l.y)})"` : '';
-    out.push(`<text x="${fmt(l.x)}" y="${fmt(l.y)}" text-anchor="${l.anchor}" font-size="${LABEL_SIZE}" font-weight="600" fill="${geom.labelColor}"${tr}>${esc(l.text)}</text>`);
+    const size = l.size || LABEL_SIZE;
+    const body = (l.lines || [l.text]).map((t, i) => i === 0 ? esc(t) : `<tspan x="${fmt(l.x)}" dy="${fmt(size * 1.15)}">${esc(t)}</tspan>`).join('');
+    out.push(`<text x="${fmt(l.x)}" y="${fmt(l.y)}" text-anchor="${l.anchor}" font-size="${size}" font-weight="600" fill="${geom.labelColor}" stroke="${esc(halo)}" stroke-width="3" stroke-linejoin="round" paint-order="stroke"${tr}>${body}</text>`);
   }
 
   out.push('</svg>');
-  return { svg: out.join('\n'), width: geom.width, height: geom.height, warnings };
+  const nodeRects = [...model.nodes.values()].map(n => ({ id: n.id, x0: n.x, y0: n.y, x1: n.x + n.w, y1: n.y + n.h }));
+  return { svg: out.join('\n'), width: geom.width, height: geom.height, warnings, labels: labels.map(labelRect), nodes: nodeRects };
 }
 
 module.exports = { parse, layout, route, renderSvg };

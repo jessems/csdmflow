@@ -11,7 +11,7 @@
     "src"
   ],
   "scripts": {
-    "test": "node test/smoke.js",
+    "test": "node test/smoke.js && node test/labels.js",
     "compare": "node tools/compare.js",
     "images": "node tools/readme-images.js"
   },
