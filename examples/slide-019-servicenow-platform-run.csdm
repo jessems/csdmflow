@@ -1,7 +1,7 @@
 title "ServiceNow Platform (Run)"
 layout tiers
 subtitle "SaaS with no infrastructure"
-# not modelled: App Product models, Dev/QA stacked environment cards behind each Service Instance,
+# not modelled: App Product models, 
 # legend, "Reviewed" date, "Platform Host"/"Platform Apps" headings, *EA/*IRM footnotes
 
 BA sn-platform: ServiceNow Platform
@@ -12,14 +12,13 @@ BA irm: ServiceNow *IRM
 BA esm: Employee Service Mgmt
 BA fsm: Financial Service Mgmt
 
-SI sn-au-prod: SN Australia Prod
-SI event-prod: *Event Mgmt Prod
-SI incident-prod: Incident Mgmt Prod
-SI ea-prod: *EA Prod
-SI irm-prod: Integrated Risk Mgmt Prod
-SI esm-prod: Employee Service Mgmt
-SI fsm-prod: Financial Service Mgmt Prod
-
+SI sn-au-prod: SN Australia Prod [Dev, QA]
+SI event-prod: *Event Mgmt Prod [Dev, QA]
+SI incident-prod: Incident Mgmt Prod [Dev, QA]
+SI ea-prod: *EA Prod [Dev, QA]
+SI irm-prod: Integrated Risk Mgmt Prod [Dev, QA]
+SI esm-prod: Employee Service Mgmt [Dev, QA]
+SI fsm-prod: Financial Service Mgmt Prod [Dev, QA]
 TMSO sn-admin: ServiceNow Administration
 TMSO sys-monitoring: System Monitoring
 TMS app-mgmt: Application Mgmt Services

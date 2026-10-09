@@ -73,6 +73,24 @@ dynamics-prod -> servers
 ad-prod -> dynamics-prod : Sends Data to   # override the label when you need to
 ```
 
+### Variants and several instances
+
+Two kinds of stacked boxes, written differently:
+
+```
+SI ea: *EA Prod [Dev, QA]                  # variants: the same service in other environments
+CI(Windows Server) win: web01, web02       # several instances: commas in the name
+```
+
+- **Variants** — `[Dev, QA]` after the name — are the same thing in another
+  environment or location (`[US, EMEA]` works the same way). They draw as back
+  cards with their name in the visible strip; the front card is the one named.
+  Relationships attach to the stack as a whole.
+- **Several instances** — commas in the name — draw as a plain stack with all
+  names on the front card.
+
+![variants and instances](docs/images/variants.svg)
+
 The id before the colon is what relationships refer to. You can leave it out and
 csdmflow will make one from the name (`BA Microsoft Dynamics` gets the id
 `microsoft-dynamics`); you only need explicit ids when two things share a name.

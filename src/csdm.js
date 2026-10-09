@@ -11,7 +11,9 @@
 //   linecolors domain|plain              (default domain: relationships take the
 //                                         colour of their domain, as on the slides)
 //   title "..." / subtitle "..."
-//   <TYPE>[(ci class)] [id:] Name[, Name2]    e.g.  BA o365: O365 E5
+//   <TYPE>[(ci class)] [id:] Name[, Name2] [Variant, ...]
+//                                         e.g.  BA o365: O365 E5
+//                                               SI ea: *EA Prod [Dev, QA]
 //   a -> b [: label override]
 
 const TYPES = {
@@ -120,11 +122,19 @@ function parseCsdm(source) {
       return;
     }
     if ((m = entRe.exec(line))) {
-      const name = m[4].trim();
+      let name = m[4].trim();
+      // trailing [A, B]: variants of this entity (environments, locations)
+      let variants = [];
+      const vm = /^(.*?)\s*\[([^\]]*)\]$/.exec(name);
+      if (vm) {
+        name = vm[1].trim();
+        variants = vm[2].split(',').map(v => v.trim()).filter(Boolean);
+        if (!variants.length) throw csdmError('empty variant list "[]"', ln);
+      }
       const id = m[3] || slug(name);
       if (ents.has(id)) throw csdmError(`duplicate id "${id}" — give one of them an explicit id ("${m[1]} myid: ${name}")`, ln);
       const instances = name.split(/\s*,\s*/);
-      ents.set(id, { id, type: m[1], ciClass: m[2] || null, name, instances, order: ents.size, ln });
+      ents.set(id, { id, type: m[1], ciClass: m[2] || null, name, instances, variants, order: ents.size, ln });
       return;
     }
     throw csdmError(`unrecognised line: "${line}"`, ln);
@@ -423,6 +433,11 @@ function compileCsdm(source) {
       attrs += ` via=${pos.get(r.to).col <= center ? 'left' : 'right'} exit=bottom`;
     }
     out.push(`${a} ${op} ${b}${lab} {${attrs}}`);
+  }
+
+  // variants: labelled back cards (environments, locations)
+  for (const e of ents.values()) {
+    if (e.variants.length) out.push(`variants ${gfId(e.id)} ${e.variants.map(v => `"${q(v)}"`).join(' ')}`);
   }
 
   // stacks for multi-instance entities

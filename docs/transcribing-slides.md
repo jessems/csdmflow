@@ -23,6 +23,7 @@ subtitle "Slide subtitle"            # optional
 layout cross                         # optional; default cross (see below)
 TYPE [id:] Name                      # entity
 TYPE(ci class) [id:] Name1, Name2    # CI with class; comma = several instances
+TYPE [id:] Name [Var1, Var2]         # variants (environments, locations): stacked, labelled cards
 a -> b                               # relationship (label/style inferred)
 a -> b : Label                       # only when the slide's label differs from the inferred one
 # comment
@@ -93,6 +94,15 @@ slide shows a label for it (e.g. `Runs on`, `Sends Data to`).
   from the repo root. It must parse; read any warnings and fix what is a
   transcription error (unknown pairs that the slide genuinely shows are fine).
 - Confidentiality: these are public-style vendor examples; still, no personal names.
+
+## Stacked boxes
+
+- A stack whose back cards carry a label in their visible strip ("Dev", "QA",
+  "EMEA") is one entity with **variants**: `SI ea: *EA Prod [Dev, QA]`. Name the
+  front card; list the back cards front-to-back. Don't create separate entities
+  for the back cards; a line drawn from a back card belongs to the stack.
+- A stack without labels, or with several names on the front card, is **several
+  instances**: `CI(Windows Server) win: Exchange01, Exchange02`.
 
 ## Connectors that run through boxes
 

@@ -24,6 +24,9 @@ const DEFAULT_STROKE = '#4a4a4a';
 const TEXT_COLOR = '#33322e';
 let LINE_H = 17;
 let PAD_Y = 10;
+// Variant back cards (environments, locations): offset per card, scaled by font.
+const VARIANT_DX = 26;
+const VARIANT_DY = 16;
 const OUTER_GAP = 44; // width of the outer channel used by via=left/right edges
 const TITLE_H = 70;
 let LABEL_SIZE = 12;
@@ -60,7 +63,7 @@ function parse(source) {
   const classes = new Map();
   const linkClasses = new Map();
   const shifts = [];
-  const meta = { background: null, title: null, subtitle: null, box: null, gap: null, legend: [], legendTitle: null, key: [], notes: [], stacks: [] };
+  const meta = { background: null, title: null, subtitle: null, box: null, gap: null, legend: [], legendTitle: null, key: [], notes: [], stacks: [], variants: [] };
 
   const kvs = (parts, ln) => {
     const out = { names: [] };
@@ -122,6 +125,14 @@ function parse(source) {
 
     m = /^note\s+([A-Za-z][\w-]*)\s+"([^"]*)"$/.exec(line);
     if (m) { meta.notes.push({ id: m[1], text: m[2], line: ln }); return; }
+
+    m = /^variants\s+([A-Za-z][\w-]*)\s+(.+)$/.exec(line);
+    if (m) {
+      const names = [...m[2].matchAll(/"([^"]*)"/g)].map(x => x[1]);
+      if (!names.length) throw parseError('variants needs quoted names, e.g. variants ea "Dev" "QA"', ln);
+      meta.variants.push({ id: m[1], names, line: ln });
+      return;
+    }
 
     m = /^stack\s+(.+)$/.exec(line);
     if (m) { meta.stacks.push(...m[1].trim().split(/\s+/)); return; }
@@ -192,6 +203,10 @@ function parse(source) {
   for (const nt of meta.notes) {
     if (!nodes.has(nt.id)) throw parseError(`note: unknown node "${nt.id}"`, nt.line);
   }
+  for (const v of meta.variants) {
+    if (!nodes.has(v.id)) throw parseError(`variants: unknown node "${v.id}"`, v.line);
+    nodes.get(v.id).variants = v.names;
+  }
   for (const id of meta.stacks) {
     if (!nodes.has(id)) throw parseError(`stack: unknown node "${id}"`);
     nodes.get(id).stack = true;
@@ -239,6 +254,23 @@ function wrapLabel(label, boxW) {
   return bestTwoLineSplit(label);
 }
 
+const variantDx = () => Math.round(VARIANT_DX * FONT_SIZE / 14);
+const variantDy = () => Math.round(VARIANT_DY * FONT_SIZE / 14);
+
+// Full footprint of a node, including any variant cards behind it.
+function nodeExtent(n) {
+  const nv = (n.variants || []).length;
+  return { x0: n.x, y0: n.y, x1: n.x + n.w + nv * variantDx(), y1: n.y + n.h + nv * variantDy() };
+}
+
+function darken(hex, f) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex);
+  if (!m) return hex;
+  const v = parseInt(m[1], 16);
+  const c = sh => Math.round(((v >> sh) & 255) * (1 - f)).toString(16).padStart(2, '0');
+  return '#' + c(16) + c(8) + c(0);
+}
+
 function luminance(hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(hex);
   if (!m) return 1;
@@ -260,8 +292,10 @@ function wrapGreedy(text, boxW) {
 
 function layout(model) {
   const fixedW = model.meta.box;
-  const COL_GAP = model.meta.gap ? model.meta.gap[0] : COL_GAP_DEFAULT;
-  const ROW_GAP = model.meta.gap ? model.meta.gap[1] : ROW_GAP_DEFAULT;
+  // variant back cards spill into the gaps: widen them by the deepest stack
+  const maxVariants = Math.max(0, ...[...model.nodes.values()].map(n => (n.variants || []).length));
+  const COL_GAP = (model.meta.gap ? model.meta.gap[0] : COL_GAP_DEFAULT) + maxVariants * variantDx();
+  const ROW_GAP = (model.meta.gap ? model.meta.gap[1] : ROW_GAP_DEFAULT) + maxVariants * variantDy();
   let boxW = fixedW || BOX_W_MIN;
   if (!fixedW) {
     for (const n of model.nodes.values()) {
@@ -303,8 +337,9 @@ function layout(model) {
     n.h = boxH;
     n.cx = n.x + boxW / 2;
     n.cy = n.y + boxH / 2;
-    maxX = Math.max(maxX, n.x + boxW);
-    maxY = Math.max(maxY, n.y + boxH);
+    const nv = (n.variants || []).length;
+    maxX = Math.max(maxX, n.x + boxW + nv * variantDx());
+    maxY = Math.max(maxY, n.y + boxH + nv * variantDy());
   }
   const gridRight = left + nCols * colStep - COL_GAP;
   const bg = model.meta.background;
@@ -881,7 +916,7 @@ function splitLabel(text) {
 }
 
 function placeLabels(requests, model, paths) {
-  const nodes = [...model.nodes.values()].map(n => ({ x0: n.x, y0: n.y, x1: n.x + n.w, y1: n.y + n.h }));
+  const nodes = [...model.nodes.values()].map(nodeExtent);
   const allSegs = paths.flatMap(p => toSegs(p.points));
   // keep labels off arrowheads: a small box around every arrow tip
   const tips = [];
@@ -1083,6 +1118,22 @@ function renderSvg(source) {
     });
   }
 
+  // Variant back cards go first, under the edges: lines stay visible across
+  // them (as on the reference slides) and only the front card covers lines.
+  for (const n of model.nodes.values()) {
+    if (!n.variants || !n.variants.length) continue;
+    const cls = n.cls ? model.classes.get(n.cls) : null;
+    const fill = cls ? cls.fill : DEFAULT_FILL;
+    const stroke = cls ? cls.stroke : DEFAULT_STROKE;
+    const textColor = (cls && cls.text) || TEXT_COLOR;
+    for (let k = n.variants.length; k >= 1; k--) {
+      const x = n.x + k * variantDx(), y = n.y + k * variantDy();
+      out.push(`<rect x="${fmt(x)}" y="${fmt(y)}" width="${fmt(n.w)}" height="${fmt(n.h)}" rx="6" fill="${esc(darken(fill, 0.08 * k))}" stroke="${esc(stroke)}" stroke-width="${STROKE_W}"/>`);
+      // name in the strip this card shows below the card in front of it
+      out.push(`<text x="${fmt(x + n.w - 6)}" y="${fmt(y + n.h - 4)}" text-anchor="end" font-size="${fmt(FONT_SIZE * 0.85)}" font-weight="600" fill="${esc(textColor)}">${esc(n.variants[k - 1])}</text>`);
+    }
+  }
+
   // edges under nodes? No — boxes are opaque; draw edges first is safer either way.
   paths.forEach((p, idx) => {
     const d = pathD(p.points, allVSegs, idx);
@@ -1132,7 +1183,7 @@ function renderSvg(source) {
   }
 
   out.push('</svg>');
-  const nodeRects = [...model.nodes.values()].map(n => ({ id: n.id, x0: n.x, y0: n.y, x1: n.x + n.w, y1: n.y + n.h }));
+  const nodeRects = [...model.nodes.values()].map(n => ({ id: n.id, ...nodeExtent(n) }));
   return { svg: out.join('\n'), width: geom.width, height: geom.height, warnings, labels: labels.map(labelRect), nodes: nodeRects };
 }
 

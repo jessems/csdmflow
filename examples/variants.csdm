@@ -1,0 +1,12 @@
+title "Variants and instances"
+
+BA ea-app: Enterprise Architecture
+SI ea: *EA Prod [Dev, QA]
+TMSO admin: ServiceNow Administration
+BSO apm: SN Application Portfolio Mgmt
+CI(Windows Server) win: web01, web02
+
+ea-app -> ea
+admin -> ea
+apm -> ea
+ea -> win

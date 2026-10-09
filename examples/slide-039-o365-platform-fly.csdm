@@ -17,8 +17,7 @@ BA ad: Active Directory
 SI o365-prod: O365 Prod
 SI teams-saas: Teams SaaS
 SI sharepoint-saas: SharePoint SaaS
-SI exchange-prod: Exchange On Prem Prod
-SI exchange-dev: Exchange On Prem Dev
+SI exchange-prod: Exchange On Prem Prod [Dev]
 SI ad-prod: Active Directory 2022 Prod
 
 BSO teams-bso: Teams
@@ -61,7 +60,6 @@ exchange -> o365
 teams -> teams-saas
 sharepoint -> sharepoint-saas
 exchange -> exchange-prod
-exchange -> exchange-dev
 ad -> ad-prod
 
 teams-saas -> o365-prod
@@ -91,10 +89,9 @@ exchange-admin -> app-mgmt
 windows-admin -> windows-group
 windows-admin -> compute
 windows-group -> windows
-# the blue service-mapping connector starts at the Dev back card and runs behind
+# the blue service-mapping connector starts at the Dev back card (drawn to the stack here) and runs behind
 # Application Exchange to the Windows servers stack; read as the stack -> app -> servers
 exchange-prod -> exchange-app
-exchange-dev -> exchange-app
 exchange-app -> windows
 
 identity -> tech-portfolio
