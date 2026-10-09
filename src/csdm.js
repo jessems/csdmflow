@@ -387,11 +387,29 @@ function place(model) {
       }
     }
   } else {
-    // offerings tier, one column per tech offering, left of the app zone
-    const tmsos = ofType('TMSO');
-    const left = lo - tmsos.length;
-    tmsos.forEach((e, k) => occupy(e, SI + 1, left + k));
-    for (const e of ofType('TMS')) putInRow(e, SI + 2, colWant(e, left, 'TMSO'), -Infinity, lo - 1);
+    // offerings tier. A tech offering sits directly under the leftmost
+    // instance it contains when nothing else hangs below that instance (no
+    // business offering, no mapped CIs) — slides 19, 21, 33, 35, 51. Otherwise
+    // it takes its own column left of the app zone (slides 27, 29).
+    const hangsBelow = si => rels.some(r =>
+      (r.to === si.id && ents.get(r.from).type === 'BSO') ||
+      (r.from === si.id && ents.get(r.to).type === 'CI'));
+    const leftZone = [];
+    for (const e of ofType('TMSO')) {
+      const sis = nbrs(e, 'SI').filter(n => pos.has(n.id));
+      const first = sis.sort((a, b) => pos.get(a.id).col - pos.get(b.id).col)[0];
+      const p = first && pos.get(first.id);
+      if (p && !hangsBelow(first) && free(p.row + 1, p.col)) occupy(e, p.row + 1, p.col);
+      else leftZone.push(e);
+    }
+    const left = lo - leftZone.length;
+    leftZone.forEach((e, k) => occupy(e, SI + 1, left + k));
+    for (const e of ofType('TMS')) {
+      const under = placedCols(nbrs(e, 'TMSO'));
+      const inApp = under.length && Math.min(...under) >= lo;
+      if (inApp) putInRow(e, SI + 2, median(under));
+      else putInRow(e, SI + 2, colWant(e, left, 'TMSO'), -Infinity, lo - 1);
+    }
     for (const e of dcgs) {
       const ciRow = median(placedRows(nbrs(e, 'CI')));
       putInRow(e, ciRow === null ? SI + 3 : ciRow, colWant(e, left, 'TMSO'), -Infinity, lo - 1);
