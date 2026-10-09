@@ -32,7 +32,8 @@ something you generate. You never place a box or pick a colour:
 
 - **Where things go** follows CSDM: applications above their instances, delivery
   (tech offerings and services) to the left, consumption (business offerings and
-  services) to the right, infrastructure below.
+  services) to the right, infrastructure below — each service-mapping hop
+  (application → server → database …) one row further down.
 - **How a line looks** follows the relationship: an offering pointing at an
   instance becomes a solid *Depends On*, an offering pointing at its service a
   dashed *References*, and so on.

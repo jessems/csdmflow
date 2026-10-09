@@ -277,11 +277,41 @@ function place(model) {
 
   // --- infrastructure: below the instances (and below a stacked consumption tier) ---
   const ciTop = (cReach === 0 || stackRows) && pos.size ? Math.max(...rows()) + 1 : SI + 1;
-  let pending = ofType('CI');
+  // Service mapping runs downward on the reference slides: each hop from the
+  // instance (app -> server -> database -> switch ...) is one row lower, and
+  // CIs at the same depth spread sideways under their parent. A hop between
+  // two CIs of the same class (app -> app) is a peer link and stays level.
+  const depth = new Map();
+  const mapRels = rels.filter(r => r.sem.kind === 'map' || ents.get(r.to).type === 'CI');
+  const peer = (a, b) => a.type === 'CI' && b.type === 'CI' && (a.ciClass || '') === (b.ciClass || '');
+  const frontier = ofType('SI').map(e => e.id);
+  frontier.forEach(id => depth.set(id, 0));
+  while (frontier.length) {
+    const id = frontier.shift();
+    for (const r of mapRels) {
+      if (r.from !== id || ents.get(r.to).type !== 'CI') continue;
+      const d = depth.get(id) + (peer(ents.get(id), ents.get(r.to)) ? 0 : 1);
+      if (depth.has(r.to) && depth.get(r.to) <= d) continue;
+      depth.set(r.to, d);
+      frontier.push(r.to);
+    }
+  }
+  const parentsOf = e => mapRels.filter(r => r.to === e.id && depth.has(r.from) && depth.get(r.from) <= (depth.get(e.id) ?? Infinity) && r.from !== e.id)
+    .map(r => ents.get(r.from));
+  const cis = ofType('CI').sort((a, b) => (depth.get(a.id) ?? 99) - (depth.get(b.id) ?? 99));
+  for (const e of cis) {
+    const d = depth.get(e.id);
+    if (d === undefined) continue; // not reachable from an instance: placed below
+    const want = median(placedCols(parentsOf(e)));
+    putInRow(e, ciTop + d - 1, want === null ? colWant(e, appLo, 'SI', 'CI') : want);
+  }
+  // CIs only reachable via groups or other CIs: shelf below the mapped tree
+  const treeBottom = Math.max(ciTop - 1, ...cis.filter(e => pos.has(e.id)).map(e => pos.get(e.id).row));
+  let pending = ofType('CI').filter(e => !pos.has(e.id));
   while (pending.length) {
     const ready = pending.filter(e => placedCols(nbrs(e, 'SI', 'CI')).length);
     for (const e of ready.length ? ready : [pending[0]]) {
-      putOnShelf(e, ciTop, colWant(e, appLo, 'SI', 'CI'), appLo, Math.max(appHi, appLo + 2));
+      putOnShelf(e, treeBottom + 1, colWant(e, appLo, 'SI', 'CI'), appLo, Math.max(appHi, appLo + 2));
     }
     pending = pending.filter(e => !pos.has(e.id));
   }
