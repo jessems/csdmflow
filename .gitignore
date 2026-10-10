@@ -8,3 +8,6 @@ node_modules/
 examples/*.svg
 examples/*.png
 examples/*.gen.gf
+# browser bundle, built by `npm run build` (and prepublishOnly)
+dist/
+_site/

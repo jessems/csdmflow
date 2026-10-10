@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>csdmflow playground</title>
+  <meta name="description" content="Draw CSDM service models from plain text — live in the browser.">
+  <style>
+    :root {
+      --bg: #f6f7f9; --panel: #ffffff; --ink: #1b1f24; --muted: #5d6570;
+      --line: #dde1e6; --accent: #1f6feb; --code-bg: #f0f2f5; --err: #b00020;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1216; --panel: #171b21; --ink: #e6e9ed; --muted: #9aa3ad;
+        --line: #2a3038; --accent: #58a6ff; --code-bg: #1e242c; --err: #ff6b81;
+      }
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      background: var(--bg); color: var(--ink);
+      font: 15px/1.5 -apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    }
+    a { color: var(--accent); }
+    code, pre, textarea, select { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; }
+
+    header {
+      display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px;
+      padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--panel);
+    }
+    header h1 { margin: 0; font-size: 20px; }
+    header p { margin: 0; color: var(--muted); flex: 1 1 280px; }
+    header nav { display: flex; gap: 14px; }
+
+    .toolbar {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+      padding: 10px 16px; border-bottom: 1px solid var(--line);
+    }
+    .toolbar label { color: var(--muted); font-size: 13px; }
+    select, button {
+      font-size: 13px; color: var(--ink); background: var(--panel);
+      border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; max-width: 100%;
+    }
+    button { cursor: pointer; font-family: inherit; }
+    button:hover { border-color: var(--accent); }
+    #examples { flex: 0 1 360px; min-width: 0; }
+    #status { font-size: 13px; color: var(--muted); margin-left: auto; }
+    #status.err { color: var(--err); }
+
+    main {
+      display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      height: calc(100vh - 160px); min-height: 480px;
+    }
+    #source {
+      width: 100%; height: 100%; resize: none; border: 0; border-right: 1px solid var(--line);
+      padding: 14px 16px; font-size: 13px; line-height: 1.55; tab-size: 2;
+      background: var(--panel); color: var(--ink); outline: none;
+    }
+    #preview { overflow: auto; padding: 16px; display: flex; align-items: flex-start; justify-content: center; }
+    #preview svg { max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+    #preview .err {
+      color: var(--err); font: 13px/1.5 ui-monospace, Menlo, monospace; white-space: pre-wrap;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px;
+    }
+
+    .usage { max-width: 860px; margin: 0 auto; padding: 32px 16px 48px; }
+    .usage h2 { font-size: 18px; margin: 0 0 8px; }
+    .usage pre {
+      background: var(--code-bg); border-radius: 6px; padding: 12px 14px; overflow-x: auto; font-size: 13px;
+    }
+    .usage p { color: var(--muted); overflow-wrap: anywhere; }
+    .usage .demo { margin-top: 16px; }
+    .usage .demo svg { border-radius: 6px; }
+
+    @media (max-width: 760px) {
+      main { grid-template-columns: minmax(0, 1fr); height: auto; }
+      #source { height: 320px; border-right: 0; border-bottom: 1px solid var(--line); }
+      #status { margin-left: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>csdmflow</h1>
+    <p>Draw CSDM service models from plain text. Edit on the left — the diagram follows.</p>
+    <nav>
+      <a href="https://github.com/jessems/csdmflow#writing-a-csdm-file">Syntax</a>
+      <a href="https://github.com/jessems/csdmflow">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="toolbar">
+    <label for="examples">Example</label>
+    <select id="examples"><option>Loading…</option></select>
+    <button id="share" type="button">Copy link</button>
+    <button id="download" type="button">Download SVG</button>
+    <span id="status" role="status"></span>
+  </div>
+
+  <main>
+    <textarea id="source" spellcheck="false" autocomplete="off" aria-label="csdmflow source"></textarea>
+    <div id="preview" aria-live="polite"></div>
+  </main>
+
+  <section class="usage">
+    <h2>Use it on your own page</h2>
+    <p>Include one script and every <code>&lt;pre class="csdmflow"&gt;</code> block becomes a diagram, the way mermaid works.</p>
+<pre><code>&lt;pre class="csdmflow"&gt;
+  BA crm: Customer Portal
+  SI crm-prod: Customer Portal Prod
+  BSO self-service: Self Service
+
+  crm -&gt; crm-prod
+  self-service -&gt; crm-prod
+&lt;/pre&gt;
+&lt;script src="https://cdn.jsdelivr.net/npm/csdmflow@0.1/dist/csdmflow.min.js"&gt;&lt;/script&gt;</code></pre>
+    <p>That snippet, rendered by this page the same way:</p>
+    <div class="demo">
+<pre class="csdmflow">
+  BA crm: Customer Portal
+  SI crm-prod: Customer Portal Prod
+  BSO self-service: Self Service
+
+  crm -> crm-prod
+  self-service -> crm-prod
+</pre>
+    </div>
+  </section>
+
+  <script src="csdmflow.min.js"></script>
+  <script>
+    const $ = id => document.getElementById(id);
+    const source = $('source'), preview = $('preview'), status = $('status'), picker = $('examples');
+    let examples = [];
+    let lastSvg = '';
+
+    // Source travels in the URL hash so a link reproduces the diagram.
+    const encode = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
+    const decode = s => new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0)));
+
+    function draw() {
+      try {
+        const { svg, width, height, warnings } = csdmflow.render(source.value);
+        preview.innerHTML = svg;
+        lastSvg = svg;
+        status.className = '';
+        status.textContent = `${Math.round(width)}×${Math.round(height)}` + (warnings.length ? ` · ${warnings.length} warning${warnings.length > 1 ? 's' : ''}: ${warnings[0]}` : '');
+      } catch (err) {
+        status.className = 'err';
+        status.textContent = 'Error';
+        preview.replaceChildren(Object.assign(document.createElement('div'), { className: 'err', textContent: err.message }));
+      }
+    }
+
+    let timer;
+    source.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        draw();
+        history.replaceState(null, '', '#src=' + encode(source.value));
+        picker.value = '';
+      }, 150);
+    });
+
+    picker.addEventListener('change', () => {
+      const ex = examples.find(e => e.file === picker.value);
+      if (!ex) return;
+      source.value = ex.source;
+      history.replaceState(null, '', '#example=' + encodeURIComponent(ex.file));
+      draw();
+    });
+
+    $('share').addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        status.className = ''; status.textContent = 'Link copied';
+      } catch { status.textContent = 'Copy the address bar to share'; }
+    });
+
+    $('download').addEventListener('click', () => {
+      if (!lastSvg) return;
+      const name = (picker.value || 'diagram.csdm').replace(/\.[^.]*$/, '') + '.svg';
+      const url = URL.createObjectURL(new Blob([lastSvg], { type: 'image/svg+xml' }));
+      Object.assign(document.createElement('a'), { href: url, download: name }).click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+
+    function pretty(file) {
+      return file.replace(/\.csdm$/, '').replace(/^slide-(\d+)-/, 'Slide $1 · ').replace(/-/g, ' ');
+    }
+
+    fetch('examples.json')
+      .then(r => r.json())
+      .then(list => {
+        examples = list;
+        picker.innerHTML = '<option value="">— your own —</option>' +
+          list.map(e => `<option value="${e.file}">${pretty(e.file)}</option>`).join('');
+        const hash = new URLSearchParams(location.hash.slice(1));
+        const fromHash = hash.get('src');
+        const exFile = hash.get('example');
+        if (fromHash) {
+          try { source.value = decode(fromHash); picker.value = ''; } catch { source.value = list[0].source; }
+        } else {
+          const ex = list.find(e => e.file === exFile) || list[0];
+          source.value = ex.source;
+          picker.value = ex.file;
+        }
+        draw();
+      })
+      .catch(err => { status.className = 'err'; status.textContent = 'Could not load examples: ' + err.message; });
+  </script>
+</body>
+</html>

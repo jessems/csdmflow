@@ -19,6 +19,22 @@ self-service -> crm-prod
 
 <sub>The full file is [`examples/hello.csdm`](examples/hello.csdm).</sub>
 
+## Try it in the browser
+
+**[Open the playground →](https://jessems.github.io/csdmflow/)** No install
+needed: type a model on the left and the diagram redraws as you go.
+
+[![The csdmflow playground: a model on the left, its diagram on the right](docs/images/playground.png)](https://jessems.github.io/csdmflow/)
+
+- **Examples** — pick any of the bundled models, including every transcribed
+  reference slide, as a starting point.
+- **Copy link** — the model travels in the URL, so a link reproduces exactly the
+  diagram you see.
+- **Download SVG** — save the diagram to drop into a slide or a doc.
+- Mistakes show the error and line number in place of the diagram.
+
+To put diagrams on your own page instead, see [In the browser](#in-the-browser).
+
 ---
 
 ## Why
@@ -56,6 +72,48 @@ while you edit:
 ```sh
 npm run compare                               # opens http://localhost:4420
 ```
+
+## In the browser
+
+Like mermaid, csdmflow can render diagrams straight into a web page. Include the
+script and every `<pre class="csdmflow">` block becomes a diagram when the page
+loads:
+
+```html
+<pre class="csdmflow">
+  BA crm: Customer Portal
+  SI crm-prod: Customer Portal Prod
+  BSO self-service: Self Service
+
+  crm -> crm-prod
+  self-service -> crm-prod
+</pre>
+
+<script src="https://cdn.jsdelivr.net/npm/csdmflow@0.1/dist/csdmflow.min.js"></script>
+```
+
+- Indentation inside the block is ignored, so the source can sit indented in
+  your HTML.
+- `<pre class="gridflow">` renders raw gridflow (`.gf`) source instead.
+- A block with an error shows the message below it; the rest of the page still
+  renders. Warnings go to the browser console.
+
+The script defines a global `csdmflow`, for pages that need more control:
+
+| Call | Effect |
+|---|---|
+| `csdmflow.initialize({ startOnLoad: false })` | Don't render on load (call before the page finishes loading) |
+| `csdmflow.run()` | Render any blocks not yet rendered, e.g. after adding content |
+| `csdmflow.run({ root: el })` | Same, but only inside `el` |
+| `csdmflow.render(source, { lang })` | Returns `{ svg, width, height, warnings }` without touching the page; `lang` is `'csdm'` (default) or `'gf'` |
+
+As an ES module: `import csdmflow from 'https://cdn.jsdelivr.net/npm/csdmflow@0.1/src/browser.js/+esm'`.
+
+To build the bundle yourself, run `npm run build` (writes
+`dist/csdmflow.min.js`). [`examples/browser.html`](examples/browser.html) uses
+the local build. `npm run site` builds the playground into `_site/`; it is
+published to GitHub Pages on every push to `main`
+([`.github/workflows/pages.yml`](.github/workflows/pages.yml)).
 
 ## Writing a `.csdm` file
 

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>csdmflow in the browser</title>
+  <style>
+    body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; max-width: 960px; margin: 2rem auto; padding: 0 16px; }
+  </style>
+</head>
+<body>
+  <h1>csdmflow in the browser</h1>
+
+  <p>A <code>&lt;pre class="csdmflow"&gt;</code> block is rendered on load:</p>
+  <pre class="csdmflow">
+    title "Hello, CSDM"
+
+    BA crm: Customer Portal
+    SI crm-prod: Customer Portal Prod
+    TMSO portal-admin: Portal Administration
+    BSO self-service: Self Service
+    CI(Linux Server) web: web01, web02
+
+    crm -> crm-prod
+    portal-admin -> crm-prod
+    self-service -> crm-prod
+    crm-prod -> web
+  </pre>
+
+  <p>A second diagram on the same page (ids are scoped per diagram):</p>
+  <pre class="csdmflow">
+    title "Variants and instances"
+
+    BA ea-app: Enterprise Architecture
+    SI ea: *EA Prod [Dev, QA]
+    TMSO admin: ServiceNow Administration
+    CI(Windows Server) win: web01, web02
+
+    ea-app -> ea
+    admin -> ea
+    ea -> win
+  </pre>
+
+  <p>Bad input shows an error instead of breaking the page:</p>
+  <pre class="csdmflow">
+    XX nope: Not a type
+  </pre>
+
+  <!-- local build; from a CDN use
+       https://cdn.jsdelivr.net/npm/csdmflow@0.1/dist/csdmflow.min.js -->
+  <script src="../dist/csdmflow.min.js"></script>
+</body>
+</html>

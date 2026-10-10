@@ -8,12 +8,16 @@
   "main": "src/csdm.js",
   "files": [
     "bin",
-    "src"
+    "src",
+    "dist"
   ],
   "scripts": {
     "test": "node test/smoke.js && node test/labels.js",
     "compare": "node tools/compare.js",
-    "images": "node tools/readme-images.js"
+    "images": "node tools/readme-images.js",
+    "build": "esbuild src/browser.js --bundle --format=iife --global-name=csdmflow --minify --target=es2019 --outfile=dist/csdmflow.min.js",
+    "prepublishOnly": "npm test && npm run build",
+    "site": "npm run build && node tools/build-site.js"
   },
   "engines": {
     "node": ">=18"
@@ -30,5 +34,11 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/jessems/csdmflow.git"
-  }
+  },
+  "unpkg": "dist/csdmflow.min.js",
+  "jsdelivr": "dist/csdmflow.min.js",
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "homepage": "https://jessems.github.io/csdmflow/"
 }
