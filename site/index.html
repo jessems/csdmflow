@@ -15,16 +15,15 @@
        only bright colours on the page.
        ------------------------------------------------------------------------- */
     :root {
-      --paper: #f2efe6;
-      --paper-deep: #e8e3d5;
-      --sheet: #fbf9f3;
+      --paper: #f5f3ee;
+      --paper-deep: #eeebe3;
+      --sheet: #fcfbf8;
       --ink: #19212b;
       --ink-soft: #586371;
       --ink-faint: #8a8f8f;
-      --rule: #cdc6b3;
-      --rule-strong: #19212b;
-      --grid: rgba(30, 80, 110, .065);
-      --grid-major: rgba(30, 80, 110, .11);
+      --rule: #e2ddd0;
+      --rule-strong: #d6d0bf;
+      --grid: rgba(30, 80, 110, .05);
       --accent: #c96f1c;
       --accent-ink: #fffaf2;
       --design: #3ba7b8;
@@ -34,7 +33,7 @@
       --mapping: #4a90d9;
       --err: #b3261e;
       --err-bg: #fbe9e7;
-      --shadow: 0 1px 0 rgba(25, 33, 43, .06), 0 12px 32px -12px rgba(25, 33, 43, .28);
+      --shadow: 0 1px 2px rgba(25, 33, 43, .05), 0 8px 24px -14px rgba(25, 33, 43, .22);
       --sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
       --mono: 'Fragment Mono', ui-monospace, 'SF Mono', Menlo, monospace;
       color-scheme: light;
@@ -47,15 +46,14 @@
         --ink: #e3edf4;
         --ink-soft: #92aabb;
         --ink-faint: #5f7a8d;
-        --rule: #22445b;
-        --rule-strong: #b9d3e3;
-        --grid: rgba(150, 205, 235, .055);
-        --grid-major: rgba(150, 205, 235, .1);
+        --rule: #1c3a4f;
+        --rule-strong: #2a4d65;
+        --grid: rgba(150, 205, 235, .045);
         --accent: #f0ac45;
         --accent-ink: #1a1206;
         --err: #ff8a80;
         --err-bg: #3a1c22;
-        --shadow: 0 1px 0 rgba(0, 0, 0, .2), 0 16px 40px -16px rgba(0, 0, 0, .6);
+        --shadow: 0 1px 2px rgba(0, 0, 0, .2), 0 10px 28px -14px rgba(0, 0, 0, .5);
         color-scheme: dark;
       }
     }
@@ -66,14 +64,7 @@
     body {
       margin: 0;
       color: var(--ink);
-      background-color: var(--paper);
-      background-image:
-        linear-gradient(var(--grid-major) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
-        linear-gradient(var(--grid) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-      background-size: 96px 96px, 96px 96px, 16px 16px, 16px 16px;
-      background-position: -1px -1px;
+      background: var(--paper);
       font: 400 16px/1.55 var(--sans);
       font-variation-settings: 'wdth' 100;
       -webkit-font-smoothing: antialiased;
@@ -97,7 +88,7 @@
     @media (max-width: 640px) { .wrap { padding: 0 16px; } }
 
     /* three-colour rule: design · delivery · consumption */
-    .domains-rule { display: flex; height: 4px; }
+    .domains-rule { display: flex; height: 2px; }
     .domains-rule i { flex: 1; }
     .domains-rule i:nth-child(1) { background: var(--design); }
     .domains-rule i:nth-child(2) { background: var(--delivery); }
@@ -109,14 +100,13 @@
       background: color-mix(in srgb, var(--paper) 88%, transparent);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--rule-strong);
+      border-bottom: 1px solid var(--rule);
     }
     .titleblock .wrap { display: flex; align-items: stretch; min-height: 56px; }
-    .tb-cell { display: flex; flex-direction: column; justify-content: center; padding: 8px 18px; border-left: 1px solid var(--rule); }
-    .tb-cell:first-child { border-left: 0; padding-left: 0; }
+    .tb-cell { display: flex; flex-direction: column; justify-content: center; padding: 8px 0; }
     .wordmark {
-      font: 800 22px/1 var(--sans);
-      font-variation-settings: 'wdth' 125;
+      font: 700 20px/1 var(--sans);
+      font-variation-settings: 'wdth' 110;
       letter-spacing: -.02em;
       text-decoration: none;
       display: flex; align-items: center; gap: 10px;
@@ -124,38 +114,30 @@
     .wordmark svg { flex: none; }
     .tb-cell .label { margin-bottom: 4px; }
     .tb-value { font: 500 13px/1.2 var(--mono); white-space: nowrap; }
-    .tb-spacer { flex: 1; border-left: 1px solid var(--rule); }
-    .tb-nav { flex-direction: row; align-items: center; gap: 20px; font-weight: 600; font-size: 14px; font-variation-settings: 'wdth' 85; letter-spacing: .02em; }
+    .tb-spacer { flex: 1; }
+    .tb-nav { flex-direction: row; align-items: center; gap: 22px; font-weight: 500; font-size: 14px; color: var(--ink-soft); }
     .tb-nav a { text-decoration: none; }
-    @media (max-width: 860px) { .tb-meta { display: none; } }
     @media (max-width: 520px) { .tb-nav a:not(.gh) { display: none; } }
 
     /* --- hero -------------------------------------------------------------- */
-    .hero { padding: 72px 0 56px; }
+    .hero { padding: 64px 0 48px; }
     .hero .wrap { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 56px; align-items: center; }
-    .eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; }
-    .eyebrow::before { content: ''; width: 28px; height: 1px; background: var(--ink-soft); }
+    .eyebrow { margin-bottom: 18px; font-size: 14px; font-weight: 600; color: var(--accent); }
     h1 {
       margin: 0 0 22px;
-      font: 800 clamp(40px, 5.6vw, 74px)/.96 var(--sans);
-      font-variation-settings: 'wdth' 112;
-      letter-spacing: -.035em;
+      font: 700 clamp(36px, 4.6vw, 60px)/1.04 var(--sans);
+      font-variation-settings: 'wdth' 100;
+      letter-spacing: -.03em;
     }
-    h1 em {
-      font-style: normal;
-      font-variation-settings: 'wdth' 62;
-      font-weight: 300;
-      letter-spacing: -.01em;
-      color: var(--ink-soft);
-    }
+    h1 em { font-style: normal; color: var(--ink-soft); }
     .lede { font-size: 18px; color: var(--ink-soft); max-width: 34ch; margin: 0 0 30px; }
     .lede strong { color: var(--ink); font-weight: 600; }
     .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
-      font: 700 14px/1 var(--sans); font-variation-settings: 'wdth' 90; letter-spacing: .02em;
-      padding: 13px 18px; border-radius: 2px; text-decoration: none; cursor: pointer;
-      border: 1px solid var(--rule-strong); color: var(--ink); background: transparent;
+      font: 600 14px/1 var(--sans);
+      padding: 12px 18px; border-radius: 6px; text-decoration: none; cursor: pointer;
+      border: 1px solid var(--rule-strong); color: var(--ink); background: var(--sheet);
       transition: transform .15s ease, background .15s ease, color .15s ease;
     }
     .btn:hover { transform: translateY(-1px); color: var(--ink); }
@@ -166,16 +148,10 @@
 
     /* the demo sheet: a typed model and the drawing it becomes */
     .demo {
-      position: relative; margin: 0 0 30px;
+      position: relative; margin: 0;
       display: grid; grid-template-columns: minmax(0, 43fr) minmax(0, 57fr);
-      background: var(--sheet); border: 1px solid var(--rule-strong); box-shadow: var(--shadow);
+      background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow);
     }
-    .demo::before, .demo::after {
-      /* crop marks */
-      content: ''; position: absolute; width: 14px; height: 14px; border: 1px solid var(--ink-soft); pointer-events: none;
-    }
-    .demo::before { top: -9px; left: -9px; border-width: 0 1px 1px 0; }
-    .demo::after { bottom: -9px; right: -9px; border-width: 1px 0 0 1px; }
     .demo-src {
       margin: 0; padding: 18px 14px; border-right: 1px solid var(--rule);
       font: 11.5px/1.75 var(--mono); color: var(--ink); white-space: pre; overflow: hidden; min-height: 330px;
@@ -188,10 +164,11 @@
     .demo-out { position: relative; display: flex; align-items: center; justify-content: center; padding: 16px; min-height: 330px; background: var(--paper-deep); }
     .demo-out svg { max-width: 100%; max-height: 300px; height: auto; border-radius: 3px; transition: opacity .25s ease; }
     .demo-cap {
-      position: absolute; left: 0; right: 0; bottom: -30px;
-      display: flex; justify-content: space-between; align-items: center;
+      grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      padding: 8px 14px; border-top: 1px solid var(--rule);
     }
-    .demo-cap button { background: none; border: 0; padding: 4px 0; cursor: pointer; color: var(--ink-soft); white-space: nowrap; flex: none; }
+    .demo-cap { font-size: 13px; color: var(--ink-soft); }
+    .demo-cap button { background: none; border: 0; padding: 4px 0; cursor: pointer; font: inherit; color: var(--ink-soft); white-space: nowrap; flex: none; }
     .demo-cap button:hover { color: var(--accent); }
 
     @media (max-width: 960px) {
@@ -202,8 +179,6 @@
       .demo { grid-template-columns: minmax(0, 1fr); }
       .demo-src { border-right: 0; border-bottom: 1px solid var(--rule); min-height: 0; max-height: 210px; }
       .demo-out { min-height: 220px; }
-      .demo { margin-bottom: 0; }
-      .demo-cap { position: static; grid-column: 1 / -1; padding: 8px 12px; gap: 12px; border-top: 1px solid var(--rule); line-height: 1.4; }
     }
 
     /* load-in: staggered rise */
@@ -221,27 +196,26 @@
 
     /* --- section headings ----------------------------------------------- */
     section { scroll-margin-top: 72px; }
-    .sec-head { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px; align-items: baseline; margin-bottom: 28px; border-top: 1px solid var(--rule-strong); padding-top: 14px; }
-    .sec-num { font: 500 13px/1 var(--mono); color: var(--ink-soft); }
+    .sec-head { margin-bottom: 24px; }
     h2 {
-      margin: 0; font: 800 clamp(26px, 3vw, 38px)/1.05 var(--sans);
-      font-variation-settings: 'wdth' 108; letter-spacing: -.025em;
+      margin: 0; font: 700 clamp(24px, 2.6vw, 32px)/1.1 var(--sans);
+      letter-spacing: -.02em;
     }
     h2 + p { margin: 10px 0 0; color: var(--ink-soft); max-width: 60ch; }
-    @media (max-width: 640px) { .sec-head { grid-template-columns: minmax(0, 1fr); gap: 8px; } }
 
     /* --- workbench --------------------------------------------------------- */
     .bench-section { padding: 40px 0 72px; }
-    .bench { background: var(--sheet); border: 1px solid var(--rule-strong); box-shadow: var(--shadow); }
+    .bench { background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 10px; box-shadow: var(--shadow); }
+    .bench .panes { border-radius: 0 0 9px 9px; overflow: hidden; } /* not on .bench: the menus must overflow it */
     .toolbar {
       display: flex; flex-wrap: wrap; align-items: center; gap: 10px 10px;
       padding: 10px 12px; border-bottom: 1px solid var(--rule);
     }
     .toolbar .label { margin-right: 2px; }
     select, .tool {
-      font: 600 13px/1 var(--sans); font-variation-settings: 'wdth' 88; letter-spacing: .01em;
+      font: 500 13px/1 var(--sans);
       color: var(--ink); background: var(--sheet);
-      border: 1px solid var(--rule); border-radius: 2px; padding: 8px 10px; cursor: pointer;
+      border: 1px solid var(--rule-strong); border-radius: 6px; padding: 8px 10px; cursor: pointer;
       transition: border-color .15s ease, background .15s ease;
     }
     select { font-family: var(--mono); font-weight: 400; font-size: 12px; max-width: 100%; min-width: 0; flex: 0 1 330px; }
@@ -250,15 +224,15 @@
     .tool .chev { display: inline-block; margin-left: 4px; transition: transform .15s ease; }
     .tool[aria-expanded="true"] .chev { transform: rotate(180deg); }
     .toolbar .grow { flex: 1; }
-    .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 2px; }
+    .seg { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: 6px; overflow: hidden; }
     .seg button { border: 0; border-radius: 0; background: none; padding: 8px 10px; font: 600 12px/1 var(--mono); color: var(--ink-soft); cursor: pointer; }
-    .seg button + button { border-left: 1px solid var(--rule); }
-    .seg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+    .seg button + button { border-left: 1px solid var(--rule-strong); }
+    .seg button[aria-pressed="true"] { background: var(--paper-deep); color: var(--ink); }
 
     .menu { position: relative; }
     .menu-list {
       position: absolute; z-index: 20; top: calc(100% + 6px); left: 0; width: 340px;
-      background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 2px; padding: 6px;
+      background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 8px; padding: 6px;
       box-shadow: var(--shadow); display: flex; flex-direction: column;
       animation: drop .14s ease-out;
     }
@@ -298,9 +272,9 @@
       display: flex; align-items: flex-start; justify-content: center;
       background-color: var(--paper-deep);
       background-image:
-        linear-gradient(var(--grid-major) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-major) 1px, transparent 1px);
-      background-size: 48px 48px;
+        linear-gradient(var(--grid) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+      background-size: 24px 24px;
     }
     #preview.fit svg { max-width: 100%; height: auto; }
     #preview svg { flex: none; border-radius: 3px; box-shadow: var(--shadow); }
@@ -333,11 +307,11 @@
 
     /* --- outputs ------------------------------------------------------------ */
     .outputs { padding: 24px 0 72px; }
-    .out-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--rule-strong); background: var(--sheet); }
+    .out-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--rule-strong); border-radius: 10px; overflow: hidden; background: var(--sheet); }
     .out { padding: 22px 20px 24px; border-left: 1px solid var(--rule); }
     .out:first-child { border-left: 0; }
     .out .fmt { font: 500 12px/1 var(--mono); color: var(--accent); }
-    .out h3 { margin: 14px 0 6px; font: 800 20px/1.1 var(--sans); font-variation-settings: 'wdth' 100; letter-spacing: -.01em; }
+    .out h3 { margin: 12px 0 6px; font: 700 18px/1.1 var(--sans); letter-spacing: -.01em; }
     .out p { margin: 0; color: var(--ink-soft); font-size: 14.5px; }
     .out svg { display: block; margin-top: 18px; color: var(--ink-soft); }
     @media (max-width: 860px) {
@@ -354,9 +328,9 @@
     /* --- cheat sheet ------------------------------------------------------- */
     .syntax { padding: 24px 0 72px; }
     .cheat { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
-    .card { background: var(--sheet); border: 1px solid var(--rule-strong); }
+    .card { background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 10px; overflow: hidden; }
     .card-h { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
-    .card-h h3 { margin: 0; font: 800 16px/1 var(--sans); font-variation-settings: 'wdth' 100; }
+    .card-h h3 { margin: 0; font: 700 15px/1 var(--sans); }
     .types { list-style: none; margin: 0; padding: 6px 0; }
     .types li { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 7px 16px; }
     .types code { font-size: 13px; font-weight: 600; }
@@ -378,7 +352,7 @@
 
     /* --- embed ---------------------------------------------------------------- */
     .embed { padding: 24px 0 80px; }
-    .embed-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border: 1px solid var(--rule-strong); background: var(--sheet); }
+    .embed-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); border: 1px solid var(--rule-strong); border-radius: 10px; overflow: hidden; background: var(--sheet); }
     .embed-grid pre.code { margin: 0; padding: 20px; font: 12.5px/1.75 var(--mono); white-space: pre; overflow-x: auto; border-right: 1px solid var(--rule); }
     .embed-grid .tag { color: var(--design); }
     .embed-grid .attr { color: var(--accent); }
@@ -393,12 +367,13 @@
     }
 
     /* --- footer ---------------------------------------------------------------- */
-    footer { border-top: 1px solid var(--rule-strong); background: var(--paper); }
+    footer { border-top: 1px solid var(--rule); }
     footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; align-items: center; padding-top: 22px; padding-bottom: 28px; font-size: 13.5px; color: var(--ink-soft); }
   </style>
 </head>
 <body>
   <header class="titleblock">
+    <div class="domains-rule" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="wrap">
       <div class="tb-cell">
         <a class="wordmark" href="#top" aria-label="csdmflow home">
@@ -411,8 +386,6 @@
           csdmflow
         </a>
       </div>
-      <div class="tb-cell tb-meta"><span class="label">Drawing</span><span class="tb-value">CSDM service models</span></div>
-      <div class="tb-cell tb-meta"><span class="label">Formats</span><span class="tb-value">svg · png · pptx · drawio</span></div>
       <div class="tb-spacer" aria-hidden="true"></div>
       <nav class="tb-cell tb-nav" aria-label="Main">
         <a href="#workbench">Editor</a>
@@ -421,15 +394,14 @@
         <a class="gh" href="https://github.com/jessems/csdmflow">GitHub ↗</a>
       </nav>
     </div>
-    <div class="domains-rule" aria-hidden="true"><i></i><i></i><i></i></div>
   </header>
 
   <main id="top">
     <section class="hero">
       <div class="wrap">
         <div>
-          <div class="eyebrow label rise">Diagrams as code · for ServiceNow CSDM</div>
-          <h1 class="rise">Service models, <em>drawn from</em> text.</h1>
+          <div class="eyebrow rise">Diagrams as code for ServiceNow CSDM</div>
+          <h1 class="rise">Service models, <em>drawn from text.</em></h1>
           <p class="lede rise">Write down your applications, instances, offerings and services. Say how they relate. <strong>csdmflow places every box, labels every line and colours every domain</strong>, the CSDM way.</p>
           <div class="cta rise">
             <a class="btn btn-primary" href="#workbench">Open the editor ↓</a>
@@ -440,8 +412,8 @@
           <pre class="demo-src" id="demo-src" aria-hidden="true"></pre>
           <div class="demo-out" id="demo-out"></div>
           <figcaption class="demo-cap">
-            <span class="label">Fig. 1 — typed on the left, laid out on the right</span>
-            <button type="button" class="label" id="replay">Replay ↺</button>
+            <span class="cap">Typed as text, laid out by csdmflow</span>
+            <button type="button" id="replay">Replay ↺</button>
           </figcaption>
         </figure>
       </div>
@@ -450,7 +422,6 @@
     <section class="bench-section" id="workbench">
       <div class="wrap">
         <div class="sec-head">
-          <span class="sec-num">01</span>
           <div>
             <h2>The editor</h2>
             <p>Type a model and the drawing follows. Start from any of the examples, including every transcribed reference slide.</p>
@@ -510,7 +481,6 @@
     <section class="outputs" id="outputs">
       <div class="wrap">
         <div class="sec-head">
-          <span class="sec-num">02</span>
           <div>
             <h2>One model, four outputs</h2>
             <p>Every format comes from the same layout, so a box sits in the same place whether you paste it into a deck or a wiki.</p>
@@ -548,7 +518,6 @@
     <section class="syntax" id="syntax">
       <div class="wrap">
         <div class="sec-head">
-          <span class="sec-num">03</span>
           <div>
             <h2>The whole language on one sheet</h2>
             <p>Entities are <code>TYPE id: Name</code>; relationships are <code>a -&gt; b</code>. csdmflow picks the label, the line style and the colour from the two types.</p>
@@ -556,7 +525,7 @@
         </div>
         <div class="cheat">
           <div class="card">
-            <div class="card-h"><h3>Entity types</h3><span class="label">Domain</span></div>
+            <div class="card-h"><h3>Entity types</h3></div>
             <ul class="types">
               <li><code>BC</code><span class="name">Business Capability</span><span class="chip" style="background:var(--design)" title="Design and planning"></span></li>
               <li><code>BA</code><span class="name">Business Application</span><span class="chip" style="background:var(--design)" title="Design and planning"></span></li>
@@ -571,7 +540,7 @@
             </ul>
           </div>
           <div class="card">
-            <div class="card-h"><h3>Relationships, inferred</h3><span class="label">Drawn as</span></div>
+            <div class="card-h"><h3>Relationships, inferred</h3></div>
             <ul class="rels">
               <li><code>BA → SI</code><svg width="64" height="10" aria-hidden="true"><path d="M2 5h52" stroke="var(--ink)" stroke-width="2"/><path d="M54 1l7 4-7 4z" fill="var(--ink)"/></svg><span class="lbl">Consumes</span></li>
               <li><code>BSO → SI</code><svg width="64" height="10" aria-hidden="true"><path d="M2 5h52" stroke="var(--consumption)" stroke-width="2"/><path d="M54 1l7 4-7 4z" fill="var(--consumption)"/></svg><span class="lbl">Depends On</span></li>
@@ -592,7 +561,6 @@
     <section class="embed" id="embed">
       <div class="wrap">
         <div class="sec-head">
-          <span class="sec-num">04</span>
           <div>
             <h2>Embed it like mermaid</h2>
             <p>One script tag, and every <code>&lt;pre class="csdmflow"&gt;</code> on the page becomes a diagram.</p>
@@ -630,7 +598,6 @@
   </main>
 
   <footer>
-    <div class="domains-rule" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="wrap">
       <span>csdmflow · <a href="https://github.com/jessems/csdmflow/blob/main/LICENSE">0BSD</a> · <a href="https://github.com/jessems/csdmflow">GitHub</a></span>
       <span>CSDM and ServiceNow are trademarks of ServiceNow, Inc. Not affiliated.</span>
