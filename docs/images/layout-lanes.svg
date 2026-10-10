@@ -1,0 +1,206 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1474 965.1999999999999" width="1474" height="965.1999999999999" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs>
+<marker id="arw-e9ebed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#e9ebed"/></marker>
+<marker id="arw-f0ac45" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#f0ac45"/></marker>
+<marker id="arw-73c26a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#73c26a"/></marker>
+<marker id="arw-69aeef" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#69aeef"/></marker>
+<linearGradient id="gf-bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="#112c40"/><stop offset="1" stop-color="#204242"/></linearGradient>
+</defs>
+<rect x="0" y="0" width="1474" height="965.1999999999999" fill="url(#gf-bg)"/>
+<text x="30" y="56" font-size="30" font-weight="700" fill="#ffffff">Basic Diagram Run Maturity</text>
+<text x="1274" y="44" font-size="14" font-weight="700" fill="#ffffff">Domains</text>
+<rect x="1274" y="56" width="18" height="10" fill="#5dbfcd"/>
+<text x="1300" y="65" font-size="11" fill="#ffffff">Design and Planning</text>
+<rect x="1274" y="72" width="18" height="10" fill="#f0ac45"/>
+<text x="1300" y="81" font-size="11" fill="#ffffff">Service Delivery</text>
+<rect x="1274" y="88" width="18" height="10" fill="#73c26a"/>
+<text x="1300" y="97" font-size="11" fill="#ffffff">Service Consumption</text>
+<rect x="924" y="30" width="330" height="55" fill="none" stroke="#ffffff" stroke-width="1"/>
+<path d="M 938 39.42857142857143 L 938 69.28571428571428" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<text x="948" y="50" font-size="10" fill="#ffffff">Relationship</text>
+<path d="M 1048 39.42857142857143 L 1048 69.28571428571428" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<text x="1058" y="50" font-size="10" fill="#ffffff">Service Mapping</text>
+<path d="M 1158 39.42857142857143 L 1158 69.28571428571428" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<text x="1168" y="50" font-size="10" fill="#ffffff">References</text>
+<path d="M 644 181.6 L 644 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<path d="M 830 181.6 L 830 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<path d="M 1016 181.6 L 1016 237.6" fill="none" stroke="#e9ebed" stroke-width="2" marker-end="url(#arw-e9ebed)"/>
+<path d="M 328 272.4 L 588 272.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 272 307.2 L 272 335.2 L 638 335.2 A 6 6 0 0 1 650 335.2 L 810 335.2 A 6 6 0 0 1 822 335.2 L 824 335.2 A 6 6 0 0 1 836 335.2 L 838 335.2 A 6 6 0 0 1 850 335.2 L 1016 335.2 L 1016 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 272 363.2 L 272 343.2 L 638 343.2 A 6 6 0 0 1 650 343.2 L 810 343.2 A 6 6 0 0 1 822 343.2 L 830 343.2 L 830 307.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 328 523.6 L 402 523.6" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 328 649.2 L 402 649.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 328 774.8 L 402 774.8" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 514 523.6 L 588 523.6" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 458 558.4 L 458 586.4 L 638 586.4 A 6 6 0 0 1 650 586.4 L 830 586.4 L 830 558.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 514 649.2 L 588 649.2" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 458 684 L 458 712 L 830 712 L 830 684" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 514 774.8 L 774 774.8" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 458 809.6 L 458 900.4 L 774 900.4" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 1146 272.4 L 1072 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
+<path d="M 1202 363.2 L 1202 343.2 L 1115 343.2 A 6 6 0 0 0 1103 343.2 L 844 343.2 L 844 307.2" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
+<path d="M 1146 523.6 L 1109 523.6 L 1109 272.4 L 700 272.4" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
+<path d="M 644 307.2 L 644 363.2" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 816 307.2 L 816 363.2" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 644 432.8 L 644 488.8" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 830 432.8 L 830 488.8" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 644 558.4 L 644 614.4" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 844 558.4 L 844 614.4" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 844 684 L 844 740" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 830 809.6 L 830 865.6" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 216 272.4 L 142 272.4" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 216 398 L 86 398 L 86 307.2" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 216 523.6 L 142 523.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 216 649.2 L 142 649.2" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 216 774.8 L 142 774.8" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 1258 272.4 L 1332 272.4" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 1258 398 L 1388 398 L 1388 307.2" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 1258 523.6 L 1332 523.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<path d="M 1388 237.6 L 1388 181.6" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
+<rect x="588" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="644" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="644" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="644" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Application A</text>
+<rect x="774" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="830" y="138.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="830" y="151.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="830" y="165.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Application B</text>
+<rect x="960" y="112" width="112" height="69.6" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
+<text x="1016" y="131.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
+<text x="1016" y="145.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="1016" y="158.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Application C</text>
+<text x="1016" y="171.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SaaS</text>
+<rect x="1332" y="112" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="1388" y="131.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
+<text x="1388" y="145.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Portfolio</text>
+<text x="1388" y="158.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Service</text>
+<text x="1388" y="171.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Portfolio A</text>
+<rect x="30" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="86" y="257.3" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="86" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
+<text x="86" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App Mgmt</text>
+<text x="86" y="297.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
+<rect x="216" y="237.6" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="272" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="272" y="277.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
+<text x="272" y="290.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App A Support</text>
+<rect x="588" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="644" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="644" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App A PROD</text>
+<rect x="774" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="830" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="830" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App B PROD</text>
+<rect x="960" y="237.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="1016" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
+<text x="1016" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App C SaaS Prod</text>
+<rect x="1146" y="237.6" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="1202" y="264" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="1202" y="277.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
+<text x="1202" y="290.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Example A</text>
+<rect x="1332" y="237.6" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="1388" y="270.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="1388" y="284.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Service #1</text>
+<rect x="216" y="363.2" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="272" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="272" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
+<text x="272" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App B Support</text>
+<rect x="588" y="363.2" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="644" y="396.3" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="644" y="409.7" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">AppA@server123</text>
+<rect x="774" y="363.2" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="830" y="396.3" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
+<text x="830" y="409.7" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">AppB@server456</text>
+<rect x="1146" y="363.2" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="1202" y="389.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="1202" y="403" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
+<text x="1202" y="416.4" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Example A</text>
+<rect x="30" y="488.8" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="86" y="515.2" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="86" y="528.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
+<text x="86" y="542" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Compute/ Hosting</text>
+<rect x="216" y="488.8" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="272" y="508.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="272" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
+<text x="272" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Windows</text>
+<text x="272" y="548.7" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Administration</text>
+<rect x="402" y="488.8" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="458" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Dynamic CI Group</text>
+<text x="458" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">All Win Servers</text>
+<rect x="588" y="488.8" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="644" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Windows Server</text>
+<text x="644" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Server123</text>
+<rect x="774" y="488.8" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="830" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Windows Server</text>
+<text x="830" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Server456</text>
+<rect x="1146" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="1202" y="515.2" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="1202" y="528.6" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
+<text x="1202" y="542" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Example B</text>
+<rect x="1332" y="488.8" width="112" height="69.6" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
+<text x="1388" y="521.9" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="1388" y="535.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Service #2</text>
+<rect x="30" y="614.4" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="86" y="634.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="86" y="647.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
+<text x="86" y="660.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Database</text>
+<text x="86" y="674.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
+<rect x="216" y="614.4" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="272" y="640.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="272" y="654.2" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
+<text x="272" y="667.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SQL Support</text>
+<rect x="402" y="614.4" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="458" y="647.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Dynamic CI Group</text>
+<text x="458" y="660.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">MSSQL Apps</text>
+<rect x="588" y="614.4" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="644" y="647.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Database</text>
+<text x="644" y="660.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">MSSQL@server123</text>
+<rect x="774" y="614.4" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="830" y="647.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Database</text>
+<text x="830" y="660.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">MSSQL@server456</text>
+<rect x="30" y="740" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="86" y="766.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="86" y="779.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
+<text x="86" y="793.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network Services</text>
+<rect x="216" y="740" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="272" y="766.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
+<text x="272" y="779.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
+<text x="272" y="793.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network Support</text>
+<rect x="402" y="740" width="112" height="69.6" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
+<text x="458" y="773.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Dynamic CI Group</text>
+<text x="458" y="786.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network Gear</text>
+<rect x="774" y="740" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="830" y="773.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Switch</text>
+<text x="830" y="786.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Switch1001</text>
+<rect x="774" y="865.6" width="112" height="69.6" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
+<text x="830" y="898.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Router</text>
+<text x="830" y="912.1" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Router 01</text>
+<text x="649" y="212.4" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
+<text x="835" y="212.4" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
+<text x="1021" y="212.4" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
+<text x="458" y="268.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="495.2" y="331.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="551" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="365" y="519.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="365" y="645.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="365" y="770.8" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
+<text x="551" y="508.8" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Query based<tspan x="551" dy="10.8">Contains</tspan></text>
+<text x="569.6" y="582.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Query based Contains</text>
+<text x="551" y="634.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Query based<tspan x="551" dy="10.8">Contains</tspan></text>
+<text x="644" y="708" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Query based Contains</text>
+<text x="644" y="770.8" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Query based Contains</text>
+<text x="616" y="896.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Query based Contains</text>
+<text x="1109" y="268.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
+<text x="1023" y="354.7" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
+<text x="1104" y="400.8" text-anchor="end" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>
+<text x="649" y="463.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Runs On</text>
+<text x="835" y="463.6" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Runs On</text>
+<text x="179" y="268.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="151" y="394" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="179" y="519.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="179" y="645.2" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="179" y="770.8" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="1295" y="268.4" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="1323" y="394" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="1295" y="519.6" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+<text x="1393" y="212.4" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">References</text>
+</svg>

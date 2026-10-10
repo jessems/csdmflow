@@ -1,4 +1,5 @@
 title "Basic Diagram Fly Maturity"
+layout lanes
 # not modelled: App/Software/Hardware Product models, Vendor and SLA tags, domain legend,
 # explanatory notes
 

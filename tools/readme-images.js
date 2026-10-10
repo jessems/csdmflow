@@ -17,6 +17,7 @@ const IMAGES = {
   'layout-cross': 'slide-043-microsoft-dynamics-fly.csdm',
   'layout-tiers': 'slide-033-epic-healthcare-saas-platform-run.csdm',
   'layout-row': 'slide-037-o365-platform-run.csdm',
+  'layout-lanes': 'slide-015-basic-diagram-run-maturity.csdm',
   'layout-reach-1-2': 'slide-047-solidworks-pdm-client-run.csdm',
 };
 

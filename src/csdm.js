@@ -5,7 +5,7 @@
 // (grid placement, relationship labels/styles, colours, legend, key) is derived
 // here from CSDM semantics and emitted as ordinary gridflow source.
 //
-//   layout cross|tiers|row               (default cross; see place())
+//   layout cross|tiers|row|lanes         (default cross; see place())
 //   layout reach <delivery> <consumption>  (each 0-2; presets are shorthands)
 //   theme dark|light                     (default dark)
 //   linecolors domain|plain              (default domain: relationships take the
@@ -97,7 +97,7 @@ function csdmError(msg, ln) {
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 function parseCsdm(source) {
-  const opts = { reach: PRESETS.cross, theme: 'dark', linecolors: 'domain', title: null, subtitle: null, warnings: [] };
+  const opts = { reach: PRESETS.cross, lanes: false, theme: 'dark', linecolors: 'domain', title: null, subtitle: null, warnings: [] };
   const ents = new Map();
   const rels = [];
   const typeAlt = Object.keys(TYPES).join('|');
@@ -108,15 +108,16 @@ function parseCsdm(source) {
     const line = raw.trim();
     if (!line || line.startsWith('#')) return;
     let m;
-    if ((m = /^layout\s+(cross|tiers|row)$/.exec(line))) { opts.reach = PRESETS[m[1]]; return; }
-    if ((m = /^layout\s+reach\s+([0-2])\s+([0-2])$/.exec(line))) { opts.reach = [+m[1], +m[2]]; return; }
+    if ((m = /^layout\s+(cross|tiers|row|lanes)$/.exec(line))) { opts.reach = PRESETS[m[1]]; opts.lanes = m[1] === 'lanes'; return; }
+    if ((m = /^layout\s+reach\s+([0-2])\s+([0-2])$/.exec(line))) { opts.reach = [+m[1], +m[2]]; opts.lanes = false; return; }
     if ((m = /^orientation\s+(horizontal|vertical)$/.exec(line))) {
       // pre-`layout` spelling
       opts.reach = m[1] === 'vertical' ? PRESETS.tiers : PRESETS.cross;
+      opts.lanes = false;
       opts.warnings.push(`line ${ln}: "orientation ${m[1]}" is deprecated; use "layout ${m[1] === 'vertical' ? 'tiers' : 'cross'}"`);
       return;
     }
-    if (/^layout\b/.test(line)) throw csdmError(`layout must be cross, tiers, row or "reach <0-2> <0-2>"`, ln);
+    if (/^layout\b/.test(line)) throw csdmError(`layout must be cross, tiers, row, lanes or "reach <0-2> <0-2>"`, ln);
     if ((m = /^theme\s+(dark|light)$/.exec(line))) { opts.theme = m[1]; return; }
     if ((m = /^linecolors\s+(domain|plain)$/.exec(line))) { opts.linecolors = m[1]; return; }
     if ((m = /^(title|subtitle)\s+"([^"]*)"$/.exec(line))) { opts[m[1]] = m[2]; return; }
@@ -179,11 +180,14 @@ function parseCsdm(source) {
 // Presets: cross = 2 1 (most slides), tiers = 0 0, row = 2 2.
 // With consumption reach 2 and several instances, the application stacks become
 // rows instead of columns (applications left of their instance), mirroring `tiers`.
+// `lanes` is reach 2 2 without that switch: application stacks stay columns, so
+// every type keeps a lane of its own, and portfolios cap their service's lane
+// from above (the basic-diagram slides 15, 16, 67, 68).
 //
 // Everything else is derived: positions follow the median of already-placed
 // neighbours. Portfolios continue their service's direction.
 
-const PRESETS = { cross: [2, 1], tiers: [0, 0], row: [2, 2] };
+const PRESETS = { cross: [2, 1], tiers: [0, 0], row: [2, 2], lanes: [2, 2] };
 
 function median(xs) {
   if (!xs.length) return null;
@@ -249,7 +253,7 @@ function place(model) {
   // becomes a row: instances stack vertically and applications sit to their
   // left (slides 37, 55). Otherwise stacks are columns: instances share one row
   // with applications above them.
-  const stackRows = cReach === 2 && ofType('SI').length > 1;
+  const stackRows = !opts.lanes && cReach === 2 && ofType('SI').length > 1;
   const BC = 0, BA = 1, SI = stackRows ? 1 : 2;
 
   // --- app zone ---
@@ -358,7 +362,8 @@ function place(model) {
     for (const e of ofType('SP').filter(sp => nbrs(sp, 'BS').length)) {
       const bs = nbrs(e, 'BS').find(n => pos.has(n.id));
       const p = bs ? pos.get(bs.id) : { row: SI, col: bsoCol };
-      if (cReach === 2) putInCol(e, p.col + 1, p.row, SI);
+      if (opts.lanes) putInCol(e, p.col, BA, 0);
+      else if (cReach === 2) putInCol(e, p.col + 1, p.row, SI);
       else putInCol(e, p.col, p.row + 1, p.row + 1);
     }
   }

@@ -163,11 +163,22 @@ Everything runs sideways, so each application becomes a row.
 
 ![row layout](docs/images/layout-row.svg)
 
+### `layout lanes`
+
+Every type gets a lane of its own on both sides of the instances — tech
+services, tech offerings, instances, business offerings, business services —
+and each box sits level with what it connects to. Portfolios sit on top of
+their service's lane. The basic-diagram slides look like this.
+
+![lanes layout](docs/images/layout-lanes.svg)
+
 ### `layout reach <delivery> <consumption>`
 
 The presets are shorthands for two numbers, each 0–2: how many boxes that side
 places beside the instance before turning down. `cross` is `reach 2 1`, `tiers`
-is `reach 0 0`, `row` is `reach 2 2`. Anything in between is allowed — here is
+is `reach 0 0`, `row` is `reach 2 2`. (`lanes` has no number form: it runs as
+far sideways as `row`, but keeps one column per application.) Anything in
+between is allowed — here is
 `reach 1 2`, where the tech service sits under its offering:
 
 ![reach 1 2 layout](docs/images/layout-reach-1-2.svg)

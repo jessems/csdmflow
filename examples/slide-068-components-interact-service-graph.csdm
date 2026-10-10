@@ -1,4 +1,5 @@
 title "How the components interact: Service Graph"
+layout lanes
 
 # Same model as slide 67, now populated through Service Graph connectors.
 # not modelled: discovery/Service Graph source box (SolarWinds, Tanium, SCCM)

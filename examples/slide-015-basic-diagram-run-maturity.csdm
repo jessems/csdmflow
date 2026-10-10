@@ -1,4 +1,5 @@
 title "Basic Diagram Run Maturity"
+layout lanes
 # not modelled: App/Software/Hardware Product models, Vendor and SLA tags, domain legend,
 # "Design & Planning" / "Service Delivery" / "Service Consumption" banners, explanatory notes
 

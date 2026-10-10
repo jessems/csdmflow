@@ -1,4 +1,5 @@
 title "How the components interact: CMDB/Discovery"
+layout lanes
 
 # not modelled: "Ven" and "SLA" tags on the Tech Mgmt Service Offerings (vendor,
 #   SLA), "Installed software" callout pointing at the servers, green frame around
