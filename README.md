@@ -30,7 +30,13 @@ needed: type a model on the left and the diagram redraws as you go.
   reference slide, as a starting point.
 - **Copy link** — the model travels in the URL, so a link reproduces exactly the
   diagram you see.
-- **Download SVG** — save the diagram to drop into a slide or a doc.
+- **Download as** — SVG, PNG, **PowerPoint** or **draw.io**. The PowerPoint and
+  draw.io files hold real, editable shapes: each box is one shape with its text
+  inside, lines keep their arrows and dashes, and in draw.io the lines stay
+  glued to their boxes when you move them.
+- **Copy as** — SVG, PNG, or **draw.io shapes** to paste straight onto a
+  draw.io canvas. (Browsers can't put editable PowerPoint shapes on the
+  clipboard; download the `.pptx` and copy the diagram from there.)
 - Mistakes show the error and line number in place of the diagram.
 
 To put diagrams on your own page instead, see [In the browser](#in-the-browser).
@@ -106,6 +112,10 @@ The script defines a global `csdmflow`, for pages that need more control:
 | `csdmflow.run()` | Render any blocks not yet rendered, e.g. after adding content |
 | `csdmflow.run({ root: el })` | Same, but only inside `el` |
 | `csdmflow.render(source, { lang })` | Returns `{ svg, width, height, warnings }` without touching the page; `lang` is `'csdm'` (default) or `'gf'` |
+| `csdmflow.scene(source, { lang })` | The laid-out diagram as shapes with coordinates, for the exporters below |
+| `csdmflow.toPptx(scene, title)` | A `.pptx` file as bytes (`Uint8Array`) |
+| `csdmflow.toDrawio(scene, title)` | A `.drawio` file as a string |
+| `csdmflow.toDrawioModel(scene)` | Bare draw.io XML: put it on the clipboard and paste it onto a draw.io canvas |
 
 As an ES module: `import csdmflow from 'https://cdn.jsdelivr.net/npm/csdmflow@0.1/src/browser.js/+esm'`.
 
@@ -289,8 +299,8 @@ recover connectors drawn near-black on the dark background.
 ## How it works
 
 ```
-your.csdm ──► src/csdm.js ──► gridflow source ──► src/gridflow.js ──► SVG
-              compiler:                            engine:
+your.csdm ──► src/csdm.js ──► gridflow source ──► src/gridflow.js ──► scene ──┬─► SVG
+              compiler:                            engine:                    └─► src/export.js ─► .pptx / .drawio
               CSDM semantics,                      grid layout, orthogonal
               placement, styles                    routing, labels
 ```
@@ -302,20 +312,27 @@ your.csdm ──► src/csdm.js ──► gridflow source ──► src/gridflow
   routes right-angled lines between them (straight, L-shaped, then Z-shaped),
   merging lines that share a target and hopping over crossings. You can also
   write `.gf` files by hand if you need a diagram the compiler can't express.
+  Its output is a **scene**: every box, line and label with absolute
+  coordinates (`buildScene`), which `sceneToSvg` draws.
+- **`src/export.js`** turns the same scene into PowerPoint and draw.io shapes,
+  so all formats show the same layout. No dependencies: it writes the `.pptx`
+  zip itself.
 
 ## Command line
 
 ```
-node bin/csdmflow.js <file.csdm|file.gf> [-o out.svg] [--png] [--emit-gf]
+node bin/csdmflow.js <file.csdm|file.gf> [-o out.svg] [--png] [--pptx] [--drawio] [--emit-gf]
 ```
 
 | Flag | Effect |
 |---|---|
 | `-o out.svg` | Output path (default: next to the input) |
 | `--png` | Also write a PNG (needs `rsvg-convert` from librsvg) |
+| `--pptx` | Also write a PowerPoint file with editable shapes |
+| `--drawio` | Also write a draw.io file with editable shapes |
 | `--emit-gf` | Also write the generated gridflow source as `<name>.gen.gf` |
 
-`npm test` renders every example and fails on any error.
+`npm test` renders and exports every example and fails on any error.
 `npm run images` regenerates the pictures in this README.
 
 ## Limitations

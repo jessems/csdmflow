@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 'use strict';
 
-// csdmflow CLI: csdmflow <file.csdm|file.gf> [-o out.svg] [--png] [--emit-gf]
+// csdmflow CLI: csdmflow <file.csdm|file.gf> [-o out.svg] [--png] [--pptx] [--drawio] [--emit-gf]
 // A .csdm file is compiled to gridflow source first (see src/csdm.js); --emit-gf
 // writes that generated source next to the output as <name>.gen.gf.
 // Emits <file>.svg next to the input (or at -o); --png also writes <file>.png
-// via rsvg-convert. Exits non-zero with a one-line message on bad input.
+// via rsvg-convert; --pptx and --drawio write editable PowerPoint / draw.io
+// files next to the svg. Exits non-zero with a one-line message on bad input.
 
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
-const { renderSvg } = require('../src/gridflow');
+const { buildScene, sceneToSvg } = require('../src/gridflow');
+const { toPptx, toDrawio } = require('../src/export');
 const { compileCsdm } = require('../src/csdm');
 
 function fail(msg) {
@@ -23,21 +25,27 @@ let input = null;
 let output = null;
 let emitGf = false;
 let png = false;
+let pptx = false;
+let drawio = false;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--emit-gf') {
     emitGf = true;
   } else if (args[i] === '--png') {
     png = true;
+  } else if (args[i] === '--pptx') {
+    pptx = true;
+  } else if (args[i] === '--drawio') {
+    drawio = true;
   } else if (args[i] === '-o') {
     output = args[++i];
     if (!output) fail('-o needs a path');
   } else if (!input) {
     input = args[i];
   } else {
-    fail(`unexpected argument "${args[i]}" (usage: csdmflow <file.gf|file.csdm> [-o out.svg] [--png] [--emit-gf])`);
+    fail(`unexpected argument "${args[i]}" (usage: csdmflow <file.gf|file.csdm> [-o out.svg] [--png] [--pptx] [--drawio] [--emit-gf])`);
   }
 }
-if (!input) fail('usage: csdmflow <file.gf|file.csdm> [-o out.svg] [--png] [--emit-gf]');
+if (!input) fail('usage: csdmflow <file.gf|file.csdm> [-o out.svg] [--png] [--pptx] [--drawio] [--emit-gf]');
 if (!fs.existsSync(input)) fail(`no such file: ${input}`);
 
 let source;
@@ -48,7 +56,7 @@ try {
 }
 
 const extraWarnings = [];
-let result;
+let scene;
 try {
   if (/\.csdm$/.test(input)) {
     const compiled = compileCsdm(source);
@@ -60,16 +68,16 @@ try {
       console.log(`wrote ${gfOut}`);
     }
   }
-  result = renderSvg(source);
+  scene = buildScene(source);
 } catch (err) {
   if (err.gridflow) fail(`${input}: ${err.message}`);
   throw err;
 }
 
 const svgOut = output || input.replace(/\.[^.]*$/, '') + '.svg';
-fs.writeFileSync(svgOut, result.svg + '\n', 'utf8');
-console.log(`wrote ${svgOut} (${result.width}x${result.height})`);
-for (const w of [...extraWarnings, ...result.warnings]) console.error('csdmflow warning: ' + w);
+fs.writeFileSync(svgOut, sceneToSvg(scene) + '\n', 'utf8');
+console.log(`wrote ${svgOut} (${scene.width}x${scene.height})`);
+for (const w of [...extraWarnings, ...scene.warnings]) console.error('csdmflow warning: ' + w);
 
 if (png) {
   const pngOut = svgOut.replace(/\.svg$/, '.png');
@@ -79,4 +87,16 @@ if (png) {
   } catch (err) {
     fail(`--png needs a working rsvg-convert (librsvg): ${err.message.split('\n')[0]}`);
   }
+}
+
+const title = (/^title\s+"([^"]*)"/m.exec(source) || [])[1] || path.basename(input).replace(/\.[^.]*$/, '');
+if (pptx) {
+  const out = svgOut.replace(/\.svg$/, '.pptx');
+  fs.writeFileSync(out, toPptx(scene, title));
+  console.log(`wrote ${out}`);
+}
+if (drawio) {
+  const out = svgOut.replace(/\.svg$/, '.drawio');
+  fs.writeFileSync(out, toDrawio(scene, title), 'utf8');
+  console.log(`wrote ${out}`);
 }

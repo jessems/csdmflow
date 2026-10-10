@@ -6,15 +6,17 @@
 // Call csdmflow.initialize({ startOnLoad: false }) before load to opt out, and
 // csdmflow.run() to render blocks added later.
 
-const { renderSvg } = require('./gridflow');
+const { renderSvg, buildScene, sceneToSvg } = require('./gridflow');
 const { compileCsdm } = require('./csdm');
+const { toPptx, toDrawio, toDrawioModel } = require('./export');
 
 const SELECTOR = 'pre.csdmflow, pre.gridflow, div.csdmflow, div.gridflow';
 let startOnLoad = true;
 let counter = 0;
 
-// Compile (if CSDM) and render. Returns { svg, width, height, warnings }.
-function render(source, opts = {}) {
+// Compile (if CSDM) and lay out. The scene feeds sceneToSvg and the
+// exporters (toPptx, toDrawio, toDrawioModel).
+function scene(source, opts = {}) {
   const lang = opts.lang || 'csdm';
   let gf = source;
   const warnings = [];
@@ -23,8 +25,15 @@ function render(source, opts = {}) {
     gf = compiled.gf;
     warnings.push(...compiled.warnings);
   }
-  const result = renderSvg(gf);
-  return { ...result, svg: scopeIds(result.svg), warnings: [...warnings, ...result.warnings] };
+  const sc = buildScene(gf);
+  sc.warnings = [...warnings, ...sc.warnings];
+  return sc;
+}
+
+// Compile (if CSDM) and render. Returns { svg, width, height, warnings }.
+function render(source, opts = {}) {
+  const sc = scene(source, opts);
+  return { svg: scopeIds(sceneToSvg(sc)), width: sc.width, height: sc.height, warnings: sc.warnings };
 }
 
 // renderSvg uses fixed ids (gf-bg, arrow markers); several diagrams on one page
@@ -81,4 +90,4 @@ if (typeof document !== 'undefined') {
   else setTimeout(start, 0); // script injected after load; let initialize() run first
 }
 
-module.exports = { render, run, initialize, compileCsdm, renderSvg };
+module.exports = { render, run, initialize, scene, sceneToSvg, toPptx, toDrawio, toDrawioModel, compileCsdm, renderSvg };

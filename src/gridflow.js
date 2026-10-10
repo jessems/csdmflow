@@ -1061,7 +1061,22 @@ function setFont(px) {
   LABEL_CHAR_W = 6.4 * k;
 }
 
-function renderSvg(source) {
+// Lay a diagram out into a scene: an ordered list of drawing items with
+// absolute geometry (back to front). renderSvg writes it as SVG; the exporters
+// in src/export.js turn the same scene into PowerPoint and draw.io shapes.
+//
+//   background  { w, h, from, to }                       top-left → bottom-right gradient
+//   rect        { x, y, w, h, rx, fill, stroke, sw }     stroke/sw/rx optional
+//   text        { x, y, lines, size, weight, fill, anchor, halo, rotate, lineGap }
+//   path        { points, d, color, sw, dash, arrowEnd, arrowStart }
+//               d is the SVG path (with hops over crossings); points the corners
+//   circle      { cx, cy, r, fill }
+//   node        { id, x, y, w, h, rx, fill, stroke, sw, textColor, size, rows }
+//               one box with its own text; rows: [{ text, weight, x, y }]
+//
+// Items carry `role` (title, legend, key, subtitle, variant, stack, note,
+// label, …) so an exporter can group or style them.
+function buildScene(source) {
   const warnings = [];
   const model = parse(source);
   setFont(model.meta.font || 14);
@@ -1093,33 +1108,20 @@ function renderSvg(source) {
     geom.width = Math.max(geom.width, Math.ceil(titleRight + 24 + keyW + 170 + MARGIN));
   }
 
-  const colors = [...new Set([
-    ...paths.filter(p => p.arrow || p.arrowStart).map(p => p.style.color),
-    ...model.meta.key.map(k => k.style.stroke || geom.edgeColor),
-  ])];
-  const markerId = c => 'arw-' + c.replace(/[^a-zA-Z0-9]/g, '');
-
-  const out = [];
-  out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${geom.width} ${geom.height}" width="${geom.width}" height="${geom.height}" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif">`);
-  out.push('<defs>');
-  for (const c of colors) {
-    out.push(`<marker id="${markerId(c)}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${esc(c)}"/></marker>`);
-  }
+  const items = [];
   const bg = model.meta.background;
-  if (bg) out.push(`<linearGradient id="gf-bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="${esc(bg[0])}"/><stop offset="1" stop-color="${esc(bg[1])}"/></linearGradient>`);
-  out.push('</defs>');
-  if (bg) out.push(`<rect x="0" y="0" width="${geom.width}" height="${geom.height}" fill="url(#gf-bg)"/>`);
+  if (bg) items.push({ type: 'background', w: geom.width, h: geom.height, from: bg[0], to: bg[1] });
   if (model.meta.title) {
-    out.push(`<text x="${MARGIN}" y="${MARGIN + 26}" font-size="30" font-weight="700" fill="${geom.labelColor}">${esc(model.meta.title)}</text>`);
+    items.push({ type: 'text', role: 'title', x: MARGIN, y: MARGIN + 26, lines: [model.meta.title], size: 30, weight: 700, fill: geom.labelColor });
   }
   if (model.meta.legend.length) {
     const lx = geom.width - MARGIN - 170;
     let ly = MARGIN + 4;
-    out.push(`<text x="${lx}" y="${ly + 10}" font-size="14" font-weight="700" fill="${geom.labelColor}">${esc(model.meta.legendTitle || 'Legend')}</text>`);
+    items.push({ type: 'text', role: 'legend', x: lx, y: ly + 10, lines: [model.meta.legendTitle || 'Legend'], size: 14, weight: 700, fill: geom.labelColor });
     ly += 22;
     for (const item of model.meta.legend) {
-      out.push(`<rect x="${lx}" y="${ly}" width="18" height="10" fill="${esc(item.color)}"/>`);
-      out.push(`<text x="${lx + 26}" y="${ly + 9}" font-size="11" fill="${geom.labelColor}">${esc(item.text)}</text>`);
+      items.push({ type: 'rect', role: 'legend', x: lx, y: ly, w: 18, h: 10, fill: item.color });
+      items.push({ type: 'text', role: 'legend', x: lx + 26, y: ly + 9, lines: [item.text], size: 11, fill: geom.labelColor });
       ly += 16;
     }
   }
@@ -1131,21 +1133,24 @@ function renderSvg(source) {
     const kx = geom.width - MARGIN - 170 - 20 - kw;
     const ky0 = MARGIN;
     const rowHK = Math.round(70 * kk);
-    out.push(`<rect x="${kx}" y="${ky0}" width="${kw}" height="${rowHK * nRowsK}" fill="none" stroke="${geom.labelColor}" stroke-width="1"/>`);
+    items.push({ type: 'rect', role: 'key', x: kx, y: ky0, w: kw, h: rowHK * nRowsK, fill: 'none', stroke: geom.labelColor, sw: 1 });
     model.meta.key.forEach((k, i) => {
       const x = kx + 14 + (i % perRow) * Math.round(140 * kk);
       const ky = ky0 + Math.floor(i / perRow) * rowHK;
-      const c = k.style.stroke || geom.edgeColor;
-      const dash = k.style.dash ? dashAttr(k.style.dash) : k.style.dashed === 'yes' ? dashAttr('dash') : '';
-      const both = k.style.both === 'yes';
-      out.push(`<path d="M ${x} ${ky + 12 * kk} L ${x} ${ky + 50 * kk}" stroke="${esc(c)}" stroke-width="2"${dash} marker-end="url(#${markerId(c)})"${both ? ` marker-start="url(#${markerId(c)})"` : ''}/>`);
+      const points = [{ x, y: ky + 12 * kk }, { x, y: ky + 50 * kk }];
+      items.push({
+        type: 'path', role: 'key', points, d: `M ${x} ${ky + 12 * kk} L ${x} ${ky + 50 * kk}`,
+        color: k.style.stroke || geom.edgeColor, sw: 2,
+        dash: k.style.dash || (k.style.dashed === 'yes' ? 'dash' : null),
+        arrowEnd: true, arrowStart: k.style.both === 'yes',
+      });
       const words = wrapGreedy(k.text, 150 * kk);
-      words.forEach((w, j) => out.push(`<text x="${x + 10}" y="${ky + 20 + j * 12}" font-size="10" fill="${geom.labelColor}">${esc(w)}</text>`));
+      words.forEach((w, j) => items.push({ type: 'text', role: 'key', x: x + 10, y: ky + 20 + j * 12, lines: [w], size: 10, fill: geom.labelColor }));
     });
   }
   if (model.meta.subtitle) {
     model.meta.subtitle.split('|').forEach((line, i) => {
-      out.push(`<text x="${MARGIN}" y="${MARGIN + 52 + i * 22}" font-size="15" font-weight="600" fill="${geom.labelColor}">${esc(line)}</text>`);
+      items.push({ type: 'text', role: 'subtitle', x: MARGIN, y: MARGIN + 52 + i * 22, lines: [line], size: 15, weight: 600, fill: geom.labelColor });
     });
   }
 
@@ -1159,24 +1164,21 @@ function renderSvg(source) {
     const textColor = (cls && cls.text) || TEXT_COLOR;
     for (let k = n.variants.length; k >= 1; k--) {
       const x = n.x + k * variantDx(), y = n.y + k * variantDy();
-      out.push(`<rect x="${fmt(x)}" y="${fmt(y)}" width="${fmt(n.w)}" height="${fmt(n.h)}" rx="6" fill="${esc(darken(fill, 0.08 * k))}" stroke="${esc(stroke)}" stroke-width="${STROKE_W}"/>`);
+      items.push({ type: 'rect', role: 'variant', of: n.id, x, y, w: n.w, h: n.h, rx: 6, fill: darken(fill, 0.08 * k), stroke, sw: STROKE_W });
       // name in the strip this card shows below the card in front of it
-      out.push(`<text x="${fmt(x + n.w - 6)}" y="${fmt(y + n.h - 4)}" text-anchor="end" font-size="${fmt(FONT_SIZE * 0.85)}" font-weight="600" fill="${esc(textColor)}">${esc(n.variants[k - 1])}</text>`);
+      items.push({ type: 'text', role: 'variant', of: n.id, x: x + n.w - 6, y: y + n.h - 4, anchor: 'end', lines: [n.variants[k - 1]], size: FONT_SIZE * 0.85, weight: 600, fill: textColor });
     }
   }
 
-  // edges under nodes? No — boxes are opaque; draw edges first is safer either way.
   paths.forEach((p, idx) => {
-    const d = pathD(p.points, allVSegs, idx);
-    const dash = dashAttr(p.style.dashed);
-    const marker = (p.arrow ? ` marker-end="url(#${markerId(p.style.color)})"` : '') +
-      (p.arrowStart ? ` marker-start="url(#${markerId(p.style.color)})"` : '');
-    out.push(`<path d="${d}" fill="none" stroke="${esc(p.style.color)}" stroke-width="${STROKE_W}"${dash}${marker}/>`);
+    items.push({
+      type: 'path', role: 'edge', points: p.points, d: pathD(p.points, allVSegs, idx),
+      color: p.style.color, sw: STROKE_W, dash: p.style.dashed || null,
+      arrowEnd: !!p.arrow, arrowStart: !!p.arrowStart,
+    });
   });
 
-  for (const dot of dots) {
-    out.push(`<circle cx="${fmt(dot.x)}" cy="${fmt(dot.y)}" r="${DOT_R}" fill="${esc(dot.color)}"/>`);
-  }
+  for (const dot of dots) items.push({ type: 'circle', role: 'joint', cx: dot.x, cy: dot.y, r: DOT_R, fill: dot.color });
 
   for (const n of model.nodes.values()) {
     const cls = n.cls ? model.classes.get(n.cls) : null;
@@ -1184,38 +1186,93 @@ function renderSvg(source) {
     const stroke = cls ? cls.stroke : DEFAULT_STROKE;
     if (n.stack) {
       for (const k of [2, 1]) {
-        out.push(`<rect x="${fmt(n.x + 5 * k)}" y="${fmt(n.y + 5 * k)}" width="${fmt(n.w)}" height="${fmt(n.h)}" rx="6" fill="${esc(fill)}" stroke="${esc(stroke)}" stroke-width="${STROKE_W}"/>`);
+        items.push({ type: 'rect', role: 'stack', of: n.id, x: n.x + 5 * k, y: n.y + 5 * k, w: n.w, h: n.h, rx: 6, fill, stroke, sw: STROKE_W });
       }
     }
-    out.push(`<rect x="${fmt(n.x)}" y="${fmt(n.y)}" width="${fmt(n.w)}" height="${fmt(n.h)}" rx="6" fill="${esc(fill)}" stroke="${esc(stroke)}" stroke-width="${STROKE_W}"/>`);
     const textColor = (cls && cls.text) || TEXT_COLOR;
     const rows = [
-      ...n.lines.map(t => ({ t, w: n.subLines.length ? 700 : 600 })),
-      ...n.subLines.map(t => ({ t, w: 400 })),
+      ...n.lines.map(t => ({ text: t, weight: n.subLines.length ? 700 : 600 })),
+      ...n.subLines.map(t => ({ text: t, weight: 400 })),
     ];
     const y0 = n.cy - ((rows.length - 1) * LINE_H) / 2 + 5;
-    rows.forEach((r, i) => {
-      out.push(`<text x="${fmt(n.cx)}" y="${fmt(y0 + i * LINE_H)}" text-anchor="middle" font-size="${FONT_SIZE}" font-weight="${r.w}" fill="${esc(textColor)}">${esc(r.t)}</text>`);
-    });
+    rows.forEach((r, i) => { r.x = n.cx; r.y = y0 + i * LINE_H; });
+    items.push({ type: 'node', id: n.id, x: n.x, y: n.y, w: n.w, h: n.h, rx: 6, fill, stroke, sw: STROKE_W, textColor, size: FONT_SIZE, lineH: LINE_H, rows });
   }
 
   for (const nt of model.meta.notes) {
     const n = model.nodes.get(nt.id);
-    out.push(`<text x="${fmt(n.cx)}" y="${fmt(n.y - 7)}" text-anchor="middle" font-size="13" font-weight="700" fill="${geom.labelColor}">${esc(nt.text)}</text>`);
+    items.push({ type: 'text', role: 'note', of: n.id, x: n.cx, y: n.y - 7, anchor: 'middle', lines: [nt.text], size: 13, weight: 700, fill: geom.labelColor });
   }
 
   // a halo in the background colour keeps labels legible where lines pass
   const halo = bg ? bg[0] : '#ffffff';
   for (const l of labels) {
-    const tr = l.rotate ? ` transform="rotate(90 ${fmt(l.x)} ${fmt(l.y)})"` : '';
     const size = l.size || LABEL_SIZE;
-    const body = (l.lines || [l.text]).map((t, i) => i === 0 ? esc(t) : `<tspan x="${fmt(l.x)}" dy="${fmt(size * 1.15)}">${esc(t)}</tspan>`).join('');
-    out.push(`<text x="${fmt(l.x)}" y="${fmt(l.y)}" text-anchor="${l.anchor}" font-size="${size}" font-weight="600" fill="${geom.labelColor}" stroke="${esc(halo)}" stroke-width="3" stroke-linejoin="round" paint-order="stroke"${tr}>${body}</text>`);
+    items.push({
+      type: 'text', role: 'label', x: l.x, y: l.y, anchor: l.anchor, lines: l.lines || [l.text],
+      size, weight: 600, fill: geom.labelColor, halo, rotate: !!l.rotate, lineGap: size * 1.15,
+    });
   }
 
-  out.push('</svg>');
   const nodeRects = [...model.nodes.values()].map(n => ({ id: n.id, ...nodeExtent(n) }));
-  return { svg: out.join('\n'), width: geom.width, height: geom.height, warnings, labels: labels.map(labelRect), nodes: nodeRects };
+  return { width: geom.width, height: geom.height, items, warnings, labels: labels.map(labelRect), nodes: nodeRects };
 }
 
-module.exports = { parse, layout, route, renderSvg };
+function sceneToSvg(scene) {
+  const { items } = scene;
+  // one arrowhead marker per colour: edge colours first, then the key's
+  const colors = [...new Set([
+    ...items.filter(i => i.type === 'path' && i.role !== 'key' && (i.arrowEnd || i.arrowStart)).map(i => i.color),
+    ...items.filter(i => i.type === 'path' && i.role === 'key').map(i => i.color),
+  ])];
+  const markerId = c => 'arw-' + c.replace(/[^a-zA-Z0-9]/g, '');
+  const bg = items.find(i => i.type === 'background');
+
+  const out = [];
+  out.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${scene.width} ${scene.height}" width="${scene.width}" height="${scene.height}" font-family="-apple-system, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif">`);
+  out.push('<defs>');
+  for (const c of colors) {
+    out.push(`<marker id="${markerId(c)}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="${esc(c)}"/></marker>`);
+  }
+  if (bg) out.push(`<linearGradient id="gf-bg" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="${esc(bg.from)}"/><stop offset="1" stop-color="${esc(bg.to)}"/></linearGradient>`);
+  out.push('</defs>');
+
+  const rect = r => `<rect x="${fmt(r.x)}" y="${fmt(r.y)}" width="${fmt(r.w)}" height="${fmt(r.h)}"${r.rx ? ` rx="${r.rx}"` : ''} fill="${esc(r.fill)}"${r.stroke ? ` stroke="${esc(r.stroke)}" stroke-width="${r.sw}"` : ''}/>`;
+  const text = (t, x, y, body) => `<text x="${fmt(x)}" y="${fmt(y)}"${t.anchor ? ` text-anchor="${t.anchor}"` : ''} font-size="${fmt(t.size)}"${t.weight ? ` font-weight="${t.weight}"` : ''} fill="${esc(t.fill)}"` +
+    (t.halo ? ` stroke="${esc(t.halo)}" stroke-width="3" stroke-linejoin="round" paint-order="stroke"` : '') +
+    (t.rotate ? ` transform="rotate(90 ${fmt(x)} ${fmt(y)})"` : '') + `>${body}</text>`;
+
+  for (const it of items) {
+    if (it.type === 'background') {
+      out.push(`<rect x="0" y="0" width="${it.w}" height="${it.h}" fill="url(#gf-bg)"/>`);
+    } else if (it.type === 'rect') {
+      out.push(rect(it));
+    } else if (it.type === 'text') {
+      const body = it.lines.map((s, i) => i === 0 ? esc(s) : `<tspan x="${fmt(it.x)}" dy="${fmt(it.lineGap)}">${esc(s)}</tspan>`).join('');
+      out.push(text(it, it.x, it.y, body));
+    } else if (it.type === 'path') {
+      const dash = dashAttr(it.dash);
+      const marker = (it.arrowEnd ? ` marker-end="url(#${markerId(it.color)})"` : '') +
+        (it.arrowStart ? ` marker-start="url(#${markerId(it.color)})"` : '');
+      // the key's sample lines keep their historic attribute order
+      if (it.role === 'key') out.push(`<path d="${it.d}" stroke="${esc(it.color)}" stroke-width="${it.sw}"${dash}${marker}/>`);
+      else out.push(`<path d="${it.d}" fill="none" stroke="${esc(it.color)}" stroke-width="${it.sw}"${dash}${marker}/>`);
+    } else if (it.type === 'circle') {
+      out.push(`<circle cx="${fmt(it.cx)}" cy="${fmt(it.cy)}" r="${it.r}" fill="${esc(it.fill)}"/>`);
+    } else if (it.type === 'node') {
+      out.push(rect(it));
+      for (const r of it.rows) {
+        out.push(text({ anchor: 'middle', size: it.size, weight: r.weight, fill: it.textColor }, r.x, r.y, esc(r.text)));
+      }
+    }
+  }
+  out.push('</svg>');
+  return out.join('\n');
+}
+
+function renderSvg(source) {
+  const scene = buildScene(source);
+  return { svg: sceneToSvg(scene), width: scene.width, height: scene.height, warnings: scene.warnings, labels: scene.labels, nodes: scene.nodes };
+}
+
+module.exports = { parse, layout, route, buildScene, sceneToSvg, renderSvg };

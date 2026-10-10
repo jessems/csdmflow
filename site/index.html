@@ -45,6 +45,20 @@
     button { cursor: pointer; font-family: inherit; }
     button:hover { border-color: var(--accent); }
     #examples { flex: 0 1 360px; min-width: 0; }
+    .menu { position: relative; }
+    .menu-list {
+      position: absolute; z-index: 10; top: calc(100% + 4px); left: 0; width: 330px;
+      background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 4px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.18); display: flex; flex-direction: column;
+    }
+    .menu-list[hidden] { display: none; }
+    .menu-list button {
+      border: 0; border-radius: 5px; text-align: left; padding: 7px 10px; display: flex; justify-content: space-between; gap: 16px;
+    }
+    .menu-list button:hover, .menu-list button:focus-visible { background: var(--code-bg); outline: none; }
+    .menu-list button { white-space: nowrap; align-items: baseline; }
+    .menu-list span { color: var(--muted); font-size: 12px; }
+    .menu-note { margin: 4px 0 2px; padding: 7px 10px 4px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; line-height: 1.45; }
     #status { font-size: 13px; color: var(--muted); margin-left: auto; }
     #status.err { color: var(--err); }
 
@@ -74,6 +88,9 @@
     .usage .demo svg { border-radius: 6px; }
 
     @media (max-width: 760px) {
+      .menu-list { width: min(330px, calc(100vw - 32px)); }
+      .menu-list span { display: none; }
+      .menu:last-of-type .menu-list { left: auto; right: 0; }
       main { grid-template-columns: minmax(0, 1fr); height: auto; }
       #source { height: 320px; border-right: 0; border-bottom: 1px solid var(--line); }
       #status { margin-left: 0; width: 100%; }
@@ -94,7 +111,24 @@
     <label for="examples">Example</label>
     <select id="examples"><option>Loading…</option></select>
     <button id="share" type="button">Copy link</button>
-    <button id="download" type="button">Download SVG</button>
+    <div class="menu">
+      <button type="button" aria-haspopup="true" aria-expanded="false" aria-controls="download-menu">Download as ▾</button>
+      <div class="menu-list" id="download-menu" role="menu" hidden>
+        <button type="button" role="menuitem" data-download="svg">SVG <span>vector image</span></button>
+        <button type="button" role="menuitem" data-download="png">PNG <span>image, 2× resolution</span></button>
+        <button type="button" role="menuitem" data-download="pptx">PowerPoint <span>.pptx, editable shapes</span></button>
+        <button type="button" role="menuitem" data-download="drawio">draw.io <span>.drawio, editable shapes</span></button>
+      </div>
+    </div>
+    <div class="menu">
+      <button type="button" aria-haspopup="true" aria-expanded="false" aria-controls="copy-menu">Copy as ▾</button>
+      <div class="menu-list" id="copy-menu" role="menu" hidden>
+        <button type="button" role="menuitem" data-copy="svg">SVG <span>vector, for Figma or code</span></button>
+        <button type="button" role="menuitem" data-copy="png">PNG <span>picture for docs, slides, chat</span></button>
+        <button type="button" role="menuitem" data-copy="drawio">draw.io shapes <span>paste onto a draw.io canvas</span></button>
+        <p class="menu-note">Editable PowerPoint shapes can't be copied from a browser. Use <b>Download as › PowerPoint</b>, then copy the diagram from that file.</p>
+      </div>
+    </div>
     <span id="status" role="status"></span>
   </div>
 
@@ -133,7 +167,6 @@
     const $ = id => document.getElementById(id);
     const source = $('source'), preview = $('preview'), status = $('status'), picker = $('examples');
     let examples = [];
-    let lastSvg = '';
 
     // Source travels in the URL hash so a link reproduces the diagram.
     const encode = s => btoa(String.fromCharCode(...new TextEncoder().encode(s)));
@@ -143,7 +176,6 @@
       try {
         const { svg, width, height, warnings } = csdmflow.render(source.value);
         preview.innerHTML = svg;
-        lastSvg = svg;
         status.className = '';
         status.textContent = `${Math.round(width)}×${Math.round(height)}` + (warnings.length ? ` · ${warnings.length} warning${warnings.length > 1 ? 's' : ''}: ${warnings[0]}` : '');
       } catch (err) {
@@ -178,12 +210,100 @@
       } catch { status.textContent = 'Copy the address bar to share'; }
     });
 
-    $('download').addEventListener('click', () => {
-      if (!lastSvg) return;
-      const name = (picker.value || 'diagram.csdm').replace(/\.[^.]*$/, '') + '.svg';
-      const url = URL.createObjectURL(new Blob([lastSvg], { type: 'image/svg+xml' }));
+    // --- export -----------------------------------------------------------
+    function current() {
+      const sc = csdmflow.scene(source.value);
+      const title = (/^title\s+"([^"]*)"/m.exec(source.value) || [])[1] || 'diagram';
+      const base = (picker.value || title).replace(/\.csdm$/, '').replace(/[^\w.-]+/g, '-').replace(/^-|-$/g, '') || 'diagram';
+      return { sc, svg: csdmflow.sceneToSvg(sc), title, base };
+    }
+
+    function pngBlob(svg, w, h, scale = 2) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = Math.ceil(w * scale); c.height = Math.ceil(h * scale);
+          const g = c.getContext('2d');
+          g.scale(scale, scale);
+          g.drawImage(img, 0, 0, w, h);
+          c.toBlob(b => (b ? resolve(b) : reject(new Error('could not draw PNG'))), 'image/png');
+        };
+        img.onerror = () => reject(new Error('could not load SVG'));
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+      });
+    }
+
+    function save(blob, name) {
+      const url = URL.createObjectURL(blob);
       Object.assign(document.createElement('a'), { href: url, download: name }).click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function say(text, err) { status.className = err ? 'err' : ''; status.textContent = text; }
+
+    const downloads = {
+      svg: ({ svg, base }) => save(new Blob([svg], { type: 'image/svg+xml' }), base + '.svg'),
+      png: async ({ svg, sc, base }) => save(await pngBlob(svg, sc.width, sc.height), base + '.png'),
+      pptx: ({ sc, title, base }) => save(new Blob([csdmflow.toPptx(sc, title)], { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' }), base + '.pptx'),
+      drawio: ({ sc, title, base }) => save(new Blob([csdmflow.toDrawio(sc, title)], { type: 'application/vnd.jgraph.mxfile' }), base + '.drawio'),
+    };
+
+    // Clipboard writes must start inside the click, so blobs go in as promises.
+    const text = s => new Blob([s], { type: 'text/plain' });
+    const copies = {
+      svg: async ({ svg }) => {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'text/plain': text(svg), 'image/svg+xml': new Blob([svg], { type: 'image/svg+xml' }) })]);
+        } catch { await navigator.clipboard.writeText(svg); }
+        return 'SVG copied';
+      },
+      png: async ({ svg, sc }) => {
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob(svg, sc.width, sc.height) })]);
+        return 'PNG copied';
+      },
+      drawio: async ({ sc }) => {
+        await navigator.clipboard.writeText(csdmflow.toDrawioModel(sc));
+        return 'draw.io shapes copied: paste onto a draw.io canvas';
+      },
+    };
+
+    function closeMenus(except) {
+      for (const m of document.querySelectorAll('.menu')) {
+        if (m === except) continue;
+        m.querySelector('.menu-list').hidden = true;
+        m.querySelector('[aria-haspopup]').setAttribute('aria-expanded', 'false');
+      }
+    }
+    for (const m of document.querySelectorAll('.menu')) {
+      const toggle = m.querySelector('[aria-haspopup]'), list = m.querySelector('.menu-list');
+      toggle.addEventListener('click', () => {
+        closeMenus(m);
+        list.hidden = !list.hidden;
+        toggle.setAttribute('aria-expanded', String(!list.hidden));
+        if (!list.hidden) list.querySelector('button').focus();
+      });
+      list.addEventListener('keydown', ev => {
+        const items = [...list.querySelectorAll('button')], i = items.indexOf(document.activeElement);
+        if (ev.key === 'ArrowDown') { items[(i + 1) % items.length].focus(); ev.preventDefault(); }
+        if (ev.key === 'ArrowUp') { items[(i - 1 + items.length) % items.length].focus(); ev.preventDefault(); }
+        if (ev.key === 'Escape') { closeMenus(); toggle.focus(); }
+      });
+    }
+    document.addEventListener('click', ev => { if (!ev.target.closest('.menu')) closeMenus(); });
+
+    document.addEventListener('click', async ev => {
+      const item = ev.target.closest('[data-download], [data-copy]');
+      if (!item) return;
+      closeMenus();
+      let cur;
+      try { cur = current(); } catch (err) { return say('Fix the error first: ' + err.message, true); }
+      try {
+        if (item.dataset.download) { await downloads[item.dataset.download](cur); say('Downloaded ' + item.dataset.download.toUpperCase()); }
+        else say(await copies[item.dataset.copy](cur));
+      } catch (err) {
+        say('Could not ' + (item.dataset.download ? 'download' : 'copy') + ': ' + err.message, true);
+      }
     });
 
     function pretty(file) {
