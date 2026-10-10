@@ -346,7 +346,9 @@ node bin/csdmflow.js <file.csdm|file.gf> [-o out.svg] [--png] [--pptx] [--drawio
 
 ## License
 
-[0BSD](LICENSE) — do anything you like with it, no attribution required.
+[MIT](LICENSE) — use it however you like, commercially included. The one
+condition: keep the copyright notice and licence text with any copy of the
+code. If csdmflow helps you, a mention or a link back is appreciated.
 
 ## Not affiliated
 
