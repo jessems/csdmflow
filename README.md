@@ -24,7 +24,7 @@ self-service -> crm-prod
 **[Open the playground →](https://jessems.github.io/csdmflow/)** No install
 needed: type a model on the left and the diagram redraws as you go.
 
-[![The csdmflow playground: a model on the left, its diagram on the right](docs/images/playground.png)](https://jessems.github.io/csdmflow/)
+[![The csdmflow site: a model typed on the left, drawn on the right](docs/images/playground.png)](https://jessems.github.io/csdmflow/)
 
 - **Examples** — pick any of the bundled models, including every transcribed
   reference slide, as a starting point.
