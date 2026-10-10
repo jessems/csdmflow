@@ -461,6 +461,24 @@ function route(model, geom, warnings) {
     ports.set(alloc.key, list);
   }
 
+  // Ports for a straight line: both ends need the same offset. Each end picks
+  // its own first free spot, which can differ (e.g. the source's centre is
+  // taken by an incoming line of another style); then look for an offset free
+  // on both ends, so the line runs straight beside the other one instead of
+  // detouring around the box. Shared (same-style) ports stay fixed.
+  function matchPorts(s, exitSide, t, enterSide, st) {
+    const po = allocPort(s.id, exitSide, st, 'out');
+    const pi = allocPort(t.id, enterSide, st, 'in');
+    if (po.off === pi.off) return [po, pi];
+    const freeAt = (id, side, off) => !(ports.get(id + '|' + side) || []).some(p => p.off === off);
+    for (const o of [po.off, pi.off, 0, PORT_STEP, -PORT_STEP, 2 * PORT_STEP, -2 * PORT_STEP]) {
+      const okS = po.shared ? o === po.off : (o === po.off || freeAt(s.id, exitSide, o));
+      const okT = pi.shared ? o === pi.off : (o === pi.off || freeAt(t.id, enterSide, o));
+      if (okS && okT) return [{ ...po, off: o }, { ...pi, off: o }];
+    }
+    return null;
+  }
+
   // Candidate check: node collisions + collinear overlap with placed edges.
   // Final-approach overlap between same (target, side, style) edges is the trunk
   // merge and is allowed.
@@ -566,9 +584,9 @@ function route(model, geom, warnings) {
     if (!done && s.gr === t.gr && s.gc !== t.gc) {
       const exitSide = t.cx > s.cx ? 'right' : 'left';
       const enterSide = t.cx > s.cx ? 'left' : 'right';
-      const po = allocPort(s.id, exitSide, st, 'out');
-      const pi = allocPort(t.id, enterSide, st, 'in');
-      if (po.off === pi.off) {
+      const pair = matchPorts(s, exitSide, t, enterSide, st);
+      if (pair) {
+        const [po, pi] = pair;
         const pts = [sidePoint(s, exitSide, po.off), sidePoint(t, enterSide, pi.off)];
         if (candidateOk(pts, s, t, st, enterSide, exitSide)) {
           accept(edge, pts, po, pi, st, exitSide, enterSide, t);
@@ -600,9 +618,9 @@ function route(model, geom, warnings) {
     if (!done && s.gc === t.gc && s.gr !== t.gr) {
       const exitSide = t.cy > s.cy ? 'bottom' : 'top';
       const enterSide = t.cy > s.cy ? 'top' : 'bottom';
-      const po = allocPort(s.id, exitSide, st, 'out');
-      const pi = allocPort(t.id, enterSide, st, 'in');
-      if (po.off === pi.off) {
+      const pair = matchPorts(s, exitSide, t, enterSide, st);
+      if (pair) {
+        const [po, pi] = pair;
         const pts = [sidePoint(s, exitSide, po.off), sidePoint(t, enterSide, pi.off)];
         if (candidateOk(pts, s, t, st, enterSide, exitSide)) {
           accept(edge, pts, po, pi, st, exitSide, enterSide, t);

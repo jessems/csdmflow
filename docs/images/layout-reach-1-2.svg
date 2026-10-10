@@ -27,7 +27,7 @@
 <path d="M 142 292.5 L 588 292.5" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 960 292.5 L 700 292.5" fill="none" stroke="#73c26a" stroke-width="2" marker-end="url(#arw-73c26a)"/>
 <path d="M 272 612 L 272 640 L 452 640 A 6 6 0 0 1 464 640 L 644 640 L 644 612" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
-<path d="M 272 612 L 272 640 L 452 640 A 6 6 0 0 1 464 640 L 731 640 A 6 6 0 0 1 743 640 L 830 640 L 830 612" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
+<path d="M 272 612 L 272 640 L 452 640 A 6 6 0 0 1 464 640 L 652 640 A 6 6 0 0 1 664 640 L 830 640 L 830 612" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 328 570.5 L 402 570.5" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 328 709.5 L 588 709.5" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
 <path d="M 272 751 L 272 779 L 830 779 L 830 751" fill="none" stroke="#f0ac45" stroke-width="2" marker-end="url(#arw-f0ac45)"/>
@@ -39,8 +39,8 @@
 <path d="M 644 473 L 644 529" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <path d="M 830 473 L 830 529" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <path d="M 458 473 L 458 529" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
-<path d="M 700 709.5 L 737 709.5 L 737 570.5 L 700 570.5" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
-<path d="M 644 668 L 644 648 L 731 648 A 6 6 0 0 1 743 648 L 844 648 L 844 612" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 658 668 L 658 612" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
+<path d="M 658 668 L 658 648 L 844 648 L 844 612" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <path d="M 588 695.5 L 458 695.5 L 458 612" fill="none" stroke="#69aeef" stroke-width="2" marker-end="url(#arw-69aeef)"/>
 <path d="M 86 334 L 86 390" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <path d="M 1072 292.5 L 1146 292.5" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
@@ -48,6 +48,7 @@
 <path d="M 142 584.5 L 179 584.5 L 179 987.5 L 142 987.5" fill="none" stroke="#e9ebed" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#arw-e9ebed)"/>
 <circle cx="644" cy="640" r="2.5" fill="#f0ac45"/>
 <circle cx="644" cy="362" r="2.5" fill="#69aeef"/>
+<circle cx="658" cy="648" r="2.5" fill="#69aeef"/>
 <rect x="588" y="112" width="112" height="83" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
 <text x="644" y="131.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
 <text x="644" y="145.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
