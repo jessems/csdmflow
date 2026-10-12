@@ -193,7 +193,7 @@ function parseCsdm(source) {
       }
       const id = m[3] || slug(name);
       if (ents.has(id)) throw csdmError(`duplicate id "${id}" — give one of them an explicit id ("${m[1]} myid: ${name}")`, ln);
-      ents.set(id, { id, type: m[1], ciClass: m[2] || null, name, instances, variants, order: ents.size, ln });
+      ents.set(id, { id, type: m[1], ciClass: m[2] ? unescapeText(m[2]) : null, name, instances, variants, order: ents.size, ln });
       return;
     }
     throw csdmError(`unrecognised line: "${line}"`, ln);

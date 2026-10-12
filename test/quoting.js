@@ -117,6 +117,15 @@ check('every box carries its id, sys_ids included', () => {
   eq(boxText(svg, '3f2a9c0e1b7d4e6a8c5b2d1f0e9a8b7c').pop(), 'App');
 });
 
+check('entity codes work in a CI class, so it can hold brackets', () => {
+  const src = 'CI(Linux Server #40;2#41;) lnx: "lnx-01", "lnx-02"';
+  eq(ent(src, 'lnx').ciClass, 'Linux Server (2)');
+  const svg = svgOf(src);
+  if (!svg.includes('>Linux Server (2)</text>')) throw new Error('title not drawn as "Linux Server (2)"');
+  // still a stack: the box and its two back cards carry its id
+  eq((svg.match(/data-id="lnx"/g) || []).length, 3);
+});
+
 check('the browser bundle scopes ids but leaves data-id alone', () => {
   const { svg } = browser.render('BA 3f2a: App\nSI 9c1d: Inst\n3f2a -> 9c1d');
   eq([...svg.matchAll(/data-id="([^"]*)"/g)].map(m => m[1]), ['3f2a', '9c1d']);

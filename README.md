@@ -204,8 +204,9 @@ SI ea: "EA, Prod" [Dev, "QA, EU"]
 ```
 
 Inside quotes, `#quot;` stands for `"` and `#<number>;` for any character by
-its decimal code (`#35;` is `#`). The same codes work in `title` and
-`subtitle`. Names without quotes behave as before.
+its decimal code (`#35;` is `#`). The same codes work in `title`, `subtitle`
+and a CI's class, e.g. `CI(Linux Server #40;2#41;)` for a box titled
+"Linux Server (2)". Names without quotes behave as before.
 
 ### Entity types
 
