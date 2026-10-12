@@ -40,7 +40,8 @@ function render(source, opts = {}) {
 // would collide, so give each render its own prefix.
 function scopeIds(svg) {
   const p = `csdmflow-${++counter}-`;
-  return svg.replace(/\bid="([^"]+)"/g, `id="${p}$1"`).replace(/url\(#([^)]+)\)/g, `url(#${p}$1)`);
+  // only the id attribute itself: data-id holds the caller's node ids
+  return svg.replace(/\sid="([^"]+)"/g, ` id="${p}$1"`).replace(/url\(#([^)]+)\)/g, `url(#${p}$1)`);
 }
 
 function esc(s) {

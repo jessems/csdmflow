@@ -119,6 +119,16 @@ The script defines a global `csdmflow`, for pages that need more control:
 | `csdmflow.toDrawio(scene, title)` | A `.drawio` file as a string |
 | `csdmflow.toDrawioModel(scene)` | Bare draw.io XML: put it on the clipboard and paste it onto a draw.io canvas |
 
+Every box in the SVG is a `<g data-id="…">` holding its id from the source,
+so a page can make boxes clickable:
+
+```js
+diagram.addEventListener('click', e => {
+  const box = e.target.closest('[data-id]');
+  if (box) open(box.dataset.id);
+});
+```
+
 As an ES module: `import csdmflow from 'https://cdn.jsdelivr.net/npm/csdmflow@0.1/src/browser.js/+esm'`.
 
 To build the bundle yourself, run `npm run build` (writes
@@ -134,23 +144,32 @@ A file is a list of **entities** and **relationships**, plus a title.
 ```
 title "Microsoft Dynamics (Fly)"
 
-BA dynamics: Microsoft Dynamics            # <TYPE> <id>: <name>
+# <TYPE> <id>: <name>
+BA dynamics: Microsoft Dynamics
 SI dynamics-prod: MS Dynamics Prod
 SI ad-prod: Active Directory Prod
-CI(Windows Server) servers: app01, app02   # CI class in brackets; commas = several instances
+# CI class in brackets; commas = several instances
+CI(Windows Server) servers: app01, app02
 
-dynamics -> dynamics-prod                  # <id> -> <id>
+# <id> -> <id>
+dynamics -> dynamics-prod
 dynamics-prod -> servers
-ad-prod -> dynamics-prod : Sends Data to   # override the label when you need to
+# override the label when you need to
+ad-prod -> dynamics-prod : Sends Data to
 ```
+
+Comments start with `#` and take a line of their own: on an entity or
+relationship line, everything after the name or label is part of it.
 
 ### Variants and several instances
 
 Two kinds of stacked boxes, written differently:
 
 ```
-SI ea: *EA Prod [Dev, QA]                  # variants: the same service in other environments
-CI(Windows Server) win: web01, web02       # several instances: commas in the name
+# variants: the same service in other environments
+SI ea: *EA Prod [Dev, QA]
+# several instances: commas in the name
+CI(Windows Server) win: web01, web02
 ```
 
 - **Variants** — `[Dev, QA]` after the name — are the same thing in another
@@ -165,6 +184,28 @@ CI(Windows Server) win: web01, web02       # several instances: commas in the na
 The id before the colon is what relationships refer to. You can leave it out and
 csdmflow will make one from the name (`BA Microsoft Dynamics` gets the id
 `microsoft-dynamics`); you only need explicit ids when two things share a name.
+
+### Names with commas, brackets or quotes
+
+Put a name in double quotes and everything inside is plain text, the way
+mermaid does it. Useful when names come from a CMDB rather than your keyboard:
+
+```
+# one box, comma and all
+BSO payroll: "Payroll, Benefits"
+# a name, not a variant
+SI sap: "SAP [Prod]"
+# #quot; is a " inside quotes
+BA hq: "The #quot;HQ#quot; Portal"
+# several quoted names = several instances
+CI(Server) web: "web, 01", "web, 02"
+# variants after a quoted name; quote them as needed
+SI ea: "EA, Prod" [Dev, "QA, EU"]
+```
+
+Inside quotes, `#quot;` stands for `"` and `#<number>;` for any character by
+its decimal code (`#35;` is `#`). The same codes work in `title` and
+`subtitle`. Names without quotes behave as before.
 
 ### Entity types
 

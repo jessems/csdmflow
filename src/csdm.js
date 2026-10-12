@@ -14,6 +14,10 @@
 //   <TYPE>[(ci class)] [id:] Name[, Name2] [Variant, ...]
 //                                         e.g.  BA o365: O365 E5
 //                                               SI ea: *EA Prod [Dev, QA]
+//   <TYPE> [id:] "Name"[, "Name2"] ["Variant", ...]
+//                                         quoted: commas and brackets inside
+//                                         the quotes are text; #quot; is a `"`
+//                                         and #<code>; any character
 //   a -> b [: label override]
 
 const TYPES = {
@@ -94,6 +98,53 @@ function csdmError(msg, ln) {
   return e;
 }
 
+// Mermaid-style text escapes inside quotes: #quot; or a decimal code like #35;
+const unescapeText = s => s.replace(/#(quot|\d+);/g, (_, c) => c === 'quot' ? '"' : String.fromCodePoint(+c));
+
+// The text after `<TYPE> [id:]` when it starts with a quote: one or more quoted
+// names (several = instances), then an optional [variant, ...] list whose items
+// may be quoted too. Inside quotes nothing is special, so names straight from a
+// CMDB ("Payroll, Benefits", "SAP [Prod]") stay one box with that name.
+function parseQuotedName(s, ln) {
+  let i = 0;
+  const ws = () => { while (/\s/.test(s[i] || '')) i++; };
+  const quoted = () => {
+    const end = s.indexOf('"', i + 1);
+    if (end < 0) throw csdmError(`unterminated quote in ${s}`, ln);
+    const text = unescapeText(s.slice(i + 1, end));
+    i = end + 1;
+    return text;
+  };
+  const instances = [quoted()];
+  for (ws(); s[i] === ','; ws()) {
+    i++; ws();
+    if (s[i] !== '"') throw csdmError(`expected a quoted name after "," in ${s}`, ln);
+    instances.push(quoted());
+  }
+  let variants = [];
+  if (s[i] === '[') {
+    const items = [];
+    for (i++, ws(); s[i] !== ']'; ws()) {
+      if (i >= s.length) throw csdmError(`unterminated variant list in ${s}`, ln);
+      if (s[i] === '"') items.push(quoted());
+      else {
+        const m = /^[^,\]"]*/.exec(s.slice(i));
+        items.push(m[0].trim());
+        i += m[0].length;
+      }
+      ws();
+      if (s[i] === ',') i++;
+      else if (s[i] !== ']' && i < s.length) throw csdmError(`expected "," or "]" in ${s}`, ln);
+    }
+    i++;
+    variants = items.filter(Boolean);
+    if (!variants.length) throw csdmError('empty variant list "[]"', ln);
+  }
+  ws();
+  if (i < s.length) throw csdmError(`unexpected text after the quoted name: "${s.slice(i)}"`, ln);
+  return { name: instances.join(', '), instances, variants };
+}
+
 const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 function parseCsdm(source) {
@@ -120,24 +171,28 @@ function parseCsdm(source) {
     if (/^layout\b/.test(line)) throw csdmError(`layout must be cross, tiers, row, lanes or "reach <0-2> <0-2>"`, ln);
     if ((m = /^theme\s+(dark|light)$/.exec(line))) { opts.theme = m[1]; return; }
     if ((m = /^linecolors\s+(domain|plain)$/.exec(line))) { opts.linecolors = m[1]; return; }
-    if ((m = /^(title|subtitle)\s+"([^"]*)"$/.exec(line))) { opts[m[1]] = m[2]; return; }
+    if ((m = /^(title|subtitle)\s+"([^"]*)"$/.exec(line))) { opts[m[1]] = unescapeText(m[2]); return; }
     if ((m = /^([a-z0-9][a-z0-9-]*)\s*->\s*([a-z0-9][a-z0-9-]*)\s*(?::\s*(.+))?$/.exec(line))) {
       rels.push({ from: m[1], to: m[2], label: m[3] ? m[3].trim() : null, ln });
       return;
     }
     if ((m = entRe.exec(line))) {
       let name = m[4].trim();
-      // trailing [A, B]: variants of this entity (environments, locations)
       let variants = [];
-      const vm = /^(.*?)\s*\[([^\]]*)\]$/.exec(name);
-      if (vm) {
-        name = vm[1].trim();
-        variants = vm[2].split(',').map(v => v.trim()).filter(Boolean);
-        if (!variants.length) throw csdmError('empty variant list "[]"', ln);
+      let instances;
+      if (name.startsWith('"')) ({ name, instances, variants } = parseQuotedName(name, ln));
+      else {
+        // trailing [A, B]: variants of this entity (environments, locations)
+        const vm = /^(.*?)\s*\[([^\]]*)\]$/.exec(name);
+        if (vm) {
+          name = vm[1].trim();
+          variants = vm[2].split(',').map(v => v.trim()).filter(Boolean);
+          if (!variants.length) throw csdmError('empty variant list "[]"', ln);
+        }
+        instances = name.split(/\s*,\s*/);
       }
       const id = m[3] || slug(name);
       if (ents.has(id)) throw csdmError(`duplicate id "${id}" — give one of them an explicit id ("${m[1]} myid: ${name}")`, ln);
-      const instances = name.split(/\s*,\s*/);
       ents.set(id, { id, type: m[1], ciClass: m[2] || null, name, instances, variants, order: ents.size, ln });
       return;
     }
@@ -447,7 +502,9 @@ function place(model) {
 
 // --- emit gridflow -----------------------------------------------------------
 
-const q = s => s.replace(/"/g, "'");
+// Text goes into gridflow inside quotes, where `"` would end it and `|` splits
+// a box's title from its name: spell those (and `#`) as gridflow entity codes.
+const q = s => s.replace(/#/g, '#35;').replace(/"/g, '#quot;').replace(/\|/g, '#124;');
 
 function compileCsdm(source) {
   const model = parseCsdm(source);
@@ -464,7 +521,8 @@ function compileCsdm(source) {
   const out = ['# generated by csdm.js — edit the .csdm source, not this file'];
   if (theme.background) out.push(`background ${theme.background}`);
   if (opts.title) out.push(`title "${q(opts.title)}"`);
-  if (opts.subtitle) out.push(`subtitle "${q(opts.subtitle)}"`);
+  // `|` in a subtitle starts a new line, so it stays as it is
+  if (opts.subtitle) out.push(`subtitle "${q(opts.subtitle).replace(/#124;/g, '|')}"`);
   out.push('font 11', 'box 112', stacked ? 'gap 56 56' : 'gap 74 56');
 
   // legend: only domains present
@@ -482,7 +540,7 @@ function compileCsdm(source) {
       if (!id) { cells.push('.'); continue; }
       const e = ents.get(id);
       const title = e.type === 'CI' && e.ciClass ? e.ciClass : TYPES[e.type].title;
-      cells.push(`${gfId(id)}["${q(title)}|${q(e.name)}"]`);
+      cells.push(`${id}["${q(title)}|${q(e.name)}"]`);
     }
     if (cells.every(c => c === '.')) continue;
     out.push('row ' + cells.join(' '));
@@ -510,7 +568,7 @@ function compileCsdm(source) {
   const rank = { rel: 0, map: 1, ref: 2, data: 2, strategic: 3 };
   const routed = [...rels].sort((x, y) => rank[x.sem.kind] - rank[y.sem.kind] || x.ln - y.ln);
   for (const r of routed) {
-    const a = gfId(r.from), b = gfId(r.to);
+    const a = r.from, b = r.to;
     const label = r.label !== null ? r.label : r.sem.label;
     const lab = label ? ` : ${label}` : '';
     const k = r.sem.kind;
@@ -525,16 +583,16 @@ function compileCsdm(source) {
 
   // variants: labelled back cards (environments, locations)
   for (const e of ents.values()) {
-    if (e.variants.length) out.push(`variants ${gfId(e.id)} ${e.variants.map(v => `"${q(v)}"`).join(' ')}`);
+    if (e.variants.length) out.push(`variants ${e.id} ${e.variants.map(v => `"${q(v)}"`).join(' ')}`);
   }
 
   // stacks for multi-instance entities
-  const stacks = [...ents.values()].filter(e => e.instances.length > 1).map(e => gfId(e.id));
+  const stacks = [...ents.values()].filter(e => e.instances.length > 1).map(e => e.id);
   if (stacks.length) out.push('stack ' + stacks.join(' '));
 
   // classes by domain
   const byDomain = {};
-  for (const e of ents.values()) (byDomain[TYPES[e.type].domain] = byDomain[TYPES[e.type].domain] || []).push(gfId(e.id));
+  for (const e of ents.values()) (byDomain[TYPES[e.type].domain] = byDomain[TYPES[e.type].domain] || []).push(e.id);
   for (const [d, ids] of Object.entries(byDomain)) {
     const [fill, stroke] = theme.domains[d];
     out.push(`class ${d} fill=${fill} stroke=${stroke} text=${theme.text} ${ids.join(' ')}`);
@@ -551,11 +609,6 @@ function relLineClass(from, to) {
   if (TYPES[from.type].domain === 'consumption') return 'rel-consumption';
   if (DELIVERY.has(from.type) && DELIVERY.has(to.type)) return 'rel-delivery';
   return 'rel';
-}
-
-// gridflow ids must start with a letter and be [\w-]
-function gfId(id) {
-  return /^[A-Za-z]/.test(id) ? id : 'n' + id;
 }
 
 module.exports = { compileCsdm, parseCsdm, TYPES, RELS };

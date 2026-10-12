@@ -42,13 +42,20 @@ function parseError(msg, lineNo) {
   return e;
 }
 
+// Quoted text cannot hold a literal `"`, and node text uses `|` to split title
+// from name, so text spells those (and `#` itself) as entity codes, mermaid
+// style: #quot; or any decimal code such as #124; for `|` and #35; for `#`.
+function unescapeText(s) {
+  return s.replace(/#(quot|\d+);/g, (_, c) => c === 'quot' ? '"' : String.fromCodePoint(+c));
+}
+
 function tokenizeCells(s, ln) {
   const out = [];
   let i = 0;
   while (i < s.length) {
     if (/\s/.test(s[i])) { i++; continue; }
     if (s[i] === '.') { out.push('.'); i++; continue; }
-    const m = /^[A-Za-z][\w-]*(\["[^"]*"\])?/.exec(s.slice(i));
+    const m = /^[A-Za-z0-9][\w-]*(\["[^"]*"\])?/.exec(s.slice(i));
     if (!m) throw parseError(`bad cell token near "${s.slice(i, i + 15)}"`, ln);
     out.push(m[0]);
     i += m[0].length;
@@ -84,19 +91,19 @@ function parse(source) {
       const cells = [];
       for (const [c, tok] of tokenizeCells(line.slice(3).trim(), ln).entries()) {
         if (tok === '.') { cells.push(null); continue; }
-        const m = /^([A-Za-z][\w-]*)(?:\["([^"]*)"\])?$/.exec(tok);
+        const m = /^([A-Za-z0-9][\w-]*)(?:\["([^"]*)"\])?$/.exec(tok);
         if (!m) throw parseError(`bad cell token "${tok}"`, ln);
         if (nodes.has(m[1])) throw parseError(`duplicate node "${m[1]}"`, ln);
         const text = m[2] !== undefined ? m[2] : m[1];
         const [title, ...rest] = text.split('|');
-        nodes.set(m[1], { id: m[1], label: title, sub: rest.join(' '), row: grid.length, col: c, cls: null, dx: 0, dy: 0 });
+        nodes.set(m[1], { id: m[1], label: unescapeText(title), sub: unescapeText(rest.join(' ')), row: grid.length, col: c, cls: null, dx: 0, dy: 0 });
         cells.push(m[1]);
       }
       grid.push(cells);
       return;
     }
 
-    let m = /^([A-Za-z][\w-]*)\s*(<-->|<-\.->|-->|-\.->|---|-\.-)\s*([A-Za-z][\w-]*)\s*(?::\s*([^{]*?))?\s*(?:\{([^}]*)\})?$/.exec(line);
+    let m = /^([A-Za-z0-9][\w-]*)\s*(<-->|<-\.->|-->|-\.->|---|-\.-)\s*([A-Za-z0-9][\w-]*)\s*(?::\s*([^{]*?))?\s*(?:\{([^}]*)\})?$/.exec(line);
     if (m) {
       const op = m[2];
       const attrs = kvs((m[5] || '').trim().split(/\s+/).filter(Boolean), ln);
@@ -112,7 +119,8 @@ function parse(source) {
     }
 
     m = /^(title|subtitle)\s+"([^"]*)"$/.exec(line);
-    if (m) { meta[m[1]] = m[2]; return; }
+    // the subtitle keeps its escapes until it is split into lines at `|`
+    if (m) { meta[m[1]] = m[1] === 'title' ? unescapeText(m[2]) : m[2]; return; }
 
     m = /^font\s+(\d+(?:\.\d+)?)$/.exec(line);
     if (m) { meta.font = +m[1]; return; }
@@ -123,12 +131,12 @@ function parse(source) {
     m = /^gap\s+(\d+)\s+(\d+)$/.exec(line);
     if (m) { meta.gap = [+m[1], +m[2]]; return; }
 
-    m = /^note\s+([A-Za-z][\w-]*)\s+"([^"]*)"$/.exec(line);
-    if (m) { meta.notes.push({ id: m[1], text: m[2], line: ln }); return; }
+    m = /^note\s+([A-Za-z0-9][\w-]*)\s+"([^"]*)"$/.exec(line);
+    if (m) { meta.notes.push({ id: m[1], text: unescapeText(m[2]), line: ln }); return; }
 
-    m = /^variants\s+([A-Za-z][\w-]*)\s+(.+)$/.exec(line);
+    m = /^variants\s+([A-Za-z0-9][\w-]*)\s+(.+)$/.exec(line);
     if (m) {
-      const names = [...m[2].matchAll(/"([^"]*)"/g)].map(x => x[1]);
+      const names = [...m[2].matchAll(/"([^"]*)"/g)].map(x => unescapeText(x[1]));
       if (!names.length) throw parseError('variants needs quoted names, e.g. variants ea "Dev" "QA"', ln);
       meta.variants.push({ id: m[1], names, line: ln });
       return;
@@ -138,19 +146,19 @@ function parse(source) {
     if (m) { meta.stacks.push(...m[1].trim().split(/\s+/)); return; }
 
     m = /^key\s+"([^"]*)"\s+(\S+)$/.exec(line);
-    if (m) { meta.key.push({ text: m[1], lc: m[2], line: ln }); return; }
+    if (m) { meta.key.push({ text: unescapeText(m[1]), lc: m[2], line: ln }); return; }
 
     m = /^legend\s+"([^"]*)"(?:\s+(\S+))?$/.exec(line);
     if (m) {
-      if (m[2]) meta.legend.push({ text: m[1], color: m[2] });
-      else meta.legendTitle = m[1];
+      if (m[2]) meta.legend.push({ text: unescapeText(m[1]), color: m[2] });
+      else meta.legendTitle = unescapeText(m[1]);
       return;
     }
 
     m = /^background\s+(\S+)(?:\s+(\S+))?$/.exec(line);
     if (m) { meta.background = [m[1], m[2] || m[1]]; return; }
 
-    m = /^shift\s+([A-Za-z][\w-]*)\s+(-?[\d.]+)(?:\s+(-?[\d.]+))?$/.exec(line);
+    m = /^shift\s+([A-Za-z0-9][\w-]*)\s+(-?[\d.]+)(?:\s+(-?[\d.]+))?$/.exec(line);
     if (m) { shifts.push({ id: m[1], dx: +m[2], dy: m[3] ? +m[3] : 0, line: ln }); return; }
 
     if (/^linkclass\s/.test(line)) {
@@ -1150,7 +1158,7 @@ function buildScene(source) {
   }
   if (model.meta.subtitle) {
     model.meta.subtitle.split('|').forEach((line, i) => {
-      items.push({ type: 'text', role: 'subtitle', x: MARGIN, y: MARGIN + 52 + i * 22, lines: [line], size: 15, weight: 600, fill: geom.labelColor });
+      items.push({ type: 'text', role: 'subtitle', x: MARGIN, y: MARGIN + 52 + i * 22, lines: [unescapeText(line)], size: 15, weight: 600, fill: geom.labelColor });
     });
   }
 
@@ -1242,7 +1250,13 @@ function sceneToSvg(scene) {
     (t.halo ? ` stroke="${esc(t.halo)}" stroke-width="3" stroke-linejoin="round" paint-order="stroke"` : '') +
     (t.rotate ? ` transform="rotate(90 ${fmt(x)} ${fmt(y)})"` : '') + `>${body}</text>`;
 
+  // Each box, and the back cards stacked behind it, carries the node id as
+  // data-id, so a page can tell which box was clicked.
+  const owned = it => it.of && (it.role === 'stack' || it.role === 'variant');
+  const tag = s => `<g data-id="${esc(s)}">`;
+
   for (const it of items) {
+    if (owned(it)) out.push(tag(it.of));
     if (it.type === 'background') {
       out.push(`<rect x="0" y="0" width="${it.w}" height="${it.h}" fill="url(#gf-bg)"/>`);
     } else if (it.type === 'rect') {
@@ -1260,11 +1274,13 @@ function sceneToSvg(scene) {
     } else if (it.type === 'circle') {
       out.push(`<circle cx="${fmt(it.cx)}" cy="${fmt(it.cy)}" r="${it.r}" fill="${esc(it.fill)}"/>`);
     } else if (it.type === 'node') {
-      out.push(rect(it));
+      out.push(tag(it.id), rect(it));
       for (const r of it.rows) {
         out.push(text({ anchor: 'middle', size: it.size, weight: r.weight, fill: it.textColor }, r.x, r.y, esc(r.text)));
       }
+      out.push('</g>');
     }
+    if (owned(it)) out.push('</g>');
   }
   out.push('</svg>');
   return out.join('\n');
