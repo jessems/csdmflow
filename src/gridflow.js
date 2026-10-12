@@ -89,7 +89,11 @@ function parse(source) {
 
     if (/^row(\s|$)/.test(line)) {
       const cells = [];
-      for (const [c, tok] of tokenizeCells(line.slice(3).trim(), ln).entries()) {
+      // no Array#entries anywhere: Prototype.js (loaded on ServiceNow pages)
+      // replaces it with a version that is not iterable
+      const toks = tokenizeCells(line.slice(3).trim(), ln);
+      for (let c = 0; c < toks.length; c++) {
+        const tok = toks[c];
         if (tok === '.') { cells.push(null); continue; }
         const m = /^([A-Za-z0-9][\w-]*)(?:\["([^"]*)"\])?$/.exec(tok);
         if (!m) throw parseError(`bad cell token "${tok}"`, ln);
@@ -910,7 +914,7 @@ function labelCandidates(req, size, lines) {
   segs.forEach((sg, si) => {
     const L = len(sg);
     if (L < 8) return;
-    for (const [fi, f] of [0.5, 0.3, 0.7, 0.15, 0.85].entries()) {
+    [0.5, 0.3, 0.7, 0.15, 0.85].forEach((f, fi) => {
       const rank = si * 4 + fi;
       if (sg.o === 'h') {
         const x = Math.min(sg.x1, sg.x2) + L * f;
@@ -929,7 +933,7 @@ function labelCandidates(req, size, lines) {
           out.push({ text: req.text, x: xr, y: yc, anchor: 'middle', rotate: true, size, rank: rank + (req.via ? 0 : 3), overhang: 0 });
         }
       }
-    }
+    });
   });
   return out;
 }
