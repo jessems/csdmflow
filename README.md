@@ -97,7 +97,7 @@ loads:
   self-service -> crm-prod
 </pre>
 
-<script src="https://cdn.jsdelivr.net/npm/csdmflow@0.1/dist/csdmflow.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/csdmflow@0.2/dist/csdmflow.min.js"></script>
 ```
 
 - Indentation inside the block is ignored, so the source can sit indented in
@@ -129,7 +129,7 @@ diagram.addEventListener('click', e => {
 });
 ```
 
-As an ES module: `import csdmflow from 'https://cdn.jsdelivr.net/npm/csdmflow@0.1/src/browser.js/+esm'`.
+As an ES module: `import csdmflow from 'https://cdn.jsdelivr.net/npm/csdmflow@0.2/src/browser.js/+esm'`.
 
 To build the bundle yourself, run `npm run build` (writes
 `dist/csdmflow.min.js`). [`examples/browser.html`](examples/browser.html) uses
