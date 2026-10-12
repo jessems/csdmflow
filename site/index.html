@@ -203,6 +203,26 @@
     }
     h2 + p { margin: 10px 0 0; color: var(--ink-soft); max-width: 60ch; }
 
+    /* --- tour video ------------------------------------------------------ */
+    .tour-section { padding: 24px 0 48px; }
+    .tour {
+      display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 400px); gap: 56px; align-items: center;
+      padding: 32px; background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 10px; box-shadow: var(--shadow);
+    }
+    .tour-copy h2 + p { max-width: 46ch; }
+    .tour-points { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+    .tour-points li { display: flex; gap: 12px; align-items: baseline; color: var(--ink-soft); }
+    .tour-points b { color: var(--ink); font-weight: 600; }
+    .tour-points .t { flex: none; width: 3.2em; font: 12px/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--ink-faint); }
+    .tour video {
+      display: block; width: 100%; max-width: 100%; height: auto; aspect-ratio: 4 / 5;
+      border-radius: 6px; border: 1px solid var(--rule); background: var(--paper-deep);
+    }
+    @media (max-width: 860px) {
+      .tour { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 22px; }
+      .tour video { max-width: 420px; margin: 0 auto; }
+    }
+
     /* --- workbench --------------------------------------------------------- */
     .bench-section { padding: 40px 0 72px; }
     .bench { background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 10px; box-shadow: var(--shadow); }
@@ -388,6 +408,7 @@
       </div>
       <div class="tb-spacer" aria-hidden="true"></div>
       <nav class="tb-cell tb-nav" aria-label="Main">
+        <a href="#tour">Tour</a>
         <a href="#workbench">Editor</a>
         <a href="#syntax">Syntax</a>
         <a href="#embed">Embed</a>
@@ -416,6 +437,27 @@
             <button type="button" id="replay">Replay ↺</button>
           </figcaption>
         </figure>
+      </div>
+    </section>
+
+    <section class="tour-section" id="tour">
+      <div class="wrap">
+        <div class="tour">
+          <div class="tour-copy">
+            <div class="eyebrow">The one-minute tour</div>
+            <h2>Stop pushing boxes around in slide decks.</h2>
+            <p>Every change to a hand-drawn service model means re-placing boxes and re-routing lines. With csdmflow you edit two lines of text and the diagram redraws itself.</p>
+            <ul class="tour-points">
+              <li><span class="t">Before</span><span>PowerPoint, Visio or draw.io: <b>hours per diagram</b>, and again at every change.</span></li>
+              <li><span class="t">After</span><span>Type the model, get it <b>laid out the CSDM way</b>.</span></li>
+              <li><span class="t">Export</span><span><b>Real, editable shapes</b> in PowerPoint and draw.io, lines glued to boxes.</span></li>
+            </ul>
+          </div>
+          <video id="tour-video" controls playsinline preload="none" poster="promo-poster.jpg" width="1080" height="1350">
+            <source src="promo.mp4" type="video/mp4">
+            <a href="promo.mp4">Watch the csdmflow tour (MP4, 56 s)</a>
+          </video>
+        </div>
       </div>
     </section>
 
