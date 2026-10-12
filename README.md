@@ -250,7 +250,7 @@ There is exactly **one** layout setting. Every layout keeps the same skeleton;
 what changes is how far each side runs sideways before it turns downward:
 
 ```
-Tech Mgmt Service ← Tech Mgmt Offering ← [ Service Instance ] → Bus Offering → Bus Service
+Tech Mgmt Service ← Tech Mgmt Offering ← [ Service Instance ] → Business Offering → Business Service
         delivery side (left)                                  consumption side (right)
 ```
 

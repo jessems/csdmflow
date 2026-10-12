@@ -46,8 +46,8 @@ reach 0 0  = layout tiers   tiers top->bottom, one column per application (19, 2
 ```
 
 Measure it on the slide: where is the Tech Mgmt Service relative to its offering
-(left = 2, below = 0/1), the Bus Offering relative to the instance (right = 1-2,
-below = 0), the Bus Service relative to its offering (right = 2, below = 1)?
+(left = 2, below = 0/1), the Business Offering relative to the instance (right = 1-2,
+below = 0), the Business Service relative to its offering (right = 2, below = 1)?
 
 Ids are lowercase kebab (`[a-z0-9-]`). If omitted, the id is the slugged name;
 give explicit ids whenever names repeat (e.g. a BA and a BSO both called "Teams").

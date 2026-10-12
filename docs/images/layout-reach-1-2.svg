@@ -49,87 +49,127 @@
 <circle cx="644" cy="640" r="2.5" fill="#f0ac45"/>
 <circle cx="644" cy="362" r="2.5" fill="#69aeef"/>
 <circle cx="658" cy="648" r="2.5" fill="#69aeef"/>
+<g data-id="solidworks-pdm">
 <rect x="588" y="112" width="112" height="83" rx="6" fill="#5dbfcd" stroke="#8fd6e0" stroke-width="2"/>
 <text x="644" y="131.7" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business</text>
 <text x="644" y="145.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
 <text x="644" y="158.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SolidWorks</text>
 <text x="644" y="171.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Product Data</text>
 <text x="644" y="185.3" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Mgmt</text>
+</g>
+<g data-id="solidworks-admin">
 <rect x="30" y="251" width="112" height="83" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
 <text x="86" y="277.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="290.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
 <text x="86" y="304.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SolidWorks</text>
 <text x="86" y="317.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Administration</text>
+</g>
+<g data-id="pdm-prod">
 <rect x="588" y="251" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="644" y="284.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Instance</text>
 <text x="644" y="297.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SolidWorks PDM</text>
 <text x="644" y="310.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Prod</text>
+</g>
+<g data-id="solidworks-bso">
 <rect x="960" y="251" width="112" height="83" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
-<text x="1016" y="284.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="1016" y="284.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business Service</text>
 <text x="1016" y="297.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Offering</text>
 <text x="1016" y="310.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SolidWorks</text>
+</g>
+<g data-id="eng-design">
 <rect x="1146" y="251" width="112" height="83" rx="6" fill="#73c26a" stroke="#a3d99c" stroke-width="2"/>
-<text x="1202" y="284.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Bus Service</text>
+<text x="1202" y="284.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Business Service</text>
 <text x="1202" y="297.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Engineering</text>
 <text x="1202" y="310.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Design Services</text>
+</g>
+<g data-id="app-mgmt">
 <rect x="30" y="390" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="86" y="416.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="429.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
 <text x="86" y="443.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Application Mgmt</text>
 <text x="86" y="456.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
+</g>
+<g data-id="license-app">
 <rect x="402" y="390" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="458" y="423.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
 <text x="458" y="436.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">License Server</text>
 <text x="458" y="449.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App</text>
+</g>
+<g data-id="sql-db">
 <rect x="588" y="390" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="644" y="423.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Database</text>
 <text x="644" y="436.5" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Microsoft SQL</text>
 <text x="644" y="449.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Database</text>
+</g>
+<g data-id="archive-app">
 <rect x="774" y="390" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="830" y="416.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Application</text>
 <text x="830" y="429.8" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">SolidWorks</text>
 <text x="830" y="443.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Archive Server</text>
 <text x="830" y="456.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">App</text>
+</g>
+<g data-id="windows-admin">
 <rect x="30" y="529" width="112" height="83" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
 <text x="86" y="555.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="568.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
 <text x="86" y="582.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Windows</text>
 <text x="86" y="595.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Administration</text>
+</g>
+<g data-id="win-servers">
 <rect x="216" y="529" width="112" height="83" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
 <text x="272" y="568.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Dynamic CI Group</text>
 <text x="272" y="582.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Windows Servers</text>
+</g>
+<g data-id="win-license">
 <rect x="402" y="529" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="458" y="568.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Windows Server</text>
 <text x="458" y="582.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Windows Server</text>
+</g>
+<g data-id="win-sql">
 <rect x="588" y="529" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="644" y="568.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Windows Server</text>
 <text x="644" y="582.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Windows Server</text>
+</g>
+<g data-id="win-archive">
 <rect x="774" y="529" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="830" y="568.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Windows Server</text>
 <text x="830" y="582.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Windows Server</text>
+</g>
+<g data-id="network-admin">
 <rect x="30" y="668" width="112" height="83" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
 <text x="86" y="694.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="707.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service Offering</text>
 <text x="86" y="721.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network</text>
 <text x="86" y="734.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Administration</text>
+</g>
+<g data-id="net-routers">
 <rect x="216" y="668" width="112" height="83" rx="6" fill="#b88c44" stroke="#d2ad72" stroke-width="2"/>
 <text x="272" y="707.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Dynamic CI Group</text>
 <text x="272" y="721.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network Routers</text>
+</g>
+<g data-id="router">
 <rect x="588" y="668" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="644" y="707.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Network Router</text>
 <text x="644" y="721.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network Router</text>
+</g>
+<g data-id="switch">
 <rect x="774" y="668" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="830" y="707.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Network Switch</text>
 <text x="830" y="721.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network Switch</text>
+</g>
+<g data-id="network-services">
 <rect x="30" y="807" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="86" y="840.1" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="853.5" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
 <text x="86" y="866.9" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Network Services</text>
+</g>
+<g data-id="compute">
 <rect x="30" y="946" width="112" height="83" rx="6" fill="#f0ac45" stroke="#f6c983" stroke-width="2"/>
 <text x="86" y="972.4" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Tech Mgmt</text>
 <text x="86" y="985.8" text-anchor="middle" font-size="11" font-weight="700" fill="#0b0b0b">Service</text>
 <text x="86" y="999.2" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Compute/Hosting</text>
 <text x="86" y="1012.6" text-anchor="middle" font-size="11" font-weight="400" fill="#0b0b0b">Services</text>
+</g>
 <text x="649" y="225.8" text-anchor="start" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Consumes</text>
 <text x="365" y="288.5" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Contains</text>
 <text x="830" y="288.5" text-anchor="middle" font-size="9.4" font-weight="600" fill="#ffffff" stroke="#112c40" stroke-width="3" stroke-linejoin="round" paint-order="stroke">Depends On</text>

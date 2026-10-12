@@ -28,8 +28,8 @@ const TYPES = {
   TMSO: { title: 'Tech Mgmt Service Offering', domain: 'offering' },
   DCG: { title: 'Dynamic CI Group', domain: 'offering' },
   CI: { title: 'Infrastructure CI', domain: 'delivery' },
-  BSO: { title: 'Bus Service Offering', domain: 'consumption' },
-  BS: { title: 'Bus Service', domain: 'consumption' },
+  BSO: { title: 'Business Service Offering', domain: 'consumption' },
+  BS: { title: 'Business Service', domain: 'consumption' },
   SP: { title: 'Service Portfolio', domain: 'consumption' },
 };
 
@@ -226,7 +226,7 @@ function parseCsdm(source) {
 // infrastructure below. What varies is how far each side's chain runs sideways
 // before it turns downward:
 //
-//   Tech Mgmt Service <- Tech Mgmt Offering <- [Service Instance] -> Bus Offering -> Bus Service
+//   Tech Mgmt Service <- Tech Mgmt Offering <- [Service Instance] -> Business Offering -> Business Service
 //
 // `reach` is that distance per side, [delivery, consumption], each 0..2:
 //   2  both boxes beside the instance row
