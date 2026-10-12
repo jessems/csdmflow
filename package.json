@@ -1,6 +1,6 @@
 {
   "name": "csdmflow",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Text-to-diagram for CSDM service models: write entities and relationships, get a laid-out diagram.",
   "bin": {
     "csdmflow": "bin/csdmflow.js"
