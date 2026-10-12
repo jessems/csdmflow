@@ -4,6 +4,8 @@
 applications, service instances, offerings and services, say how they relate,
 and csdmflow lays out the diagram for you — colours, labels and arrows included.
 
+https://github.com/user-attachments/assets/eed9276a-c35a-43be-945e-cd0eb11c9b70
+
 ```
 BA crm: Customer Portal
 SI crm-prod: Customer Portal Prod
