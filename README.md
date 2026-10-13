@@ -236,6 +236,7 @@ You can write the arrow either way round — it is flipped to the CSDM direction
 | `BSO` → `SI` | **Depends On** (green) |
 | `BSO` → `BS`, `TMSO` → `TMS`, `TMS`/`BS` → `SP` | dashed **References** |
 | `TMSO` → `SI` / `DCG` / `CI` | **Contains** (orange) |
+| `SI` → `DCG` (the group that populates it) | **Contains** (orange) |
 | `DCG` → `CI` | **Query based Contains** (orange) |
 | `SI` → `CI`, `CI` → `CI` | blue service-mapping arrow, pointing down the chain |
 | `SI` → `SI` | **Depends On** (orange) |

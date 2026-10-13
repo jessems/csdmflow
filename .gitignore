@@ -11,3 +11,7 @@ examples/*.gen.gf
 # browser bundle, built by `npm run build` (and prepublishOnly)
 dist/
 _site/
+# promo video output (rebuild with: node promo/record.mjs)
+promo/stills/
+promo/*.mp4
+promo/cover.png

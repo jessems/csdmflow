@@ -48,6 +48,8 @@ const RELS = {
   'SI>CI': { label: '', kind: 'map' },
   'CI>CI': { label: '', kind: 'map' },
   'SI>SI': { label: 'Depends On', kind: 'rel' },
+  // a service instance populated by a dynamic CI group
+  'SI>DCG': { label: 'Contains', kind: 'rel' },
   'TMS>SP': { label: 'References', kind: 'ref' },
   'BS>SP': { label: 'References', kind: 'ref' },
   'BC>TMS': { label: 'Provided by::Provides', kind: 'strategic' },
