@@ -74,13 +74,15 @@ function bgAt(scene, x, y) {
 function attach(scene, p) {
   for (const n of scene.items) {
     if (n.type !== 'node') continue;
-    const inX = p.x >= n.x - 1.5 && p.x <= n.x + n.w + 1.5;
-    const inY = p.y >= n.y - 1.5 && p.y <= n.y + n.h + 1.5;
-    const onV = Math.abs(p.x - n.x) < 1.5 || Math.abs(p.x - n.x - n.w) < 1.5;
-    const onH = Math.abs(p.y - n.y) < 1.5 || Math.abs(p.y - n.y - n.h) < 1.5;
+    // a stacked box's lines end on its back card, below and right of it
+    const w = n.w + (n.stack || 0), h = n.h + (n.stack || 0);
+    const inX = p.x >= n.x - 1.5 && p.x <= n.x + w + 1.5;
+    const inY = p.y >= n.y - 1.5 && p.y <= n.y + h + 1.5;
+    const onV = Math.abs(p.x - n.x) < 1.5 || Math.abs(p.x - n.x - w) < 1.5;
+    const onH = Math.abs(p.y - n.y) < 1.5 || Math.abs(p.y - n.y - h) < 1.5;
     if (inX && inY && (onV || onH)) {
-      const fx = Math.max(0, Math.min(1, (p.x - n.x) / n.w));
-      const fy = Math.max(0, Math.min(1, (p.y - n.y) / n.h));
+      const fx = Math.max(0, Math.min(w / n.w, (p.x - n.x) / n.w));
+      const fy = Math.max(0, Math.min(h / n.h, (p.y - n.y) / n.h));
       return { node: n, fx: r1(fx * 1000) / 1000, fy: r1(fy * 1000) / 1000 };
     }
   }

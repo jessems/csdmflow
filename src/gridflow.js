@@ -16,6 +16,7 @@ const ROW_GAP_DEFAULT = 70;
 const MARGIN = 30;
 const LANE_STEP = 8;
 const PORT_STEP = 14;
+const PORT_MARGIN = 6; // nearest a port gets to a box corner
 const HOP_R = 6;
 const DOT_R = 2.5;
 const STROKE_W = 2;
@@ -269,10 +270,15 @@ function wrapLabel(label, boxW) {
 const variantDx = () => Math.round(VARIANT_DX * FONT_SIZE / 14);
 const variantDy = () => Math.round(VARIANT_DY * FONT_SIZE / 14);
 
-// Full footprint of a node, including any variant cards behind it.
+// Stacked (several-instance) boxes draw two cards over the edges, 5px apart.
+const STACK_D = 10;
+const stackD = n => (n.stack ? STACK_D : 0);
+
+// Full footprint of a node, including any variant or stack cards behind it.
 function nodeExtent(n) {
   const nv = (n.variants || []).length;
-  return { x0: n.x, y0: n.y, x1: n.x + n.w + nv * variantDx(), y1: n.y + n.h + nv * variantDy() };
+  const sd = stackD(n);
+  return { x0: n.x, y0: n.y, x1: n.x + n.w + Math.max(nv * variantDx(), sd), y1: n.y + n.h + Math.max(nv * variantDy(), sd) };
 }
 
 // Line patterns: `-.->` gives dash; {dash=dashdot} a dash-dot (data flows).
@@ -366,6 +372,8 @@ function layout(model) {
     labelColor: dark ? '#ffffff' : TEXT_COLOR,
     boxW,
     boxH,
+    colGap: COL_GAP,
+    rowGap: ROW_GAP,
     nCols,
     nRows,
     width: Math.max(maxX, gridRight) + padR + MARGIN,
@@ -383,13 +391,15 @@ function layout(model) {
 // Routing — auto 3-tier: straight -> L(v-first) -> L(h-first) -> Z(gutter lane)
 // ---------------------------------------------------------------------------
 
+// Lines end on the visible outline: below and right of a stacked box that is
+// its back card, which is drawn over the edges and would hide the arrowhead.
 function sidePoint(n, side, off) {
   off = off || 0;
   switch (side) {
     case 'top': return { x: n.cx + off, y: n.y };
-    case 'bottom': return { x: n.cx + off, y: n.y + n.h };
+    case 'bottom': return { x: n.cx + off, y: n.y + n.h + stackD(n) };
     case 'left': return { x: n.x, y: n.cy + off };
-    case 'right': return { x: n.x + n.w, y: n.cy + off };
+    case 'right': return { x: n.x + n.w + stackD(n), y: n.cy + off };
   }
 }
 
@@ -404,29 +414,33 @@ function toSegs(points) {
   return out;
 }
 
-function passesThroughNode(seg, n) {
-  const eps = 0.5;
+// pad > 0 also catches a line running along (within pad of) the border.
+function passesThroughNode(seg, n, pad = 0) {
+  const eps = 0.5 - pad;
+  const w = n.w + stackD(n), h = n.h + stackD(n);
   if (seg.o === 'v') {
-    if (seg.x <= n.x + eps || seg.x >= n.x + n.w - eps) return false;
+    if (seg.x <= n.x + eps || seg.x >= n.x + w - eps) return false;
     const y1 = Math.min(seg.y1, seg.y2), y2 = Math.max(seg.y1, seg.y2);
-    return y2 > n.y + eps && y1 < n.y + n.h - eps;
+    return y2 > n.y + eps && y1 < n.y + h - eps;
   }
-  if (seg.y <= n.y + eps || seg.y >= n.y + n.h - eps) return false;
+  if (seg.y <= n.y + eps || seg.y >= n.y + h - eps) return false;
   const x1 = Math.min(seg.x1, seg.x2), x2 = Math.max(seg.x1, seg.x2);
-  return x2 > n.x + eps && x1 < n.x + n.w - eps;
+  return x2 > n.x + eps && x1 < n.x + w - eps;
 }
 
 // Collinear overlap; end-to-end touching (gap <= 2px) counts too, so a corner
 // landing exactly on another edge's segment falls through to the next lane.
+// Parallel lines closer than LINE_NEAR read as one line, so they count as well.
+const LINE_NEAR = 5;
 function segsOverlap(a, b) {
   if (a.o !== b.o) return false;
   if (a.o === 'v') {
-    if (Math.abs(a.x - b.x) > 0.5) return false;
+    if (Math.abs(a.x - b.x) >= LINE_NEAR) return false;
     const a1 = Math.min(a.y1, a.y2), a2 = Math.max(a.y1, a.y2);
     const b1 = Math.min(b.y1, b.y2), b2 = Math.max(b.y1, b.y2);
     return Math.min(a2, b2) - Math.max(a1, b1) > -2;
   }
-  if (Math.abs(a.y - b.y) > 0.5) return false;
+  if (Math.abs(a.y - b.y) >= LINE_NEAR) return false;
   const a1 = Math.min(a.x1, a.x2), a2 = Math.max(a.x1, a.x2);
   const b1 = Math.min(b.x1, b.x2), b2 = Math.max(b.x1, b.x2);
   return Math.min(a2, b2) - Math.max(a1, b1) > -2;
@@ -446,6 +460,14 @@ function route(model, geom, warnings) {
   };
   const styleKey = st => `${st.color}|${st.dashed}`;
 
+  // A port stays on its side, clear of the corners: a line leaving a corner
+  // would run along the border of every box it passes.
+  function portFits(nodeId, side, off) {
+    const n = nodes.get(nodeId);
+    const half = (side === 'top' || side === 'bottom' ? n.w : n.h) / 2;
+    return Math.abs(off) <= half - PORT_MARGIN;
+  }
+
   // Tentative port allocation. dir: 'in' | 'out'. Incoming edges with identical
   // style share the center attachment (trunk); everything else spreads ±14px.
   // pref biases spreading toward the target's side (+1 = positive offsets first).
@@ -458,11 +480,12 @@ function route(model, geom, warnings) {
     const mate = list.find(p => p.dir === dir && p.styleKey === styleKey(st));
     if (mate) return { off: mate.off, shared: true, key };
     const used = new Set(list.map(p => p.off));
-    const seq = pref > 0
-      ? [0, PORT_STEP, 2 * PORT_STEP, -PORT_STEP, -2 * PORT_STEP]
+    const seq = (pref > 0
+      ? [0, PORT_STEP, 2 * PORT_STEP, -PORT_STEP, -2 * PORT_STEP, 3 * PORT_STEP, -3 * PORT_STEP]
       : pref < 0
-        ? [0, -PORT_STEP, -2 * PORT_STEP, PORT_STEP, 2 * PORT_STEP]
-        : [0, PORT_STEP, -PORT_STEP, 2 * PORT_STEP, -2 * PORT_STEP];
+        ? [0, -PORT_STEP, -2 * PORT_STEP, PORT_STEP, 2 * PORT_STEP, -3 * PORT_STEP, 3 * PORT_STEP]
+        : [0, PORT_STEP, -PORT_STEP, 2 * PORT_STEP, -2 * PORT_STEP, 3 * PORT_STEP, -3 * PORT_STEP]
+    ).filter(o => portFits(nodeId, side, o));
     const off = seq.find(o => !used.has(o));
     return { off: off !== undefined ? off : 0, shared: false, key };
   }
@@ -484,6 +507,7 @@ function route(model, geom, warnings) {
     if (po.off === pi.off) return [po, pi];
     const freeAt = (id, side, off) => !(ports.get(id + '|' + side) || []).some(p => p.off === off);
     for (const o of [po.off, pi.off, 0, PORT_STEP, -PORT_STEP, 2 * PORT_STEP, -2 * PORT_STEP]) {
+      if (!portFits(s.id, exitSide, o) || !portFits(t.id, enterSide, o)) continue;
       const okS = po.shared ? o === po.off : (o === po.off || freeAt(s.id, exitSide, o));
       const okT = pi.shared ? o === pi.off : (o === pi.off || freeAt(t.id, enterSide, o));
       if (okS && okT) return [{ ...po, off: o }, { ...pi, off: o }];
@@ -499,7 +523,7 @@ function route(model, geom, warnings) {
     for (const seg of segs) {
       for (const n of nodes.values()) {
         if (n === s || n === t) continue;
-        if (passesThroughNode(seg, n)) return false;
+        if (passesThroughNode(seg, n, 2)) return false;
       }
     }
     const trunkKey = `${t.id}|${enterSide}|${styleKey(st)}`;
@@ -528,6 +552,231 @@ function route(model, geom, warnings) {
       trunkKey: `${t.id}|${enterSide}|${styleKey(st)}`,
       srcTrunkKey: `${edge.from}|${exitSide}|${styleKey(st)}`,
     });
+  }
+
+  // --- lane search, for edges none of the fixed shapes can route ---
+  // Cheapest path over a grid of lanes (every gutter's lanes plus the port
+  // lines of both ends); bends and crossings cost extra. Boxes are walls, and
+  // so are other edges' lines, nearby parallels included: the only lines it may
+  // run along are its own bus (same source, side and style) and its trunk's
+  // final approach (same target and style). Corners of other lines are walls
+  // too, so it never seems to join one.
+  const SEARCH_BEND = 30;
+  const SEARCH_CROSS = 25;
+  const SEARCH_PAD = 4; // keep lanes this far off box borders
+  const SEARCH_BUDGET = 400000; // states expanded before giving up
+  const SEARCH_GREED = 1.5; // heuristic weight
+  const SIDES = ['top', 'bottom', 'left', 'right'];
+  const DIRS = [[0, -1], [0, 1], [-1, 0], [1, 0]]; // up, down, left, right: SIDES index = direction out
+  const SIDE_IN = { top: 1, bottom: 0, left: 3, right: 2 }; // direction arriving into the side
+  const rd = v => Math.round(v * 10) / 10;
+  const nodeList = [...nodes.values()];
+  const rects = nodeList.map(n => ({
+    x0: n.x - SEARCH_PAD, y0: n.y - SEARCH_PAD,
+    x1: n.x + n.w + stackD(n) + SEARCH_PAD, y1: n.y + n.h + stackD(n) + SEARCH_PAD,
+  }));
+  const lowerBound = (arr, v) => {
+    let lo = 0, hi = arr.length;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (arr[m] < v) lo = m + 1; else hi = m; }
+    return lo;
+  };
+
+  function searchRoute(edge, s, t, st) {
+    const sk = styleKey(st);
+    const ends = (n, dir) => SIDES.map(side => {
+      const alloc = allocPort(n.id, side, st, dir);
+      const p = sidePoint(n, side, alloc.off);
+      return { side, alloc, p: { x: rd(p.x), y: rd(p.y) } };
+    });
+    const outs = ends(s, 'out');
+    const ins = ends(t, 'in');
+
+    // the lanes
+    const kc = Math.max(0, Math.floor((geom.colGap / 2 - 10) / LANE_STEP));
+    const kr = Math.max(0, Math.floor((geom.rowGap / 2 - 10) / LANE_STEP));
+    const xsSet = new Set(), ysSet = new Set();
+    for (let c = -1; c < geom.nCols; c++) for (let k = -kc; k <= kc; k++) xsSet.add(rd(geom.gutterX(c) + k * LANE_STEP));
+    for (let r = -1; r < geom.nRows; r++) for (let k = -kr; k <= kr; k++) ysSet.add(rd(geom.gutterY(r) + k * LANE_STEP));
+    for (const e of [...outs, ...ins]) { xsSet.add(e.p.x); ysSet.add(e.p.y); }
+    const xs = [...xsSet].filter(x => x >= 8).sort((a, b) => a - b);
+    const ys = [...ysSet].filter(y => y >= 8).sort((a, b) => a - b);
+    const nx = xs.length, ny = ys.length;
+    const xi = new Map(xs.map((x, i) => [x, i]));
+    const yi = new Map(ys.map((y, i) => [y, i]));
+    const ptOf = p => (xi.has(p.x) && yi.has(p.y) ? yi.get(p.y) * nx + xi.get(p.x) : -1);
+
+    // box walls: hWall[iy * nx + ix] is the move ix -> ix + 1 along ys[iy],
+    // vWall[iy * nx + ix] the move iy -> iy + 1 along xs[ix];
+    // 0 free, k + 1 only box k, -1 several boxes
+    const hWall = new Int32Array(nx * ny), vWall = new Int32Array(nx * ny);
+    const mark = (arr, i, k) => { arr[i] = arr[i] === 0 || arr[i] === k + 1 ? k + 1 : -1; };
+    rects.forEach((r, k) => {
+      for (let iy = lowerBound(ys, r.y0); iy < ny && ys[iy] < r.y1; iy++) {
+        if (ys[iy] <= r.y0) continue;
+        for (let ix = Math.max(0, lowerBound(xs, r.x0) - 1); ix < nx - 1 && xs[ix] < r.x1; ix++) {
+          if (xs[ix + 1] > r.x0) mark(hWall, iy * nx + ix, k);
+        }
+      }
+      for (let ix = lowerBound(xs, r.x0); ix < nx && xs[ix] < r.x1; ix++) {
+        if (xs[ix] <= r.x0) continue;
+        for (let iy = Math.max(0, lowerBound(ys, r.y0) - 1); iy < ny - 1 && ys[iy] < r.y1; iy++) {
+          if (ys[iy + 1] > r.y0) mark(vWall, iy * nx + ix, k);
+        }
+      }
+    });
+    const sIdx = nodeList.indexOf(s), tIdx = nodeList.indexOf(t);
+    const walled = (w, first, last) => w !== 0 && (w < 0 || !((first && w - 1 === sIdx) || (last && w - 1 === tIdx)));
+
+    // other edges' lines: near[lane] holds those close enough to block it,
+    // cross[lane] those between lanes ix - 1 and ix (or exactly on ix)
+    const hNear = Array.from({ length: ny }, () => []), vNear = Array.from({ length: nx }, () => []);
+    const hCross = Array.from({ length: ny + 1 }, () => []), vCross = Array.from({ length: nx + 1 }, () => []);
+    const corners = new Set();
+    for (const p of placed) {
+      const same = sk === styleKey(p.style);
+      const segs = toSegs(p.points);
+      segs.forEach((sg, i) => {
+        const v = sg.o === 'v';
+        const rec = {
+          c: v ? sg.x : sg.y,
+          lo: v ? Math.min(sg.y1, sg.y2) : Math.min(sg.x1, sg.x2),
+          hi: v ? Math.max(sg.y1, sg.y2) : Math.max(sg.x1, sg.x2),
+          bus: same && p.edge.from === s.id ? p.exitSide : null,
+          trunk: same && p.edge.to === t.id && i === segs.length - 1,
+        };
+        const lanes = v ? xs : ys, near = v ? vNear : hNear;
+        for (let j = lowerBound(lanes, rec.c - LINE_NEAR); j < lanes.length && lanes[j] < rec.c + LINE_NEAR; j++) {
+          near[j].push({ ...rec, exact: Math.abs(lanes[j] - rec.c) < 0.05 });
+        }
+        const j = lowerBound(lanes, rec.c - 0.05);
+        (v ? vCross : hCross)[j].push({ ...rec, at: j < lanes.length && Math.abs(lanes[j] - rec.c) < 0.05 });
+      });
+      if (!same || (p.edge.from !== s.id && p.edge.to !== t.id)) {
+        for (const q of p.points) { const k = ptOf({ x: rd(q.x), y: rd(q.y) }); if (k >= 0) corners.add(k); }
+      }
+    }
+    const lineBlocked = (list, a, b, side) => {
+      const lo = Math.min(a, b), hi = Math.max(a, b);
+      for (const r of list) {
+        if (Math.min(hi, r.hi) - Math.max(lo, r.lo) <= -0.5) continue;
+        if (r.exact && (r.trunk || r.bus === side)) continue;
+        return true;
+      }
+      return false;
+    };
+    // lines crossed moving between lanes i and i + 1, arriving on lane dest
+    const crossed = (buckets, i, dest, along) => {
+      let n = 0;
+      for (const r of buckets[i + 1]) if (!r.at && along > r.lo + 0.5 && along < r.hi - 0.5) n++;
+      for (const r of buckets[dest]) if (r.at && along > r.lo + 0.5 && along < r.hi - 0.5) n++;
+      return n;
+    };
+
+    const goalDir = new Map(); // point -> [{ dir, end }]
+    for (const e of ins) {
+      const k = ptOf(e.p);
+      if (k >= 0) (goalDir.get(k) || goalDir.set(k, []).get(k)).push({ dir: SIDE_IN[e.side], e });
+    }
+    const goalAt = (pt, d) => { const gs = goalDir.get(pt); return gs ? gs.find(gl => gl.dir === d) : null; };
+    // distance to the target box, plus the bend still needed when off its axes;
+    // weighted (as in weighted A*): a near-shortest route found far sooner
+    const hCost = (x, y) => {
+      const dx = Math.max(0, Math.abs(x - t.cx) - t.w / 2), dy = Math.max(0, Math.abs(y - t.cy) - t.h / 2);
+      return SEARCH_GREED * (dx + dy + (dx > 0 && dy > 0 ? SEARCH_BEND : 0));
+    };
+
+    // state = ((point * 4 + exit side) * 4 + direction)
+    const N = nx * ny * 16;
+    const g = new Float64Array(N).fill(Infinity);
+    const from = new Int32Array(N).fill(-1);
+    const hf = [], hs = []; // binary heap: f values, states
+    const push = (f, id) => {
+      let i = hf.length;
+      hf.push(f); hs.push(id);
+      while (i > 0) {
+        const pi = (i - 1) >> 1;
+        if (hf[pi] <= f) break;
+        hf[i] = hf[pi]; hs[i] = hs[pi];
+        i = pi;
+      }
+      hf[i] = f; hs[i] = id;
+    };
+    const pop = () => {
+      const id = hs[0];
+      const f = hf.pop(), last = hs.pop();
+      if (hf.length) {
+        let i = 0;
+        for (;;) {
+          const l = 2 * i + 1, r = l + 1;
+          let m = -1, mf = f;
+          if (l < hf.length && hf[l] < mf) { m = l; mf = hf[l]; }
+          if (r < hf.length && hf[r] < mf) { m = r; mf = hf[r]; }
+          if (m < 0) break;
+          hf[i] = hf[m]; hs[i] = hs[m];
+          i = m;
+        }
+        hf[i] = f; hs[i] = last;
+      }
+      return id;
+    };
+    const starts = new Map();
+    outs.forEach((e, si) => {
+      const k = ptOf(e.p);
+      if (k < 0) return;
+      const id = (k * 4 + si) * 4 + si;
+      g[id] = 0;
+      starts.set(id, e);
+      push(hCost(e.p.x, e.p.y), id);
+    });
+
+    let found = -1, goal = null;
+    for (let budget = SEARCH_BUDGET; hf.length && budget > 0; budget--) {
+      const id = pop();
+      const d = id & 3, side = (id >> 2) & 3, pt = id >> 4;
+      const ix = pt % nx, iy = (pt - ix) / nx;
+      const ax = xs[ix], ay = ys[iy];
+      const gc = g[id];
+      if ((goal = goalAt(pt, d)) && !starts.has(id)) { found = id; break; }
+      const first = starts.has(id);
+      for (let nd = 0; nd < 4; nd++) {
+        if (first && nd !== d) continue; // leave the box straight out of its side
+        if (nd === (d ^ 1)) continue; // no reversing
+        const jx = ix + DIRS[nd][0], jy = iy + DIRS[nd][1];
+        if (jx < 0 || jx >= nx || jy < 0 || jy >= ny) continue;
+        const npt = jy * nx + jx;
+        const nid = (npt * 4 + side) * 4 + nd;
+        const last = !!goalAt(npt, nd);
+        const vert = nd < 2;
+        const w = vert ? vWall[Math.min(iy, jy) * nx + ix] : hWall[iy * nx + Math.min(ix, jx)];
+        if (walled(w, first, last)) continue;
+        const bx = xs[jx], by = ys[jy];
+        if (vert ? lineBlocked(vNear[ix], ay, by, SIDES[side]) : lineBlocked(hNear[iy], ax, bx, SIDES[side])) continue;
+        if (!last && corners.has(npt)) continue;
+        const cross = vert ? crossed(hCross, Math.min(iy, jy), jy, ax) : crossed(vCross, Math.min(ix, jx), jx, ay);
+        const ng = gc + Math.abs(bx - ax) + Math.abs(by - ay) + (nd !== d ? SEARCH_BEND : 0) + cross * SEARCH_CROSS;
+        if (ng >= g[nid]) continue;
+        g[nid] = ng;
+        from[nid] = id;
+        push(ng + hCost(bx, by), nid);
+      }
+    }
+    if (found < 0) return false;
+    const chain = [];
+    for (let cur = found; cur >= 0; cur = from[cur]) chain.push(cur);
+    chain.reverse();
+    const start = starts.get(chain[0]);
+    const end = goal.e;
+    // corners only: keep the points where the direction changes
+    const pts = [start.p];
+    for (let i = 1; i < chain.length - 1; i++) {
+      if ((chain[i] & 3) !== (chain[i + 1] & 3)) {
+        const pt = chain[i] >> 4;
+        pts.push({ x: xs[pt % nx], y: ys[Math.floor(pt / nx)] });
+      }
+    }
+    pts.push(end.p);
+    accept(edge, pts, start.alloc, end.alloc, st, start.side, end.side, t);
+    return true;
   }
 
   for (const edge of model.edges) {
@@ -734,6 +983,8 @@ function route(model, geom, warnings) {
         }
       }
     }
+
+    if (!done) done = searchRoute(edge, s, t, st);
 
     // --- last resort: draw the base Z anyway, warn, never fail ---
     if (!done) {
@@ -1083,8 +1334,9 @@ function setFont(px) {
 //   path        { points, d, color, sw, dash, arrowEnd, arrowStart }
 //               d is the SVG path (with hops over crossings); points the corners
 //   circle      { cx, cy, r, fill }
-//   node        { id, x, y, w, h, rx, fill, stroke, sw, textColor, size, rows }
-//               one box with its own text; rows: [{ text, weight, x, y }]
+//   node        { id, x, y, w, h, stack, rx, fill, stroke, sw, textColor, size, rows }
+//               one box with its own text; rows: [{ text, weight, x, y }];
+//               stack: depth of the back cards, where lines below/right end
 //
 // Items carry `role` (title, legend, key, subtitle, variant, stack, note,
 // label, …) so an exporter can group or style them.
@@ -1096,7 +1348,13 @@ function buildScene(source) {
   const placed = route(model, geom, warnings);
   const { paths, dots, labels } = buildDrawing(model, placed);
 
-  // grow the canvas so edge labels near the border are not clipped
+  // grow the canvas so lines and labels near the border are not clipped
+  for (const p of paths) {
+    for (const q of p.points) {
+      geom.width = Math.max(geom.width, Math.ceil(q.x + MARGIN / 2));
+      geom.height = Math.max(geom.height, Math.ceil(q.y + MARGIN / 2));
+    }
+  }
   for (const l of labels) {
     const r = labelRect(l);
     geom.width = Math.max(geom.width, Math.ceil(r.x1 + MARGIN / 2));
@@ -1198,7 +1456,7 @@ function buildScene(source) {
     const stroke = cls ? cls.stroke : DEFAULT_STROKE;
     if (n.stack) {
       for (const k of [2, 1]) {
-        items.push({ type: 'rect', role: 'stack', of: n.id, x: n.x + 5 * k, y: n.y + 5 * k, w: n.w, h: n.h, rx: 6, fill, stroke, sw: STROKE_W });
+        items.push({ type: 'rect', role: 'stack', of: n.id, x: n.x + STACK_D / 2 * k, y: n.y + STACK_D / 2 * k, w: n.w, h: n.h, rx: 6, fill, stroke, sw: STROKE_W });
       }
     }
     const textColor = (cls && cls.text) || TEXT_COLOR;
@@ -1208,7 +1466,7 @@ function buildScene(source) {
     ];
     const y0 = n.cy - ((rows.length - 1) * LINE_H) / 2 + 5;
     rows.forEach((r, i) => { r.x = n.cx; r.y = y0 + i * LINE_H; });
-    items.push({ type: 'node', id: n.id, x: n.x, y: n.y, w: n.w, h: n.h, rx: 6, fill, stroke, sw: STROKE_W, textColor, size: FONT_SIZE, lineH: LINE_H, rows });
+    items.push({ type: 'node', id: n.id, x: n.x, y: n.y, w: n.w, h: n.h, ...(n.stack ? { stack: STACK_D } : {}), rx: 6, fill, stroke, sw: STROKE_W, textColor, size: FONT_SIZE, lineH: LINE_H, rows });
   }
 
   for (const nt of model.meta.notes) {
