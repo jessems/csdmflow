@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>csdmflow editor</title>
+  <meta name="description" content="The csdmflow editor: type a CSDM service model, see it drawn, export to SVG, PNG, PowerPoint and draw.io.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Fragment+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site.css">
+  <style>
+    /* the editor fills the window below the title block */
+    body.page-editor { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+    .page-editor main { flex: 1; display: flex; padding: 16px 0; min-height: 0; }
+    .page-editor main > .wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+    .page-editor .bench { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .page-editor .panes { flex: 1; height: auto; min-height: 420px; }
+    .tb-nav a[aria-current="page"] { color: var(--ink); }
+    @media (max-width: 860px) {
+      .page-editor .panes { flex: none; }
+    }
+  </style>
+</head>
+<body class="page-editor" data-page="editor">
+  <header class="titleblock">
+    <div class="domains-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="wrap">
+      <div class="tb-cell">
+        <a class="wordmark" href="./" aria-label="csdmflow home">
+          <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+            <rect x="7" y="1" width="8" height="6" rx="1.5" fill="var(--design)"/>
+            <rect x="7" y="15" width="8" height="6" rx="1.5" fill="var(--delivery)"/>
+            <rect x="15.5" y="8" width="6" height="6" rx="1.5" fill="var(--consumption)"/>
+            <path d="M11 7v8M15.5 11H13" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+          csdmflow
+        </a>
+      </div>
+      <div class="tb-spacer" aria-hidden="true"></div>
+      <nav class="tb-cell tb-nav" aria-label="Main">
+        <a href="./#tour">Tour</a>
+        <a href="editor.html" aria-current="page">Editor</a>
+        <a href="./#syntax">Syntax</a>
+        <a href="./#embed">Embed</a>
+        <a class="gh" href="https://github.com/jessems/csdmflow">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+    <div class="bench">
+      <div class="toolbar">
+        <label class="label" for="examples">Example</label>
+        <select id="examples"><option>Loading…</option></select>
+        <span class="grow"></span>
+        <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" id="zoom-fit" aria-pressed="true">Fit</button>
+          <button type="button" id="zoom-1" aria-pressed="false">1:1</button>
+        </div>
+        <button class="tool" id="share" type="button">Copy link</button>
+        <div class="menu">
+          <button class="tool" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="download-menu">Download as<span class="chev">▾</span></button>
+          <div class="menu-list" id="download-menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-download="svg"><span class="fmt">.svg</span><span>SVG<small>Vector image, sharp at any size</small></span></button>
+            <button type="button" role="menuitem" data-download="png"><span class="fmt">.png</span><span>PNG<small>Picture at 2× resolution</small></span></button>
+            <button type="button" role="menuitem" data-download="pptx"><span class="fmt">.pptx</span><span>PowerPoint<small>Editable shapes, text inside each box</small></span></button>
+            <button type="button" role="menuitem" data-download="drawio"><span class="fmt">.drawio</span><span>draw.io<small>Editable shapes, lines glued to boxes</small></span></button>
+          </div>
+        </div>
+        <div class="menu">
+          <button class="tool" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="copy-menu">Copy as<span class="chev">▾</span></button>
+          <div class="menu-list" id="copy-menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-copy="svg"><span class="fmt">svg</span><span>SVG<small>Vector, for Figma or code</small></span></button>
+            <button type="button" role="menuitem" data-copy="png"><span class="fmt">png</span><span>PNG<small>Picture for docs, slides, chat</small></span></button>
+            <button type="button" role="menuitem" data-copy="drawio"><span class="fmt">xml</span><span>draw.io shapes<small>Paste straight onto a draw.io canvas</small></span></button>
+            <p class="menu-note">Browsers can't put editable PowerPoint shapes on the clipboard. Use <b>Download as › PowerPoint</b> and copy the diagram from that file.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="panes">
+        <div class="editor">
+          <pre class="gutter" id="gutter" aria-hidden="true"></pre>
+          <textarea id="source" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Model source"></textarea>
+        </div>
+        <div class="drawing">
+          <div id="preview" class="fit" aria-live="polite"></div>
+          <div class="sheet-meta">
+            <div><span class="label">Title</span><span class="v" id="m-title">—</span></div>
+            <div class="hide-sm"><span class="label">Layout</span><span class="v" id="m-layout">—</span></div>
+            <div class="hide-sm"><span class="label">Boxes</span><span class="v" id="m-boxes">—</span></div>
+            <div><span class="label">Size</span><span class="v" id="m-size">—</span></div>
+            <div><span class="label">Status</span><span class="v" id="status" role="status">—</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </main>
+
+  <script src="csdmflow.min.js"></script>
+  <script src="editor.js"></script>
+</body>
+</html>
