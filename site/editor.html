@@ -11,14 +11,16 @@
   <link rel="stylesheet" href="site.css">
   <style>
     /* the editor fills the window below the title block */
-    body.page-editor { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+    /* exactly the window's height, so a zoomed drawing scrolls inside its pane */
+    body.page-editor { height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
     .page-editor main { flex: 1; display: flex; padding: 16px 0; min-height: 0; }
     .page-editor main > .wrap { flex: 1; display: flex; flex-direction: column; min-height: 0; min-width: 0; }
     .page-editor .bench { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-    .page-editor .panes { flex: 1; height: auto; min-height: 420px; }
+    .page-editor .panes { flex: 1; height: auto; min-height: 420px; grid-template-rows: minmax(0, 1fr); }
     .tb-nav a[aria-current="page"] { color: var(--ink); }
     @media (max-width: 860px) {
-      .page-editor .panes { flex: none; }
+      body.page-editor { height: auto; min-height: 100vh; }
+      .page-editor .panes { flex: none; grid-template-rows: none; }
     }
   </style>
 </head>
@@ -65,6 +67,9 @@
         </select>
         <span class="grow"></span>
         <div class="seg" role="group" aria-label="Zoom">
+          <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+          <span class="seg-value" id="zoom-level" aria-live="polite">100%</span>
+          <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
           <button type="button" id="zoom-fit" aria-pressed="true">Fit</button>
           <button type="button" id="zoom-1" aria-pressed="false">1:1</button>
         </div>
@@ -95,7 +100,7 @@
           <textarea id="source" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Model source"></textarea>
         </div>
         <div class="drawing">
-          <div id="preview" class="fit" aria-live="polite"></div>
+          <div id="preview" aria-live="polite"></div>
           <div class="sheet-meta">
             <div><span class="label">Title</span><span class="v" id="m-title">—</span></div>
             <div class="hide-sm"><span class="label">Layout</span><span class="v" id="m-layout">—</span></div>

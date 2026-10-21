@@ -104,6 +104,9 @@
             </select>
             <span class="grow"></span>
             <div class="seg" role="group" aria-label="Zoom">
+              <button type="button" id="zoom-out" aria-label="Zoom out">−</button>
+              <span class="seg-value" id="zoom-level" aria-live="polite">100%</span>
+              <button type="button" id="zoom-in" aria-label="Zoom in">+</button>
               <button type="button" id="zoom-fit" aria-pressed="true">Fit</button>
               <button type="button" id="zoom-1" aria-pressed="false">1:1</button>
             </div>
@@ -134,7 +137,7 @@
               <textarea id="source" spellcheck="false" autocomplete="off" autocapitalize="off" aria-label="Model source"></textarea>
             </div>
             <div class="drawing">
-              <div id="preview" class="fit" aria-live="polite"></div>
+              <div id="preview" aria-live="polite"></div>
               <div class="sheet-meta">
                 <div><span class="label">Title</span><span class="v" id="m-title">—</span></div>
                 <div class="hide-sm"><span class="label">Layout</span><span class="v" id="m-layout">—</span></div>

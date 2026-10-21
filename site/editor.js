@@ -57,6 +57,8 @@
     try {
       const { svg, width, height, warnings } = csdmflow.render(text);
       preview.innerHTML = svg;
+      natural = { width, height };
+      applyZoom();
       setMeta('m-size', `${Math.round(width)} × ${Math.round(height)}`);
       setMeta('m-boxes', String(csdmflow.scene(text).items.filter(i => i.type === 'node').length));
       status.className = warnings.length ? 'v warn' : 'v';
@@ -115,13 +117,87 @@
     draw();
   });
 
-  for (const [id, fit] of [['zoom-fit', true], ['zoom-1', false]]) {
-    $(id).addEventListener('click', () => {
-      preview.classList.toggle('fit', fit);
-      $('zoom-fit').setAttribute('aria-pressed', String(fit));
-      $('zoom-1').setAttribute('aria-pressed', String(!fit));
-    });
+  // --- zoom ----------------------------------------------------------------------
+  // zoom: null fits the drawing to the pane's width (never above 1:1), a
+  // number is the scale. It survives redraws, so typing doesn't reset it.
+  const MIN_ZOOM = 0.1, MAX_ZOOM = 8, STEP = 1.25;
+  let zoom = null;
+  let natural = null; // the drawing's own size, from the last render
+  const svgOf = () => preview.querySelector(':scope > svg');
+
+  function fitScale() {
+    const cs = getComputedStyle(preview);
+    const room = preview.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    return natural ? Math.min(1, room / natural.width) : 1;
   }
+  const scale = () => (zoom == null ? fitScale() : zoom);
+
+  function applyZoom() {
+    const s = scale();
+    const svg = svgOf();
+    if (svg && natural) {
+      svg.style.width = natural.width * s + 'px';
+      svg.style.height = natural.height * s + 'px';
+    }
+    $('zoom-level').textContent = Math.round(s * 100) + '%';
+    $('zoom-fit').setAttribute('aria-pressed', String(zoom == null));
+    $('zoom-1').setAttribute('aria-pressed', String(zoom === 1));
+  }
+
+  // Zoom to `next`, keeping the point at (x, y) on screen where it is, or the
+  // middle of the pane when no point is given.
+  function zoomTo(next, x, y) {
+    const svg = svgOf();
+    next = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, next));
+    if (!svg) { zoom = next; return applyZoom(); }
+    const pane = preview.getBoundingClientRect();
+    if (x == null) { x = pane.left + preview.clientWidth / 2; y = pane.top + preview.clientHeight / 2; }
+    const before = svg.getBoundingClientRect();
+    const rx = (x - before.left) / before.width, ry = (y - before.top) / before.height;
+    zoom = next;
+    applyZoom();
+    const after = svg.getBoundingClientRect();
+    preview.scrollLeft += after.left + rx * after.width - x;
+    preview.scrollTop += after.top + ry * after.height - y;
+  }
+
+  $('zoom-in').addEventListener('click', () => zoomTo(scale() * STEP));
+  $('zoom-out').addEventListener('click', () => zoomTo(scale() / STEP));
+  $('zoom-1').addEventListener('click', () => zoomTo(1));
+  $('zoom-fit').addEventListener('click', () => { zoom = null; applyZoom(); preview.scrollTo(0, 0); });
+  new ResizeObserver(() => { if (zoom == null) applyZoom(); }).observe(preview);
+
+  // The wheel zooms around the pointer; a trackpad pinch arrives as a wheel
+  // with ctrlKey. On the landing page the wheel scrolls the page unless
+  // ⌘/Ctrl is held, so the diagram doesn't trap the reader.
+  preview.addEventListener('wheel', ev => {
+    if (!standalone && !ev.ctrlKey && !ev.metaKey) return;
+    if (!svgOf()) return;
+    ev.preventDefault();
+    const px = ev.deltaMode === 1 ? ev.deltaY * 16 : ev.deltaY; // lines → pixels
+    const factor = Math.min(2, Math.max(0.5, Math.exp(-px * (ev.ctrlKey ? 0.01 : 0.002))));
+    zoomTo(scale() * factor, ev.clientX, ev.clientY);
+  }, { passive: false });
+  preview.title = standalone ? 'Scroll to zoom, drag to move' : '⌘/Ctrl + scroll to zoom, drag to move';
+
+  // Drag to move around a drawing larger than the pane (mouse and pen; touch
+  // scrolls natively).
+  let drag = null;
+  preview.addEventListener('pointerdown', ev => {
+    if (ev.pointerType === 'touch' || ev.button !== 0 || !svgOf()) return;
+    drag = { x: ev.clientX, y: ev.clientY, left: preview.scrollLeft, top: preview.scrollTop, id: ev.pointerId };
+    preview.setPointerCapture(ev.pointerId);
+    preview.classList.add('dragging');
+    ev.preventDefault();
+  });
+  preview.addEventListener('pointermove', ev => {
+    if (!drag || ev.pointerId !== drag.id) return;
+    preview.scrollLeft = drag.left - (ev.clientX - drag.x);
+    preview.scrollTop = drag.top - (ev.clientY - drag.y);
+  });
+  const endDrag = () => { drag = null; preview.classList.remove('dragging'); };
+  preview.addEventListener('pointerup', endDrag);
+  preview.addEventListener('pointercancel', endDrag);
 
   function say(text, err) { status.className = err ? 'v err' : 'v'; setMeta('status', text); }
 
