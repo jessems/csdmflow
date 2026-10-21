@@ -8,6 +8,7 @@
 //
 // Usage: npm run bg-scripts   (npm test fails while a pasted script is out of date)
 const fs = require('node:fs');
+const crypto = require('node:crypto');
 const path = require('node:path');
 
 const dir = __dirname;
@@ -20,7 +21,11 @@ function bundle(file) {
     if (!fs.existsSync(p)) throw new Error(`${file}: no such include: ${inc}`);
     return `// ---- ${inc} ----\n${fs.readFileSync(p, 'utf8').trimEnd()}\n// ---- end ${inc} ----`;
   });
-  return `// Built from tools/bg-scripts/${file} by tools/bg-scripts/build.js; edit that, not this.\n${body}`;
+  // the version is a hash of what goes in, so the same sources always build the
+  // same file, and a run's output says which copy of the script it came from
+  const version = crypto.createHash('sha256').update(body).digest('hex').slice(0, 8);
+  return `// Built from tools/bg-scripts/${file} by tools/bg-scripts/build.js; edit that, not this.\n` +
+    `var SCRIPT_VERSION = '${version}';\n${body}`;
 }
 
 const scripts = () => fs.readdirSync(dir).filter(f => f.endsWith('.js') && f !== 'build.js').sort();

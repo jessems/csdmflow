@@ -106,7 +106,10 @@ checks a graph against them.
      `bso-cluster.js` uses.
 2. Write ES5 only: `var`, `function`, no arrows or template strings. Global
    background scripts run ES5. `npm test` checks this.
-3. Run `npm run bg-scripts` and commit the file it writes to `paste/`. `npm test`
+3. Run `npm run bg-scripts` and commit the file it writes to `paste/`. The
+   build stamps it with `SCRIPT_VERSION`, a hash of its sources; print it as
+   the first line of a run, as `bso-cluster.js` does, so a run's output shows
+   which copy of the script ran. `npm test`
    fails while a file in `paste/` is out of date.
 4. Add a mocked-instance test to [`test/bg-scripts.js`](../../test/bg-scripts.js).
    `bso-cluster`'s test shows how to mock the instance.

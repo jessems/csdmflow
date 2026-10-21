@@ -346,6 +346,12 @@ check('bso-cluster: no usable instance address, no links, no failure', () => {
   }
 });
 
+check('bso-cluster: a run says first which version of the script it is', () => {
+  const text = runCluster({ ROOT: "'SO9999'" });
+  const version = /^var SCRIPT_VERSION = '(\w{8})';$/m.exec(fs.readFileSync(path.join(pasteDir, 'bso-cluster.js'), 'utf8'))[1];
+  eq(text.split('\n')[0], `*** Script: bso-cluster version ${version}`);
+});
+
 check('bso-cluster: an unknown offering says so', () => {
   ok(/No service offering with sys_id or number "SO9999"/.test(runCluster({ ROOT: "'SO9999'" })), 'no message');
 });

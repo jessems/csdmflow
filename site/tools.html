@@ -141,16 +141,19 @@
 
   <script>
     // Each script is fetched once, up front, so the copy happens inside the
-    // click: Safari refuses clipboard writes that wait on a download.
+    // click: Safari refuses clipboard writes that wait on a download. no-cache:
+    // always ask the server whether there's a newer copy, never run a stale one.
     const texts = {};
     for (const btn of document.querySelectorAll('[data-copy]')) {
       const url = btn.dataset.copy, status = btn.parentElement.querySelector('.tool-status');
       const say = (msg, err) => { status.textContent = msg; status.classList.toggle('err', !!err); };
-      fetch(url)
+      fetch(url, { cache: 'no-cache' })
         .then(r => { if (!r.ok) throw new Error(r.status + ' ' + r.statusText); return r.text(); })
         .then(text => {
           texts[url] = text;
           btn.disabled = false;
+          const version = (/^var SCRIPT_VERSION = '(\w+)';$/m.exec(text) || [])[1];
+          if (version) say(`Version ${version}. A run prints its version first, so you can tell which copy ran.`);
           for (const pre of document.querySelectorAll(`[data-source="${url}"]`)) pre.textContent = text;
         })
         .catch(err => say('Could not load the script: ' + err.message, true));

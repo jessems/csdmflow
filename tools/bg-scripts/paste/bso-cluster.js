@@ -1,4 +1,5 @@
 // Built from tools/bg-scripts/bso-cluster.js by tools/bg-scripts/build.js; edit that, not this.
+var SCRIPT_VERSION = '95083182';
 // BSO cluster — everything around one service offering, as a csdmflow diagram.
 //
 // Paste tools/bg-scripts/paste/bso-cluster.js (not this file) into
@@ -897,6 +898,8 @@ var Cmdb = (function () {
 })();
 // ---- end lib/cmdb.js ----
 (function () {
+  // which copy of the script ran (set by build.js)
+  gs.print('bso-cluster version ' + (typeof SCRIPT_VERSION === 'undefined' ? 'unbuilt' : SCRIPT_VERSION));
   if (!ROOT) return gs.print('Set ROOT to a service offering\'s sys_id or number first.');
   var rootId = Cmdb.findOffering(ROOT);
   var root = rootId && Cmdb.read([rootId])[rootId];

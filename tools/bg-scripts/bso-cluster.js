@@ -25,6 +25,8 @@ var DEBUG = false;        // also print the offering's relationships and every l
 //#include lib/cmdb.js
 
 (function () {
+  // which copy of the script ran (set by build.js)
+  gs.print('bso-cluster version ' + (typeof SCRIPT_VERSION === 'undefined' ? 'unbuilt' : SCRIPT_VERSION));
   if (!ROOT) return gs.print('Set ROOT to a service offering\'s sys_id or number first.');
   var rootId = Cmdb.findOffering(ROOT);
   var root = rootId && Cmdb.read([rootId])[rootId];
