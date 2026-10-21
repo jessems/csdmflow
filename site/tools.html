@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>csdmflow tools</title>
+  <meta name="description" content="Background scripts that read a CSDM model from a ServiceNow instance and print it as a csdmflow diagram.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=Fragment+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="site.css">
+  <style>
+    .tools-page main { padding: 40px 0 80px; }
+    .tools-page .tb-nav a[aria-current="page"] { color: var(--ink); }
+    .tool-card { margin-top: 28px; background: var(--sheet); border: 1px solid var(--rule-strong); border-radius: 10px; box-shadow: var(--shadow); overflow: hidden; }
+    .tool-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px 24px; padding: 24px 24px 20px; border-bottom: 1px solid var(--rule); }
+    .tool-head h3 { margin: 0; font-size: 22px; letter-spacing: -.01em; }
+    .tool-head p { margin: 6px 0 0; color: var(--ink-soft); max-width: 62ch; }
+    .tool-kind { display: inline-block; margin-bottom: 8px; font: 11px/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+    .tool-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+    .tool-actions .btn { cursor: pointer; font: inherit; font-weight: 600; }
+    .tool-status { flex-basis: 100%; min-height: 1.2em; font: 12px/1.4 var(--mono); color: var(--ink-soft); }
+    .tool-status.err { color: var(--err); }
+    .tool-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .tool-body > section { padding: 22px 24px 26px; min-width: 0; }
+    .tool-body > section + section { border-left: 1px solid var(--rule); }
+    .tool-body h4 { margin: 0 0 12px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+    .tool-body h4:not(:first-child) { margin-top: 26px; }
+    .tool-body ol, .tool-body ul { margin: 0; padding-left: 1.3em; }
+    .tool-body li { margin: 0 0 8px; line-height: 1.55; }
+    .tool-body p { margin: 0 0 10px; line-height: 1.55; color: var(--ink-soft); }
+    .settings { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .settings th, .settings td { text-align: left; vertical-align: top; padding: 8px 10px 8px 0; border-bottom: 1px solid var(--rule); }
+    .settings th { font: 600 13px var(--mono); white-space: nowrap; }
+    .settings td { color: var(--ink-soft); line-height: 1.5; }
+    .settings code { color: var(--ink); }
+    .source { border-top: 1px solid var(--rule); }
+    .source summary { cursor: pointer; padding: 14px 24px; font-size: 14px; color: var(--ink-soft); }
+    .source summary:hover { color: var(--ink); }
+    .source pre { margin: 0; max-height: 460px; overflow: auto; padding: 16px 24px 20px; background: var(--paper-deep); border-top: 1px solid var(--rule); font: 12px/1.65 var(--mono); white-space: pre; }
+    .tools-more { margin-top: 28px; color: var(--ink-soft); font-size: 14.5px; }
+    @media (max-width: 860px) {
+      .tool-body { grid-template-columns: minmax(0, 1fr); }
+      .tool-body > section + section { border-left: 0; border-top: 1px solid var(--rule); }
+    }
+  </style>
+</head>
+<body class="tools-page">
+  <header class="titleblock">
+    <div class="domains-rule" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="wrap">
+      <div class="tb-cell">
+        <a class="wordmark" href="./" aria-label="csdmflow home">
+          <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+            <rect x="7" y="1" width="8" height="6" rx="1.5" fill="var(--design)"/>
+            <rect x="7" y="15" width="8" height="6" rx="1.5" fill="var(--delivery)"/>
+            <rect x="15.5" y="8" width="6" height="6" rx="1.5" fill="var(--consumption)"/>
+            <path d="M11 7v8M15.5 11H13" stroke="currentColor" stroke-width="1.4"/>
+          </svg>
+          csdmflow
+        </a>
+      </div>
+      <div class="tb-spacer" aria-hidden="true"></div>
+      <nav class="tb-cell tb-nav" aria-label="Main">
+        <a href="./#tour">Tour</a>
+        <a href="editor.html">Editor</a>
+        <a href="tools.html" aria-current="page">Tools</a>
+        <a href="./#syntax">Syntax</a>
+        <a href="./#embed">Embed</a>
+        <a class="gh" href="https://github.com/jessems/csdmflow">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <h2>Tools</h2>
+          <p>Scripts that read a CSDM model straight from your ServiceNow instance and hand it to csdmflow. Paste one into <b>Scripts - Background</b>, run it, and open the diagram in the editor.</p>
+        </div>
+      </div>
+
+      <article class="tool-card" id="bso-cluster">
+        <div class="tool-head">
+          <div>
+            <span class="tool-kind">Background script · read-only</span>
+            <h3>BSO cluster</h3>
+            <p>Draws everything around one business service offering: its service, the service instances it depends on, their tech offerings and dynamic CI groups, and each instance's service map.</p>
+          </div>
+          <div class="tool-actions">
+            <button class="btn btn-primary" type="button" data-copy="tools/bg-scripts/bso-cluster.js" disabled>Copy script</button>
+            <a class="btn" href="tools/bg-scripts/bso-cluster.js" download="bso-cluster.js">Download .js</a>
+            <a class="btn" href="https://github.com/jessems/csdmflow/blob/main/tools/bg-scripts/bso-cluster.js">Source ↗</a>
+            <span class="tool-status" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="tool-body">
+          <section>
+            <h4>How to run it</h4>
+            <ol>
+              <li>On your instance, open <b>System Definition › Scripts - Background</b>, in the <b>global</b> scope.</li>
+              <li>Paste the script and set <code>ROOT</code> at the top to the offering's number (e.g. <code>'SO0001234'</code>) or sys_id.</li>
+              <li>Select <b>Run script</b>.</li>
+              <li>Open the link it prints. The editor shows the diagram, ready to adjust and export.</li>
+            </ol>
+            <h4>What it prints</h4>
+            <ul>
+              <li><b>csdmflow source</b>, to paste into the editor or save as a <code>.csdm</code> file.</li>
+              <li><b>An editor link</b> that opens the diagram directly.</li>
+              <li><b>The data as JSON</b> on one line (the <code>csdm-graph</code> format), for other tools.</li>
+            </ul>
+            <h4>Safe to run</h4>
+            <p>It only reads: plain queries, no inserts, updates or deletes. Group members are counted per class, not read one by one, so even large groups stay quick.</p>
+            <p>The diagram travels in the link after the <code>#</code>, which browsers never send to a server. The CI and service names can still be read by anyone who has the link.</p>
+          </section>
+          <section>
+            <h4>Settings</h4>
+            <table class="settings">
+              <tbody>
+                <tr><th>ROOT</th><td>The business service offering to start from: its number or sys_id. A tech offering is refused with a note saying so.</td></tr>
+                <tr><th>LAYOUT</th><td><code>cross</code>, <code>tiers</code>, <code>row</code> or <code>lanes</code>; empty for the default. You can also switch it in the editor.</td></tr>
+                <tr><th>MAX_CI_DEPTH</th><td>How many hops a service map is followed below its instance. Default <code>5</code>.</td></tr>
+                <tr><th>DEBUG</th><td><code>true</code> also prints the offering's relationships and every link left out, with the reason. Useful when something you expect is missing.</td></tr>
+              </tbody>
+            </table>
+            <h4>What it walks</h4>
+            <p>From the offering: its business service and portfolio, the service instances it depends on, their applications, tech offerings and dynamic CI groups, the tech offerings' services and groups, the groups' members, and each instance's service map, downwards. Other offerings of the same service are left out, so the picture stays about this one offering.</p>
+          </section>
+        </div>
+        <details class="source">
+          <summary>Show the script</summary>
+          <pre data-source="tools/bg-scripts/bso-cluster.js">Loading…</pre>
+        </details>
+      </article>
+
+      <p class="tools-more">More scripts are on the way. They all live in <a href="https://github.com/jessems/csdmflow/tree/main/tools/bg-scripts">tools/bg-scripts</a> on GitHub.</p>
+    </div>
+  </main>
+
+  <script>
+    // Each script is fetched once, up front, so the copy happens inside the
+    // click: Safari refuses clipboard writes that wait on a download.
+    const texts = {};
+    for (const btn of document.querySelectorAll('[data-copy]')) {
+      const url = btn.dataset.copy, status = btn.parentElement.querySelector('.tool-status');
+      const say = (msg, err) => { status.textContent = msg; status.classList.toggle('err', !!err); };
+      fetch(url)
+        .then(r => { if (!r.ok) throw new Error(r.status + ' ' + r.statusText); return r.text(); })
+        .then(text => {
+          texts[url] = text;
+          btn.disabled = false;
+          for (const pre of document.querySelectorAll(`[data-source="${url}"]`)) pre.textContent = text;
+        })
+        .catch(err => say('Could not load the script: ' + err.message, true));
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(texts[url]);
+          say(`Copied ${texts[url].trimEnd().split('\n').length.toLocaleString('en-US')} lines. Paste into Scripts - Background.`);
+        } catch {
+          say('Copy blocked by the browser. Use Download .js instead.', true);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

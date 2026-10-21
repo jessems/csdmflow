@@ -5,6 +5,9 @@ scope) on a ServiceNow instance. Each one reads part of the CMDB and prints
 it as a csdmflow diagram. They only read and never write. These files are not
 part of the npm package.
 
+The easiest way to get one is the [Tools page](https://jessems.github.io/csdmflow/tools.html):
+**Copy script** puts the paste-ready file on your clipboard.
+
 **Paste the file in [`paste/`](paste/), not the one beside this README.** A
 background script has to be one block, so `npm run bg-scripts` builds each
 script with its `//#include`d libraries inlined.

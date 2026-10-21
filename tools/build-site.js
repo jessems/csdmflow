@@ -2,8 +2,9 @@
 'use strict';
 
 // Builds the GitHub Pages site into _site/: the playground page from site/,
-// the browser bundle from dist/ (run `npm run build` first), and every model
-// in examples/ as examples.json for the playground's example picker.
+// the browser bundle from dist/ (run `npm run build` first), every model in
+// examples/ as examples.json for the playground's example picker, and the
+// paste-ready background scripts for the Tools page.
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -19,6 +20,10 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 fs.cpSync(path.join(root, 'site'), out, { recursive: true });
 fs.copyFileSync(bundle, path.join(out, 'csdmflow.min.js'));
+
+// the background scripts, ready to paste, for the Tools page (tools.html)
+const pasteDir = path.join(root, 'tools', 'bg-scripts', 'paste');
+fs.cpSync(pasteDir, path.join(out, 'tools', 'bg-scripts'), { recursive: true });
 
 // hello and variants first; the transcribed slides after, in slide order
 const first = ['hello.csdm', 'variants.csdm'];
