@@ -381,6 +381,25 @@ function place(model) {
     const want = median(placedCols(parentsOf(e)));
     putInRow(e, ciTop + d - 1, want === null ? colWant(e, appLo, 'SI', 'CI') : want);
   }
+  // Dynamic CI groups an instance links to (it depends on them, or one
+  // populates it) belong to its downward tree like its mapped CIs: side by side
+  // in the tier below the instance, each group's members underneath it. Groups
+  // that hang off tech offerings only stay on the delivery side, as on the
+  // reference slides.
+  const instanceGroups = ofType('DCG').filter(g => nbrs(g, 'SI').length);
+  for (const si of ofType('SI')) {
+    // a group a tech offering also links to goes first: nearest the delivery
+    // side on the left, so the offering's line comes in from the side rather
+    // than merging into the instance's lines from above
+    const own = instanceGroups.filter(g => !pos.has(g.id) && nbrs(g, 'SI')[0].id === si.id)
+      .sort((a, b) => (nbrs(b, 'TMSO').length > 0) - (nbrs(a, 'TMSO').length > 0));
+    const at = pos.get(si.id);
+    own.forEach((g, i) => putInRow(g, ciTop, at.col - Math.floor((own.length - 1) / 2) + i));
+  }
+  for (const g of instanceGroups) {
+    const p = pos.get(g.id);
+    for (const ci of nbrs(g, 'CI').filter(c => !pos.has(c.id) && nbrs(c).every(n => n.type === 'DCG'))) putInRow(ci, p.row + 1, p.col);
+  }
   // CIs only reachable via groups or other CIs: shelf below the mapped tree
   const treeBottom = Math.max(ciTop - 1, ...cis.filter(e => pos.has(e.id)).map(e => pos.get(e.id).row));
   let pending = ofType('CI').filter(e => !pos.has(e.id));
@@ -393,10 +412,20 @@ function place(model) {
     putInRow(e, median(placedRows(others)) + 1, median(placedCols(others)));
   }
   pending = pending.filter(e => !pos.has(e.id));
+  // A group's members sit in the group's row (the group is placed later, in
+  // the row of its members): members of different groups get a shelf row each,
+  // or their groups would all want the same row and stack up around it.
+  const groupKey = e => {
+    const n = nbrs(e);
+    return n.length && n.every(x => x.type === 'DCG') ? n.map(x => x.id).sort().join('|') : null;
+  };
+  const groupShelf = new Map(); // group key -> its shelf row, below the first
   while (pending.length) {
     const ready = pending.filter(e => placedCols(nbrs(e, 'SI', 'CI')).length);
     for (const e of ready.length ? ready : [pending[0]]) {
-      putOnShelf(e, treeBottom + 1, colWant(e, appLo, 'SI', 'CI'), appLo, Math.max(appHi, appLo + 2));
+      const key = groupKey(e);
+      if (key !== null && !groupShelf.has(key)) groupShelf.set(key, treeBottom + 1 + groupShelf.size);
+      putOnShelf(e, key === null ? treeBottom + 1 : groupShelf.get(key), colWant(e, appLo, 'SI', 'CI'), appLo, Math.max(appHi, appLo + 2));
     }
     pending = pending.filter(e => !pos.has(e.id));
   }
@@ -426,7 +455,7 @@ function place(model) {
   }
 
   // --- delivery: flank to the left of everything placed so far ---
-  const dcgs = ofType('DCG');
+  const dcgs = ofType('DCG').filter(e => !pos.has(e.id));
   if (dReach > 0) {
     const dcgCol = lo - 1;
     const tmsoCol = lo - (dcgs.length ? 2 : 1);
@@ -563,6 +592,9 @@ function compileCsdm(source) {
   if (kinds.has('ref')) out.push('key "References" ref');
   if (kinds.has('data')) out.push('key "Sends data to" data');
 
+  const instanceGroup = id => ents.get(id).type === 'DCG' &&
+    rels.some(r => (r.from === id && ents.get(r.to).type === 'SI') || (r.to === id && ents.get(r.from).type === 'SI'));
+
   // Strategic edges go around the outside, on the side their far end sits.
   const center = (nCols - 1) / 2;
   // Edges route in declaration order, and earlier edges claim the best ports:
@@ -580,6 +612,10 @@ function compileCsdm(source) {
     if (k === 'strategic') {
       attrs += ` via=${pos.get(r.to).col <= center ? 'left' : 'right'} exit=bottom`;
     }
+    // A group an instance links to, which a tech offering also contains: the
+    // offering's "Contains" and the instance's line look alike, so they would
+    // merge into one trunk with two labels. A lane of their own keeps them apart.
+    if (ents.get(a).type === 'TMSO' && instanceGroup(b)) attrs += ' lane=offering';
     out.push(`${a} ${op} ${b}${lab} {${attrs}}`);
   }
 

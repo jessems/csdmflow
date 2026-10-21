@@ -456,9 +456,12 @@ function route(model, geom, warnings) {
     const cls = src.cls ? model.classes.get(src.cls) : null;
     const color = e.attrs.stroke || (cls ? cls.stroke : geom.edgeColor);
     const dashed = e.attrs.dash && e.attrs.dash !== 'none' ? e.attrs.dash : (e.dashed ? 'dash' : false);
-    return { color, dashed };
+    return { color, dashed, lane: e.attrs.lane || '' };
   };
-  const styleKey = st => `${st.color}|${st.dashed}`;
+  // Lines merge into a shared trunk or bus only when this key matches: same
+  // colour and dash, and the same `lane` (an edge attribute; unset for most),
+  // so a writer can keep lines that look alike from merging.
+  const styleKey = st => `${st.color}|${st.dashed}${st.lane ? '|' + st.lane : ''}`;
 
   // A port stays on its side, clear of the corners: a line leaving a corner
   // would run along the border of every box it passes.

@@ -37,5 +37,86 @@ check('it renders', () => {
   eq(r.nodes.map(n => n.id).filter(id => ['mail', 'gw', 'hosts'].includes(id)).sort(), ['gw', 'hosts', 'mail']);
 });
 
+// An instance depending on several groups, each with its own members: the
+// groups sit side by side in the tier below the instance, as its service map
+// would, each group's members under it. The group the tech offering also
+// links to comes first, on the offering's side, so their lines don't merge.
+check("an instance's groups sit in a row below it, members under each group", () => {
+  const { gf } = compileCsdm(`SI wlan: WLAN
+TMSO wlan-ops: WLAN Operations
+BSO byod: BYOD WLAN
+DCG g1: Group One
+DCG g2: Group Two
+DCG g3: Group Three
+CI(Wireless Access Point) m1: "13'952 CIs"
+CI(Wireless Access Point) m2: "3'829 CIs"
+CI(Wireless Access Point) m3: "16'321 CIs"
+byod -> wlan
+wlan-ops -> wlan
+wlan-ops -> g2
+wlan -> g1 : Depends On
+wlan -> g2 : Depends On
+wlan -> g3 : Depends On
+g1 -> m1
+g2 -> m2
+g3 -> m3
+`);
+  const rows = gf.split('\n').filter(l => l.startsWith('row ')).map(l => l.slice(4).replace(/\["[^"]*"\]/g, '').split(/\s+/));
+  const at = id => { const r = rows.findIndex(cells => cells.includes(id)); return [r, rows[r].indexOf(id)]; };
+  const [siRow, siCol] = at('wlan');
+  const groups = ['g2', 'g1', 'g3'].map(at);
+  eq(groups.map(([r]) => r), [siRow + 1, siRow + 1, siRow + 1]);
+  eq(groups.map(([, c]) => c), [siCol - 1, siCol, siCol + 1]);
+  eq(['m2', 'm1', 'm3'].map(at), groups.map(([r, c]) => [r + 1, c]));
+});
+
+// A group that only a tech offering links to keeps the reference slides'
+// place: on the delivery side, in the row of its members.
+check('a group under a tech offering only stays beside its members', () => {
+  const { gf } = compileCsdm(`SI app: App Prod
+TMSO ops: Server Ops
+DCG servers: All Servers
+CI(Linux Server) hosts: web01, web02
+ops -> app
+ops -> servers
+servers -> hosts
+`);
+  const rows = gf.split('\n').filter(l => l.startsWith('row ')).map(l => l.slice(4).replace(/\["[^"]*"\]/g, '').split(/\s+/));
+  const row = id => rows.findIndex(cells => cells.includes(id));
+  eq(row('servers'), row('hosts'));
+});
+
+// A tech offering and an instance both linked to one group: the offering's
+// "Contains" and the instance's "Depends On" look alike, and would merge into
+// one trunk with two labels. The offering's line gets a lane of its own and
+// arrives with its own arrowhead.
+check("an offering's line into an instance's group doesn't merge with the instance's", () => {
+  const browser = require('../src/browser');
+  const { gf } = compileCsdm(`SI wlan: WLAN
+TMSO ops: WLAN Ops
+TMSO ops2: More Ops
+BSO byod: BYOD
+DCG g1: One
+DCG g2: Two
+DCG g3: Three
+byod -> wlan
+ops -> wlan
+ops -> g2
+ops2 -> g3
+wlan -> g1 : Depends On
+wlan -> g2 : Depends On
+wlan -> g3 : Depends On
+`);
+  eq(gf.split('\n').filter(l => / lane=offering/.test(l)).map(l => l.split(' ')[0] + '>' + l.split(' ')[2]).sort(), ['ops2>g3', 'ops>g2']);
+  const arrowsInto = (source, id) => {
+    const s = browser.scene(source, { lang: 'gf' });
+    const box = s.items.find(i => i.type === 'node' && i.id === id);
+    return s.items.filter(i => i.role === 'edge' && i.arrowEnd).map(i => i.points[i.points.length - 1])
+      .filter(p => p.x >= box.x && p.x <= box.x + box.w && p.y >= box.y - 1 && p.y <= box.y + box.h + 1).length;
+  };
+  eq(arrowsInto(gf, 'g2'), 2);
+  eq(arrowsInto(gf.replace(/ lane=offering/g, ''), 'g2'), 1); // what the lane prevents
+});
+
 if (failed) process.exit(1);
 console.log('relations: ok');
