@@ -228,7 +228,7 @@ select, .tool {
   transition: border-color .15s ease, background .15s ease;
 }
 select { font-family: var(--mono); font-weight: 400; font-size: 12px; max-width: 100%; min-width: 0; flex: 0 1 330px; }
-select#layout { flex: none; }
+select#layout, select#theme { flex: none; }
 .tool:hover, select:hover { border-color: var(--ink-soft); }
 .tool[aria-expanded="true"] { border-color: var(--ink); background: var(--paper-deep); }
 .tool .chev { display: inline-block; margin-left: 4px; transition: transform .15s ease; }
@@ -291,7 +291,7 @@ select#layout { flex: none; }
 }
 /* auto margins centre a small drawing; unlike justify-content they don't
    cut off the left of one wider than the pane */
-#preview svg { flex: none; margin: 0 auto; border-radius: 3px; box-shadow: var(--shadow); }
+#preview svg { flex: none; margin: 0 auto; border-radius: 3px; box-shadow: var(--shadow); background: #fff; } /* the light theme has no background of its own */
 #preview.dragging { cursor: grabbing; }
 #preview:has(.err-card) { cursor: auto; }
 .err-card {

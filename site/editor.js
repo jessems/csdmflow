@@ -5,7 +5,7 @@
   // --- editor ------------------------------------------------------------------
   const $ = id => document.getElementById(id);
   const source = $('source'), preview = $('preview'), status = $('status'), picker = $('examples'), gutter = $('gutter');
-  const layoutPick = $('layout');
+  const layoutPick = $('layout'), themePick = $('theme');
   let examples = [];
   // The standalone page (editor.html) starts on the user's own model; the
   // landing page's editor starts on the first example.
@@ -80,6 +80,7 @@
     const preset = [...layoutPick.options].some(o => o.value === layout && !o.disabled);
     layoutPick.querySelector('[data-custom]').hidden = preset;
     layoutPick.value = preset ? layout : 'custom';
+    themePick.value = (/^\s*theme\s+(dark|light)\s*$/m.exec(text) || [, 'dark'])[1];
     try {
       const { svg, width, height, warnings } = csdmflow.render(text);
       preview.innerHTML = svg;
@@ -117,12 +118,14 @@
     timer = setTimeout(edited, 150);
   });
 
-  // The layout lives in the model as a `layout` line, so a link or a download
-  // keeps it: the menu rewrites that line, or adds one under the title.
-  layoutPick.addEventListener('change', () => {
-    const line = 'layout ' + layoutPick.value;
+  // The layout and the theme live in the model as `layout` and `theme` lines,
+  // so a link or a download keeps them: the menus rewrite that line, or add one
+  // under the title.
+  function setLine(keyword, value) {
+    const line = keyword + ' ' + value;
+    const re = new RegExp(`^[ \\t]*${keyword}\\b.*$`, 'm');
     const text = source.value;
-    if (/^[ \t]*layout\b.*$/m.test(text)) source.value = text.replace(/^[ \t]*layout\b.*$/m, line);
+    if (re.test(text)) source.value = text.replace(re, line);
     else {
       const lines = text.split('\n');
       let at = 0; // under a leading title and subtitle
@@ -132,7 +135,9 @@
     }
     paintGutter(0);
     edited();
-  });
+  }
+  layoutPick.addEventListener('change', () => setLine('layout', layoutPick.value));
+  themePick.addEventListener('change', () => setLine('theme', themePick.value));
 
   picker.addEventListener('change', () => {
     const ex = examples.find(e => e.file === picker.value);
@@ -259,6 +264,9 @@
         const c = document.createElement('canvas');
         c.width = Math.ceil(w * scale); c.height = Math.ceil(h * scale);
         const g = c.getContext('2d');
+        // the light theme draws no background of its own: paper white, not see-through
+        g.fillStyle = '#ffffff';
+        g.fillRect(0, 0, c.width, c.height);
         g.scale(scale, scale);
         g.drawImage(img, 0, 0, w, h);
         c.toBlob(b => (b ? resolve(b) : reject(new Error('could not draw PNG'))), 'image/png');
