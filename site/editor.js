@@ -5,6 +5,7 @@
   // --- editor ------------------------------------------------------------------
   const $ = id => document.getElementById(id);
   const source = $('source'), preview = $('preview'), status = $('status'), picker = $('examples'), gutter = $('gutter');
+  const layoutPick = $('layout');
   let examples = [];
   // The standalone page (editor.html) starts on the user's own model; the
   // landing page's editor starts on the first example.
@@ -47,7 +48,12 @@
   function draw() {
     const text = source.value;
     setMeta('m-title', (/^title\s+"([^"]*)"/m.exec(text) || [])[1] || 'untitled');
-    setMeta('m-layout', (/^layout\s+(.+)$/m.exec(text) || [, 'cross'])[1].trim());
+    const layout = (/^layout\s+(.+)$/m.exec(text) || [, 'cross'])[1].trim();
+    setMeta('m-layout', layout);
+    // the layout menu shows the model's layout; "layout reach 1 2" is none of the presets
+    const preset = [...layoutPick.options].some(o => o.value === layout && !o.disabled);
+    layoutPick.querySelector('[data-custom]').hidden = preset;
+    layoutPick.value = preset ? layout : 'custom';
     try {
       const { svg, width, height, warnings } = csdmflow.render(text);
       preview.innerHTML = svg;
@@ -68,16 +74,36 @@
     }
   }
 
+  // after an edit, by typing or by the layout menu: the model is your own now
+  function edited() {
+    draw();
+    history.replaceState(null, '', '#src=' + encode(source.value));
+    picker.value = '';
+    saveDraft(source.value);
+  }
+
   let timer;
   source.addEventListener('input', () => {
     paintGutter(0);
     clearTimeout(timer);
-    timer = setTimeout(() => {
-      draw();
-      history.replaceState(null, '', '#src=' + encode(source.value));
-      picker.value = '';
-      saveDraft(source.value);
-    }, 150);
+    timer = setTimeout(edited, 150);
+  });
+
+  // The layout lives in the model as a `layout` line, so a link or a download
+  // keeps it: the menu rewrites that line, or adds one under the title.
+  layoutPick.addEventListener('change', () => {
+    const line = 'layout ' + layoutPick.value;
+    const text = source.value;
+    if (/^[ \t]*layout\b.*$/m.test(text)) source.value = text.replace(/^[ \t]*layout\b.*$/m, line);
+    else {
+      const lines = text.split('\n');
+      let at = 0; // under a leading title and subtitle
+      while (at < lines.length && /^\s*(title|subtitle)\b/.test(lines[at])) at++;
+      lines.splice(at, 0, line);
+      source.value = lines.join('\n');
+    }
+    paintGutter(0);
+    edited();
   });
 
   picker.addEventListener('change', () => {
