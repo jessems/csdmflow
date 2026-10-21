@@ -1,0 +1,812 @@
+// Built from tools/bg-scripts/bso-cluster.js by tools/bg-scripts/build.js; edit that, not this.
+// BSO cluster — everything around one service offering, as a csdmflow diagram.
+//
+// Paste tools/bg-scripts/paste/bso-cluster.js (not this file) into
+// Scripts - Background, global scope, set ROOT and run it. It reads, never
+// writes. It prints:
+//   1. the csdmflow source, ready for the playground or a .csdm file
+//   2. a playground link that opens it
+//   3. the csdm-graph JSON on one line, for tools that want the data
+//      (node tools/bg-scripts/lib/csdm-graph.js export.txt turns it back into source)
+//
+// What it walks to is set by lib/walk.js, the same rules as the ITFM 2.0
+// Inspector: the offering's service (and its portfolio), its service
+// instances, their applications, tech offerings and dynamic CI groups, the
+// groups' tech offerings and members (counted per class, not read), the tech
+// offerings' services and other groups, and each instance's service map,
+// downwards.
+
+var ROOT = '';            // the business service offering's sys_id or number, e.g. 'SO0001234'
+var LAYOUT = '';          // '' (csdmflow's default), 'cross', 'tiers', 'row' or 'lanes'
+var MAX_CI_DEPTH = 5;     // hops a service map is followed below its instance
+var DEBUG = false;        // also print the offering's relationships and every link left out, and why
+
+// ---- lib/csdm-graph.js ----
+// csdm-graph — the intermediate format every background script writes, and its
+// conversion to csdmflow source. A graph is plain data straight from the CMDB:
+// nodes are records, edges are the links between them. What a diagram needs
+// beyond that (ids, grouping CIs into stacks, quoting) is decided here, so every
+// script draws the same way.
+//
+// ES5 on purpose: build.js inlines this file into scripts that run as
+// ServiceNow background scripts, and global scope there is ES5. It runs in Node
+// too (tests, and `node tools/bg-scripts/lib/csdm-graph.js export.txt`).
+
+/**
+ * The csdmflow entity types a node can have.
+ * @typedef {'BC'|'BA'|'SI'|'TMS'|'TMSO'|'DCG'|'CI'|'BSO'|'BS'|'SP'} EntityType
+ */
+
+/**
+ * One CMDB record.
+ * @typedef {Object} GraphNode
+ * @property {string} id            sys_id
+ * @property {EntityType} type
+ * @property {string} name
+ * @property {string} [table]       sys_class_name, e.g. "cmdb_ci_win_server"
+ * @property {string} [className]   the class's label, e.g. "Windows Server"; a CI's box title
+ * @property {string} [number]      e.g. a service offering's "SO0001234"
+ * @property {number} [count]       CIs only: stands in for this many CIs of the class, e.g. a
+ *                                  group's members; then id is made up and name is empty
+ * @property {Object<string, *>} [attrs]  anything else a script wants to keep
+ */
+
+/**
+ * A link between two nodes, oriented parent -> child as ServiceNow stores it
+ * (cmdb_rel_ci parent/child, offering -> its parent service, service -> its
+ * portfolio, group -> member).
+ * csdmflow turns each pair the CSDM way round itself.
+ * @typedef {Object} GraphEdge
+ * @property {string} from          sys_id of a node in the graph
+ * @property {string} to            sys_id of a node in the graph
+ * @property {'cmdb_rel_ci'|'parent'|'portfolio'|'svc_ci_assoc'|'dcg_member'} via  where the link was found
+ * @property {string} [rel]         the cmdb_rel_type name, e.g. "Depends on::Used by" (via cmdb_rel_ci)
+ */
+
+/**
+ * @typedef {Object} CsdmGraph
+ * @property {'csdm-graph'} format
+ * @property {1} version
+ * @property {{script: string, instance?: string, generatedAt?: string, root?: string}} source
+ *           which script wrote it, where and when; root is the sys_id it started from
+ * @property {GraphNode[]} nodes
+ * @property {GraphEdge[]} edges
+ * @property {string[]} warnings    what the script could not read or chose to leave out
+ */
+
+var CsdmGraph = (function () {
+  var FORMAT = 'csdm-graph';
+  var VERSION = 1;
+  var TYPES = ['BC', 'BA', 'SI', 'TMS', 'TMSO', 'DCG', 'CI', 'BSO', 'BS', 'SP'];
+  var VIAS = ['cmdb_rel_ci', 'parent', 'portfolio', 'svc_ci_assoc', 'dcg_member'];
+  var PLAYGROUND = 'https://jessems.github.io/csdmflow/editor.html';
+
+  function has(list, x) { return list.indexOf(x) >= 0; }
+
+  /** @returns {CsdmGraph} an empty graph */
+  function create(source) {
+    return { format: FORMAT, version: VERSION, source: source, nodes: [], edges: [], warnings: [] };
+  }
+
+  /**
+   * A graph to fill in, which ignores a node or edge it already has.
+   * @returns {{graph: CsdmGraph, node: function(string): GraphNode, addNode: function(GraphNode): GraphNode,
+   *            addEdge: function(string, string, string, string=), warn: function(string)}}
+   */
+  function builder(source) {
+    var g = create(source);
+    var nodes = {};
+    var edges = {};
+    return {
+      graph: g,
+      node: function (id) { return nodes[id]; },
+      addNode: function (n) {
+        if (!nodes[n.id]) { nodes[n.id] = n; g.nodes.push(n); }
+        return nodes[n.id];
+      },
+      // one edge per pair of nodes: the first way it was found wins
+      addEdge: function (from, to, via, rel) {
+        var key = from < to ? from + '|' + to : to + '|' + from;
+        if (from === to || edges[key] || !nodes[from] || !nodes[to]) return;
+        edges[key] = true;
+        var e = { from: from, to: to, via: via };
+        if (rel) e.rel = rel;
+        g.edges.push(e);
+      },
+      warn: function (msg) { g.warnings.push(msg); }
+    };
+  }
+
+  /**
+   * Everything wrong with a graph, as messages; empty when it is valid.
+   * @param {*} g
+   * @returns {string[]}
+   */
+  function validate(g) {
+    var errs = [];
+    if (!g || typeof g !== 'object') return ['not an object'];
+    if (g.format !== FORMAT) errs.push('format must be "' + FORMAT + '"');
+    if (g.version !== VERSION) errs.push('version must be ' + VERSION);
+    if (!g.source || typeof g.source.script !== 'string') errs.push('source.script is missing');
+    if (!isArray(g.nodes)) errs.push('nodes must be an array');
+    if (!isArray(g.edges)) errs.push('edges must be an array');
+    if (!isArray(g.warnings)) errs.push('warnings must be an array');
+    if (errs.length) return errs;
+    var ids = {};
+    g.nodes.forEach(function (n, i) {
+      var at = 'nodes[' + i + ']';
+      if (!n || typeof n.id !== 'string' || !n.id) return errs.push(at + ': id is missing');
+      if (ids[n.id]) errs.push(at + ': duplicate id ' + n.id);
+      ids[n.id] = true;
+      if (!has(TYPES, n.type)) errs.push(at + ': type must be one of ' + TYPES.join(', ') + ', not ' + n.type);
+      if (typeof n.name !== 'string') errs.push(at + ': name is missing');
+      if (n.count != null && !(n.type === 'CI' && n.count > 0 && n.count % 1 === 0)) errs.push(at + ': count must be a positive whole number, on a CI');
+    });
+    g.edges.forEach(function (e, i) {
+      var at = 'edges[' + i + ']';
+      if (!e || !ids[e.from]) errs.push(at + ': from is not a node: ' + (e && e.from));
+      if (!e || !ids[e.to]) errs.push(at + ': to is not a node: ' + (e && e.to));
+      if (e && !has(VIAS, e.via)) errs.push(at + ': via must be one of ' + VIAS.join(', '));
+    });
+    return errs;
+  }
+
+  function isArray(x) { return Object.prototype.toString.call(x) === '[object Array]'; }
+
+  // --- to csdmflow -------------------------------------------------------------
+
+  // Text inside csdmflow quotes: only `"` and `#` are special.
+  function quote(s) {
+    return '"' + (clean(s) || '(no name)').replace(/#/g, '#35;').replace(/"/g, '#quot;') + '"';
+  }
+  // 1'250 as in Switzerland; by hand, since the instance's JavaScript has no Intl
+  function count(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, "'"); }
+
+  // boxes by type, then name, as the ITFM 2.0 Inspector writes them
+  var ORDER = ['BA', 'SI', 'TMSO', 'TMS', 'DCG', 'CI', 'BSO', 'BS', 'SP', 'BC'];
+
+  // Lines whose relationship type is not the one csdmflow labels the pair
+  // with (Contains, for a group under an offering or an instance).
+  var LABELS = {
+    'DCG|SI': { 'Depends on::Used by': 'Depends On' },
+    'DCG|TMSO': { 'Depends on::Used by': 'Depends On' }
+  };
+  // A CI class sits in parentheses, so those are escaped too.
+  function classText(s) {
+    return clean(s).replace(/#/g, '#35;').replace(/\(/g, '#40;').replace(/\)/g, '#41;');
+  }
+  function clean(s) { return String(s == null ? '' : s).replace(/\s+/g, ' ').replace(/^ | $/g, ''); }
+  function slug(s) {
+    return clean(s).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40).replace(/-+$/, '');
+  }
+
+  /**
+   * csdmflow source for a graph.
+   *
+   * CIs that share a class and exactly the same neighbours become one stacked
+   * box titled with the count ("CI(Windows Server (2)) web: "web01", "web02""),
+   * so a group of 200 servers is one box, not 200. Edges between the same two
+   * boxes are drawn once.
+   *
+   * @param {CsdmGraph} g
+   * @param {{title?: string, subtitle?: string, layout?: string, maxNames?: number}} [opts]
+   *        maxNames: names shown on a stacked box; beyond, the first few and "…" (default 4)
+   * @returns {string}
+   */
+  function toCsdm(g, opts) {
+    opts = opts || {};
+    var maxNames = opts.maxNames || 4;
+    var errs = validate(g);
+    if (errs.length) throw new Error('not a valid csdm-graph: ' + errs.join('; '));
+
+    var byId = {};
+    g.nodes.forEach(function (n) { byId[n.id] = n; });
+    var nbrs = {};
+    g.nodes.forEach(function (n) { nbrs[n.id] = { up: [], down: [] }; });
+    g.edges.forEach(function (e) {
+      if (e.from === e.to) return;
+      nbrs[e.from].down.push(e.to);
+      nbrs[e.to].up.push(e.from);
+    });
+
+    // one box per non-CI node; CIs share a box when class and neighbours match
+    var boxes = [];
+    var boxOf = {};
+    var ciBox = {};
+    g.nodes.forEach(function (n) {
+      if (n.type === 'CI' && n.count) {
+        // CIs counted, not read: a box of their own, "Windows Server" / "1'250 CIs"
+        boxOf[n.id] = { type: 'CI', ciClass: n.className || n.table || '', names: [count(n.count) + (n.count === 1 ? ' CI' : ' CIs')], counted: true };
+        boxes.push(boxOf[n.id]);
+      } else if (n.type === 'CI') {
+        var key = (n.className || n.table || '') + '|' + uniq(nbrs[n.id].up).sort().join(',') + '|' + uniq(nbrs[n.id].down).sort().join(',');
+        var b = ciBox[key];
+        if (!b) {
+          b = ciBox[key] = { type: 'CI', ciClass: n.className || n.table || '', names: [] };
+          boxes.push(b);
+        }
+        b.names.push(n.name);
+        boxOf[n.id] = b;
+      } else {
+        boxOf[n.id] = { type: n.type, names: [n.name] };
+        boxes.push(boxOf[n.id]);
+      }
+    });
+
+    var rank = function (t) { var i = ORDER.indexOf(t); return i < 0 ? ORDER.length : i; };
+    var first = function (b) { return (b.counted ? b.ciClass : b.names.slice().sort()[0]) || ''; };
+    boxes.sort(function (a, z) {
+      return rank(a.type) - rank(z.type) || (first(a) < first(z) ? -1 : first(a) > first(z) ? 1 : 0);
+    });
+
+    var taken = {};
+    boxes.forEach(function (b) {
+      var base = slug(b.type === 'CI' ? (b.counted ? (b.ciClass || 'ci') + ' members' : b.names.length > 1 ? b.ciClass || 'ci' : b.names[0]) : b.names[0]) || b.type.toLowerCase();
+      var id = base;
+      for (var k = 2; taken[id]; k++) id = base + '-' + k;
+      taken[id] = true;
+      b.id = id;
+    });
+
+    var lines = [];
+    var root = g.source.root && byId[g.source.root];
+    var title = opts.title || (root ? root.name : '');
+    if (title) lines.push('title ' + quote(title));
+    var sub = opts.subtitle;
+    if (sub == null) {
+      sub = [root && root.number, g.source.instance, g.source.generatedAt && g.source.generatedAt.slice(0, 10)]
+        .filter(Boolean).join(' · ');
+    }
+    if (sub) lines.push('subtitle ' + quote(sub));
+    if (opts.layout) lines.push('layout ' + opts.layout);
+    if (lines.length) lines.push('');
+
+    boxes.forEach(function (b) {
+      var shown = b.names.slice().sort();
+      if (shown.length > maxNames) shown = shown.slice(0, maxNames - 1).concat(['…']);
+      // several CIs: the count in the title, "Linux Server (7)"
+      var cls = classText(b.ciClass || 'CI') + (b.names.length > 1 ? ' #40;' + count(b.names.length) + '#41;' : '');
+      var head = b.type === 'CI' ? 'CI(' + cls + ')' : b.type;
+      lines.push(head + ' ' + b.id + ': ' + shown.map(quote).join(', '));
+    });
+    lines.push('');
+
+    var seen = {};
+    g.edges.forEach(function (e) {
+      var a = boxOf[e.from].id, z = boxOf[e.to].id;
+      if (a === z || seen[a + '>' + z]) return;
+      seen[a + '>' + z] = true;
+      var types = [byId[e.from].type, byId[e.to].type].sort().join('|');
+      var label = LABELS[types] && LABELS[types][e.rel];
+      lines.push(a + ' -> ' + z + (label ? ' : ' + label : ''));
+    });
+    return lines.join('\n') + '\n';
+  }
+
+  function uniq(xs) {
+    var out = [], seen = {};
+    xs.forEach(function (x) { if (!seen[x]) { seen[x] = true; out.push(x); } });
+    return out;
+  }
+
+  // --- playground link ---------------------------------------------------------
+
+  var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+
+  // UTF-8 then base64, without btoa or Buffer (neither exists on the instance)
+  function base64(s) {
+    var bytes = [], i, c;
+    for (i = 0; i < s.length; i++) {
+      c = s.charCodeAt(i);
+      if (c >= 0xd800 && c < 0xdc00 && i + 1 < s.length) c = 0x10000 + ((c - 0xd800) << 10) + (s.charCodeAt(++i) - 0xdc00);
+      if (c < 0x80) bytes.push(c);
+      else if (c < 0x800) bytes.push(0xc0 | c >> 6, 0x80 | c & 63);
+      else if (c < 0x10000) bytes.push(0xe0 | c >> 12, 0x80 | c >> 6 & 63, 0x80 | c & 63);
+      else bytes.push(0xf0 | c >> 18, 0x80 | c >> 12 & 63, 0x80 | c >> 6 & 63, 0x80 | c & 63);
+    }
+    var out = '';
+    for (i = 0; i < bytes.length; i += 3) {
+      var n = bytes[i] << 16 | (bytes[i + 1] || 0) << 8 | (bytes[i + 2] || 0);
+      out += B64.charAt(n >> 18 & 63) + B64.charAt(n >> 12 & 63) +
+        (i + 1 < bytes.length ? B64.charAt(n >> 6 & 63) : '=') +
+        (i + 2 < bytes.length ? B64.charAt(n & 63) : '=');
+    }
+    return out;
+  }
+
+  /** A playground link that opens with this csdmflow source. */
+  function playgroundUrl(source) {
+    return PLAYGROUND + '#src=' + encodeURIComponent(base64(source));
+  }
+
+  /**
+   * The graph in text copied from a background script's output: the one
+   * {"format":"csdm-graph",…} line, whatever surrounds it.
+   * @returns {CsdmGraph}
+   */
+  function parse(text) {
+    var at = text.search(/\{\s*"format"\s*:\s*"csdm-graph"/);
+    if (at < 0) throw new Error('no {"format":"csdm-graph",…} line found');
+    var g;
+    try { g = JSON.parse(text.slice(at).split(/\r?\n/)[0]); } catch (e) {
+      throw new Error('the csdm-graph JSON is cut off or garbled; copy it again');
+    }
+    var errs = validate(g);
+    if (errs.length) throw new Error('not a valid csdm-graph: ' + errs.join('; '));
+    return g;
+  }
+
+  return {
+    FORMAT: FORMAT, VERSION: VERSION, TYPES: TYPES,
+    create: create, builder: builder, validate: validate, toCsdm: toCsdm, parse: parse,
+    playgroundUrl: playgroundUrl, base64: base64
+  };
+})();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = CsdmGraph;
+  // node tools/bg-scripts/lib/csdm-graph.js export.txt [--layout tiers]: the csdmflow source
+  if (typeof require !== 'undefined' && require.main === module) {
+    var args = process.argv.slice(2);
+    var li = args.indexOf('--layout');
+    var layout = li >= 0 ? args.splice(li, 2)[1] : undefined;
+    if (!args[0]) {
+      console.error('usage: node tools/bg-scripts/lib/csdm-graph.js <export.txt> [--layout cross|tiers|row|lanes]');
+      process.exit(1);
+    }
+    process.stdout.write(CsdmGraph.toCsdm(CsdmGraph.parse(require('fs').readFileSync(args[0], 'utf8')), { layout: layout }));
+  }
+}
+// ---- end lib/csdm-graph.js ----
+// ---- lib/walk.js ----
+// walk — which records belong in a CSDM picture, independent of Glide. The
+// rules follow the ITFM 2.0 Inspector's src/server/graph/model.ts: walking out
+// from a record, each type leads only to certain types (FOLLOW), through only
+// certain links (LINKS), and a service map is read downwards to a fixed depth.
+// lib/cmdb.js supplies the records; this file is pure, so the test runs it
+// in Node. ES5: it is inlined into background scripts.
+
+/**
+ * A record as lib/cmdb.js reads it.
+ * @typedef {Object} Rec
+ * @property {string} id
+ * @property {string} table            sys_class_name, or 'spm_service_portfolio'
+ * @property {string[]} ancestors      the class and every class it extends
+ * @property {string} name
+ * @property {string} [classLabel]     the class's label, e.g. "Windows Server"
+ * @property {string} [number]         offerings: e.g. "SO0001234"
+ * @property {string} [parentId]       offerings: their parent service
+ * @property {number} [count]          stands in for this many CIs of the class (a group's members), not one record
+ * @property {string[]} [parentAncestors]  offerings: the ancestors of their parent service
+ */
+
+/**
+ * A record linked to one already in the picture.
+ * @typedef {Object} Link
+ * @property {string} from     the record in the picture
+ * @property {Rec} rec         the record it is linked to
+ * @property {string} via      a cmdb_rel_type name ("Contains::Contained by"), 'parent', 'portfolio' or 'member'
+ * @property {boolean} [down]  relationships: rec is the child
+ */
+
+var CsdmWalk = (function () {
+  // Walking out from the root, the types each type leads on to. A business
+  // service's other offerings, or another service's instances, are never
+  // reached: the picture stays about the root.
+  var FOLLOW = {
+    BS: ['SP'],
+    BSO: ['BS', 'SI'],
+    SI: ['BA', 'TMSO', 'DCG', 'CI'],
+    TMSO: ['TMS', 'DCG'],
+    // the tech offering that manages a group an instance contains
+    DCG: ['CI', 'TMSO'],
+    CI: ['CI'],
+    BA: [],
+    TMS: [],
+    SP: []
+  };
+
+  // Which links count, by the unordered pair of types. Relationship types vary
+  // between CSDM versions and implementations, so each pair accepts all the
+  // known spellings; the line csdmflow draws comes from the pair.
+  var LINKS = {
+    'BS|SP': ['portfolio'],
+    'BS|BSO': ['parent'],
+    'TMS|TMSO': ['parent'],
+    'BSO|SI': ['Depends on::Used by'],
+    'BA|SI': ['Uses::Used by', 'Consumes::Consumed by'],
+    'SI|TMSO': ['Depends on::Used by', 'Contains::Contained by'],
+    'DCG|TMSO': ['Contains::Contained by', 'Depends on::Used by'],
+    // an instance contains the group that populates it, or depends on it
+    'DCG|SI': ['Contains::Contained by', 'Depends on::Used by'],
+    // the service map: an instance and its CIs, and CIs among themselves
+    // ... or, for an instance populated by a dynamic CI group, its members
+    'CI|SI': ['Depends on::Used by', 'Contains::Contained by', 'Runs on::Runs', 'member'],
+    'CI|CI': ['Depends on::Used by', 'Runs on::Runs', 'Hosted on::Hosts', 'Contains::Contained by'],
+    'CI|DCG': ['member']
+  };
+
+  /** The relationship types worth querying for at all. */
+  var REL_TYPES = [];
+  Object.keys(LINKS).forEach(function (k) {
+    LINKS[k].forEach(function (v) {
+      if (v !== 'parent' && v !== 'portfolio' && v !== 'member' && REL_TYPES.indexOf(v) < 0) REL_TYPES.push(v);
+    });
+  });
+
+  function pairKey(a, b) { return [a, b].sort().join('|'); }
+  function has(list, x) { return list.indexOf(x) >= 0; }
+
+  /** The csdmflow type of a record, or null for one that stays out of the picture. */
+  function classify(rec) {
+    var is = function (t) { return has(rec.ancestors, t); };
+    if (rec.table === 'spm_service_portfolio') return 'SP';
+    // offerings extend cmdb_ci_service; the service they offer decides the kind
+    if (is('service_offering')) {
+      var parent = rec.parentAncestors || [];
+      if (has(parent, 'cmdb_ci_service_business')) return 'BSO';
+      if (has(parent, 'cmdb_ci_service_technical')) return 'TMSO';
+      return null;
+    }
+    // dynamic CI groups extend cmdb_ci_service_auto, so they come first
+    if (is('cmdb_ci_query_based_service')) return 'DCG';
+    if (is('cmdb_ci_service_auto')) return 'SI';
+    if (is('cmdb_ci_service_business')) return 'BS';
+    if (is('cmdb_ci_service_technical')) return 'TMS';
+    if (is('cmdb_ci_business_app')) return 'BA';
+    // any other CI; services of other kinds (legacy, unclassified) stay out
+    if (is('cmdb_ci') && !is('cmdb_ci_service')) return 'CI';
+    return null;
+  }
+
+  // An application service populated by the Dynamic CI Group method is stored
+  // in the dynamic CI group table itself, so a record there is an instance or a
+  // group depending on what reaches it: an instance under a business offering,
+  // a group under a tech offering.
+  // The type a record takes when reached from a record of type hereType.
+  function typeFrom(rec, hereType, via) {
+    var type = classify(rec);
+    if (type !== 'DCG') return type;
+    var allowed = function (t) { return has(FOLLOW[hereType], t) && has(LINKS[pairKey(hereType, t)] || [], via); };
+    return !allowed('DCG') && allowed('SI') ? 'SI' : 'DCG';
+  }
+
+  /** The node csdm-graph keeps for a record. */
+  function toNode(rec, type) {
+    var n = { id: rec.id, type: type, name: rec.name, table: rec.table };
+    if (type === 'CI' && rec.classLabel) n.className = rec.classLabel;
+    if (rec.number) n.number = rec.number;
+    if (rec.count) n.count = rec.count;
+    return n;
+  }
+
+  /**
+   * Walks out from root into the builder, one ring of records at a time.
+   * `links(ring)` returns every Link of the records in the ring ([{rec, type}]);
+   * the walk keeps those FOLLOW and LINKS allow. A group's members (one Rec
+   * per class, with a count) join the picture but are not walked on from; a
+   * service map stops maxCiDepth hops below its instance.
+   * @param {Rec} root
+   * @param {function(Array<{rec: Rec, type: string}>): Link[]} links
+   * @param {*} b   a CsdmGraph.builder
+   * @param {{maxCiDepth?: number, skipped?: function(Link, string)}} [opts]
+   *        skipped: told of every link left out, and why
+   */
+  function walk(root, links, b, opts) {
+    var maxCiDepth = (opts && opts.maxCiDepth) || 5;
+    var skip = (opts && opts.skipped) || function () {};
+    var rootType = classify(root);
+    if (!rootType) throw new Error((root.name || root.id) + ' is not a CSDM record csdmflow draws');
+    var types = {};
+    var depth = {}; // CIs: hops below their service instance
+    var walked = {};
+    types[root.id] = rootType;
+    b.addNode(toNode(root, rootType));
+    walked[root.id] = true;
+    var ring = [{ rec: root, type: rootType }];
+    while (ring.length) {
+      var next = [];
+      links(ring).forEach(function (l) {
+        var hereType = types[l.from];
+        var type = types[l.rec.id] || typeFrom(l.rec, hereType, l.via);
+        if (!type) return skip(l, 'its class ' + l.rec.table + ' is not drawn');
+        if (!has(FOLLOW[hereType], type)) return skip(l, hereType + ' does not lead to ' + type);
+        if (!has(LINKS[pairKey(hereType, type)] || [], l.via)) return skip(l, hereType + ' and ' + type + ' are not linked by ' + l.via);
+        var walkOn = true;
+        if (type === 'CI') {
+          if (l.via === 'member') walkOn = false;
+          // a service map is read downwards: up from a shared server lie other applications
+          else if (!l.down) return skip(l, 'above a CI in a service map');
+          else {
+            var d = hereType === 'CI' ? depth[l.from] + 1 : 1;
+            if (d > maxCiDepth) return skip(l, 'deeper than ' + maxCiDepth + ' in a service map');
+            if (!(l.rec.id in depth) || d < depth[l.rec.id]) depth[l.rec.id] = d;
+          }
+        }
+        if (!types[l.rec.id]) {
+          types[l.rec.id] = type;
+          b.addNode(toNode(l.rec, type));
+        }
+        if (l.via === 'parent' || l.via === 'portfolio' || l.via === 'member') b.addEdge(l.from, l.rec.id, l.via === 'member' ? 'dcg_member' : l.via);
+        else if (l.down) b.addEdge(l.from, l.rec.id, 'cmdb_rel_ci', l.via);
+        else b.addEdge(l.rec.id, l.from, 'cmdb_rel_ci', l.via);
+        if (walkOn && !walked[l.rec.id]) {
+          walked[l.rec.id] = true;
+          next.push({ rec: l.rec, type: type });
+        }
+      });
+      ring = next;
+    }
+    return b.graph;
+  }
+
+  return { FOLLOW: FOLLOW, LINKS: LINKS, REL_TYPES: REL_TYPES, classify: classify, typeFrom: typeFrom, walk: walk };
+})();
+
+if (typeof module !== 'undefined' && module.exports) module.exports = CsdmWalk;
+// ---- end lib/walk.js ----
+// ---- lib/cmdb.js ----
+// cmdb — the Glide side of lib/walk.js: reads records and their links, a whole
+// ring of the walk at a time, so a ring of 200 CIs costs a few queries rather
+// than hundreds. Only reads. ES5, global scope.
+
+var Cmdb = (function () {
+  var CHUNK = 200; // sys_ids per IN query
+
+  function str(v) { return v == null ? '' : '' + v; }
+
+  function chunks(ids) {
+    var out = [];
+    for (var i = 0; i < ids.length; i += CHUNK) out.push(ids.slice(i, i + CHUNK));
+    return out;
+  }
+
+  function uniq(xs) {
+    var seen = {};
+    return xs.filter(function (x) { return x && !seen[x] && (seen[x] = true); });
+  }
+
+  // Each row of `table` whose `field` is one of `ids`, in chunks; `extra` adds
+  // conditions to each query.
+  function eachIn(table, field, ids, fn, extra) {
+    chunks(uniq(ids)).forEach(function (chunk) {
+      var gr = new GlideRecord(table);
+      gr.addQuery(field, 'IN', chunk.join(','));
+      if (extra) extra(gr);
+      gr.query();
+      while (gr.next()) fn(gr);
+    });
+  }
+
+  // a class and every class it extends, e.g. cmdb_ci_win_server ... cmdb_ci
+  var hierarchy = {};
+  function ancestors(cls) {
+    if (!hierarchy[cls]) {
+      // TableUtils in global scope; GlideTableHierarchy only exists in a scoped app
+      var list = typeof TableUtils !== 'undefined' ? new TableUtils(cls).getTables() : new GlideTableHierarchy(cls).getTables();
+      var out = [];
+      // a JavaScript array, or a Java list
+      var n = typeof list.size === 'function' ? list.size() : list.length;
+      for (var i = 0; i < n; i++) out.push(str(typeof list.get === 'function' ? list.get(i) : list[i]));
+      hierarchy[cls] = out;
+    }
+    return hierarchy[cls];
+  }
+
+  var cache = {}; // sys_id -> Rec, or null when it could not be read
+
+  /** The Recs with these sys_ids, keyed by sys_id; unreadable ids are left out. */
+  function read(ids) {
+    var todo = uniq(ids).filter(function (id) { return !(id in cache); });
+    var offerings = [];
+    eachIn('cmdb_ci', 'sys_id', todo, function (gr) {
+      var cls = str(gr.getValue('sys_class_name'));
+      var rec = { id: str(gr.getUniqueValue()), table: cls, ancestors: ancestors(cls), name: str(gr.getValue('name')), classLabel: str(gr.getClassDisplayValue()) || cls };
+      cache[rec.id] = rec;
+      if (rec.ancestors.indexOf('service_offering') >= 0) offerings.push(rec);
+    });
+    // what an offering offers decides whether it is a business or a tech offering
+    var byId = {};
+    offerings.forEach(function (o) { byId[o.id] = o; });
+    eachIn('service_offering', 'sys_id', offerings.map(function (o) { return o.id; }), function (gr) {
+      var o = byId[str(gr.getUniqueValue())];
+      o.number = str(gr.getValue('number'));
+      o.parentId = str(gr.getValue('parent'));
+    });
+    var parentClass = {};
+    eachIn('cmdb_ci', 'sys_id', offerings.map(function (o) { return o.parentId; }), function (gr) {
+      parentClass[str(gr.getUniqueValue())] = str(gr.getValue('sys_class_name'));
+    });
+    offerings.forEach(function (o) { if (parentClass[o.parentId]) o.parentAncestors = ancestors(parentClass[o.parentId]); });
+    todo.forEach(function (id) { if (!(id in cache)) cache[id] = null; });
+    var out = {};
+    ids.forEach(function (id) { if (cache[id]) out[id] = cache[id]; });
+    return out;
+  }
+
+  // A group's members of one class, as one Rec standing in for all of them
+  var labels = {};
+  function membersOf(group, cls, n) {
+    if (!(cls in labels)) {
+      var gr = new GlideRecord(cls);
+      labels[cls] = gr.isValid() ? str(gr.getClassDisplayValue()) || cls : cls;
+    }
+    return { id: group + ':' + cls, table: cls, ancestors: ancestors(cls), name: '', classLabel: labels[cls], count: n };
+  }
+
+  function readPortfolios(ids) {
+    var out = {};
+    eachIn('spm_service_portfolio', 'sys_id', ids, function (gr) {
+      var id = str(gr.getUniqueValue());
+      out[id] = { id: id, table: 'spm_service_portfolio', ancestors: ['spm_service_portfolio'], name: str(gr.getValue('name')) };
+    });
+    return out;
+  }
+
+  // relationship types by their stored name ("Contains::Contained by"), not
+  // their display text, which a language or a renamed label could change
+  var relTypes = null;
+  function relTypeIds() {
+    if (!relTypes) {
+      relTypes = {};
+      eachIn('cmdb_rel_type', 'name', CsdmWalk.REL_TYPES, function (gr) { relTypes[str(gr.getUniqueValue())] = str(gr.getValue('name')); });
+    }
+    return relTypes;
+  }
+
+  /**
+   * Every Link of the records in a ring of the walk (see lib/walk.js).
+   * @param {Array<{rec: Rec, type: string}>} ring
+   */
+  function links(ring) {
+    var out = [];
+    var of = function (type) { return ring.filter(function (x) { return x.type === type; }).map(function (x) { return x.rec; }); };
+    var pending = []; // [from, id, via, down]: read the records in one go at the end
+
+    // an offering's service
+    of('BSO').concat(of('TMSO')).forEach(function (o) { if (o.parentId) pending.push([o.id, o.parentId, 'parent']); });
+
+    // a service names its portfolio directly, and through its taxonomy node
+    var services = of('BS');
+    if (services.length) {
+      var portfolios = [], nodeOf = {};
+      eachIn('cmdb_ci_service', 'sys_id', services.map(function (s) { return s.id; }), function (gr) {
+        var id = str(gr.getUniqueValue());
+        if (gr.getValue('spm_service_portfolio')) portfolios.push([id, str(gr.getValue('spm_service_portfolio'))]);
+        if (gr.getValue('spm_taxonomy_node')) nodeOf[str(gr.getValue('spm_taxonomy_node'))] = id;
+      });
+      eachIn('spm_taxonomy_node', 'sys_id', Object.keys(nodeOf), function (gr) {
+        if (gr.getValue('spm_service_portfolio')) portfolios.push([nodeOf[str(gr.getUniqueValue())], str(gr.getValue('spm_service_portfolio'))]);
+      });
+      var recs = readPortfolios(portfolios.map(function (p) { return p[1]; }));
+      portfolios.forEach(function (p) { if (recs[p[1]]) out.push({ from: p[0], rec: recs[p[1]], via: 'portfolio' }); });
+    }
+
+    // relationships of the allowed types; a CI's service map is only read
+    // downwards, so for CIs only their children matter
+    var types = relTypeIds();
+    var typeList = Object.keys(types).join(',');
+    var both = of('BSO').concat(of('SI'), of('TMSO'), of('DCG')).map(function (r) { return r.id; });
+    var down = both.concat(of('CI').map(function (r) { return r.id; }));
+    var seen = {};
+    var rel = function (gr) {
+      var key = str(gr.getUniqueValue());
+      if (seen[key]) return;
+      seen[key] = true;
+      return [str(gr.getValue('parent')), str(gr.getValue('child')), types[str(gr.getValue('type'))]];
+    };
+    var byType = function (gr) { gr.addQuery('type', 'IN', typeList); };
+    if (typeList) {
+      eachIn('cmdb_rel_ci', 'parent', down, function (gr) {
+        var r = rel(gr);
+        if (r) pending.push([r[0], r[1], r[2], true]);
+      }, byType);
+      eachIn('cmdb_rel_ci', 'child', both, function (gr) {
+        var r = rel(gr);
+        if (r) pending.push([r[1], r[0], r[2], false]);
+      }, byType);
+    }
+
+    // a group's members, as the platform has computed them: counted per
+    // class, in one query for the whole ring, without reading a single CI.
+    // An instance populated by a dynamic CI group is such a group itself.
+    var groups = of('DCG').concat(of('SI').filter(function (s) {
+      return s.ancestors.indexOf('cmdb_ci_query_based_service') >= 0;
+    })).map(function (g) { return g.id; });
+    if (groups.length) {
+      var ga = new GlideAggregate('svc_ci_assoc');
+      ga.addQuery('service_id', 'IN', groups.join(','));
+      ga.addAggregate('COUNT');
+      ga.groupBy('service_id');
+      ga.groupBy('ci_id.sys_class_name');
+      ga.query();
+      while (ga.next()) {
+        var group = str(ga.getValue('service_id')), cls = str(ga.getValue('ci_id.sys_class_name'));
+        if (!cls) continue;
+        out.push({ from: group, rec: membersOf(group, cls, parseInt(ga.getAggregate('COUNT'), 10)), via: 'member' });
+      }
+    }
+
+    var recs = read(pending.map(function (p) { return p[1]; }));
+    pending.forEach(function (p) {
+      if (recs[p[1]]) out.push({ from: p[0], rec: recs[p[1]], via: p[2], down: p[3] });
+    });
+    return out;
+  }
+
+  /**
+   * Every relationship of a record, of any type, as text: for finding out why
+   * the walk leaves something out.
+   */
+  function describeRelations(id) {
+    var out = [];
+    ['parent', 'child'].forEach(function (end) {
+      var gr = new GlideRecord('cmdb_rel_ci');
+      gr.addQuery(end, id);
+      gr.query();
+      while (gr.next()) {
+        var other = end === 'parent' ? gr.child : gr.parent;
+        var cls = str(other.sys_class_name);
+        out.push((end === 'parent' ? '--[' : '<--[') + str(gr.type.name) + ']-- ' + str(other.getDisplayValue()) +
+          ' (' + cls + (cls ? ' < ' + ancestors(cls).join(' < ') : '') + ')');
+      }
+    });
+    return out;
+  }
+
+  /** The sys_id of the service offering with this sys_id or number, or ''. */
+  function findOffering(key) {
+    key = str(key).replace(/^\s+|\s+$/g, '');
+    var gr = new GlideRecord('service_offering');
+    if (/^[0-9a-f]{32}$/.test(key)) {
+      if (gr.get(key)) return str(gr.getUniqueValue());
+    } else {
+      gr.addQuery('number', key);
+      gr.query();
+      if (gr.next()) return str(gr.getUniqueValue());
+    }
+    return '';
+  }
+
+  function instance() { return str(gs.getProperty('instance_name')); }
+
+  return { read: read, links: links, describeRelations: describeRelations, findOffering: findOffering, instance: instance };
+})();
+// ---- end lib/cmdb.js ----
+(function () {
+  if (!ROOT) return gs.print('Set ROOT to a service offering\'s sys_id or number first.');
+  var rootId = Cmdb.findOffering(ROOT);
+  var root = rootId && Cmdb.read([rootId])[rootId];
+  if (!root) return gs.print('No service offering with sys_id or number "' + ROOT + '".');
+  var kind = CsdmWalk.classify(root);
+  if (kind !== 'BSO') {
+    return gs.print(root.name + ' (' + (root.number || rootId) + ') is ' +
+      (kind ? 'a ' + kind : 'an offering of neither a business nor a technology management service') + ', not a BSO. Please provide a BSO.');
+  }
+
+  var b = CsdmGraph.builder({ script: 'bso-cluster', instance: Cmdb.instance(), generatedAt: new Date().toISOString(), root: rootId });
+  var started = new Date().getTime();
+  var skipped = [];
+  var g = CsdmWalk.walk(root, Cmdb.links, b, {
+    maxCiDepth: MAX_CI_DEPTH,
+    skipped: function (l, why) {
+      var from = b.node(l.from);
+      skipped.push((from ? from.name : l.from) + ' -[' + l.via + ']- ' + (l.rec.name || l.rec.table) + ' (' + l.rec.table + '): ' + why);
+    }
+  });
+  if (DEBUG) {
+    gs.print('--- relationships of ' + root.name + ' (' + root.table + ', parent ' + (root.parentAncestors || ['?'])[0] + ') ---\n' +
+      (Cmdb.describeRelations(rootId).join('\n') || '(none)'));
+    gs.print('--- left out ---\n' + (skipped.join('\n') || '(nothing)'));
+  }
+
+  var source = CsdmGraph.toCsdm(g, { layout: LAYOUT || undefined });
+  var counts = {};
+  g.nodes.forEach(function (n) { counts[n.type] = (counts[n.type] || 0) + 1; });
+  gs.print('BSO cluster of ' + root.name + ': ' + Object.keys(counts).map(function (t) { return counts[t] + ' ' + t; }).join(', ') +
+    ' (' + ((new Date().getTime() - started) / 1000).toFixed(1) + ' s)');
+  g.warnings.forEach(function (w) { gs.print('warning: ' + w); });
+  gs.print('--- csdmflow ---\n' + source);
+  gs.print('--- playground ---\n' + CsdmGraph.playgroundUrl(source));
+  gs.print('--- csdm-graph ---\n' + JSON.stringify(g));
+})();
