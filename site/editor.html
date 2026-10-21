@@ -18,7 +18,13 @@
     .page-editor .bench { flex: 1; display: flex; flex-direction: column; min-height: 0; }
     .page-editor .panes { flex: 1; height: auto; min-height: 420px; grid-template-rows: minmax(0, 1fr); }
     .tb-nav a[aria-current="page"] { color: var(--ink); }
+    /* full width: the page is the editor, so the drawing gets the room. The
+       source keeps a readable width (it grows a little on wide screens) and
+       the drawing takes everything else. */
+    .page-editor .wrap { max-width: none; padding: 0 16px; }
+    .page-editor .panes { grid-template-columns: clamp(340px, 30%, 560px) minmax(0, 1fr); }
     @media (max-width: 860px) {
+      .page-editor .panes { grid-template-columns: minmax(0, 1fr); }
       body.page-editor { height: auto; min-height: 100vh; }
       .page-editor .panes { flex: none; grid-template-rows: none; }
     }
