@@ -47,8 +47,11 @@ Each script prints three things:
 
 1. **The csdmflow source.** Paste it into the
    [playground](https://jessems.github.io/csdmflow/) or save it as a `.csdm` file.
-2. **A playground link** that opens the diagram directly. It is long when the
-   cluster is big.
+2. **An editor link** that opens the diagram directly. The source in it is
+   compressed (`#z=`, deflate then base64url), so it stays a few hundred
+   characters for a typical cluster. Every box in the diagram links to its
+   record on the instance (`glide.servlet.uri`); a stack of CIs or a member
+   count links to the list of those CIs.
 3. **The csdm-graph JSON** on one line. This is the data behind the diagram.
    To turn copied output back into source, maybe with another layout, run:
    ```sh

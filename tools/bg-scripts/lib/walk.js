@@ -16,6 +16,7 @@
  * @property {string} [number]         offerings: e.g. "SO0001234"
  * @property {string} [parentId]       offerings: their parent service
  * @property {number} [count]          stands in for this many CIs of the class (a group's members), not one record
+ * @property {string} [url]            where the record (or the list behind a count) opens on the instance
  * @property {string[]} [parentAncestors]  offerings: the ancestors of their parent service
  */
 
@@ -116,6 +117,7 @@ var CsdmWalk = (function () {
     if (type === 'CI' && rec.classLabel) n.className = rec.classLabel;
     if (rec.number) n.number = rec.number;
     if (rec.count) n.count = rec.count;
+    if (rec.url) n.url = rec.url;
     return n;
   }
 

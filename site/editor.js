@@ -11,12 +11,38 @@
   // landing page's editor starts on the first example.
   const standalone = document.body.dataset.page === 'editor';
 
-  // Source travels in the URL hash so a link reproduces the diagram. base64 can
-  // hold "+", which a URL reads as a space, so it goes in percent-encoded.
+  // Source travels in the URL hash so a link reproduces the diagram.
+  //   #z=    deflated, then base64url: about a quarter of the length (links the
+  //          editor writes, and the background scripts' links)
+  //   #src=  plain base64, percent-encoded (older links, and browsers without
+  //          CompressionStream)
   const encode = s => encodeURIComponent(btoa(String.fromCharCode(...new TextEncoder().encode(s))));
   const decode = s => new TextDecoder().decode(Uint8Array.from(atob(decodeURIComponent(s)), c => c.charCodeAt(0)));
+  const canCompress = typeof CompressionStream === 'function' && typeof DecompressionStream === 'function';
+  const piped = (bytes, stream) => new Response(new Blob([bytes]).stream().pipeThrough(stream)).arrayBuffer();
+  async function zip(s) {
+    const bytes = new Uint8Array(await piped(new TextEncoder().encode(s), new CompressionStream('deflate-raw')));
+    let bin = '';
+    for (const b of bytes) bin += String.fromCharCode(b);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  async function unzip(s) {
+    const bytes = Uint8Array.from(atob(s.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+    return new TextDecoder().decode(await piped(bytes, new DecompressionStream('deflate-raw')));
+  }
   // The raw value, not URLSearchParams.get, which turns a "+" in older links into a space
   const fromHash = key => (new RegExp(`[#&]${key}=([^&]*)`).exec(location.hash) || [])[1] || null;
+  // Put the model in the address; compressing is asynchronous, so a slow
+  // result never overwrites a newer one.
+  let hashTurn = 0;
+  async function setHash(text) {
+    const turn = ++hashTurn;
+    let hash = '#src=' + encode(text);
+    if (canCompress) {
+      try { hash = '#z=' + await zip(text); } catch { /* keep the plain form */ }
+    }
+    if (turn === hashTurn) history.replaceState(null, '', hash);
+  }
 
   // Your own model, kept in this browser between visits
   const DRAFT = 'csdmflow-draft';
@@ -79,7 +105,7 @@
   // after an edit, by typing or by the layout menu: the model is your own now
   function edited() {
     draw();
-    history.replaceState(null, '', '#src=' + encode(source.value));
+    setHash(source.value);
     picker.value = '';
     saveDraft(source.value);
   }
@@ -113,7 +139,8 @@
     // back to your own: the model you were writing, or a starting point
     source.value = ex ? ex.source : loadDraft() || STARTER;
     source.scrollTop = 0;
-    history.replaceState(null, '', ex ? '#example=' + encodeURIComponent(ex.file) : '#src=' + encode(source.value));
+    if (ex) { hashTurn++; history.replaceState(null, '', '#example=' + encodeURIComponent(ex.file)); }
+    else setHash(source.value);
     draw();
   });
 
@@ -182,19 +209,30 @@
 
   // Drag to move around a drawing larger than the pane (mouse and pen; touch
   // scrolls natively).
-  let drag = null;
+  // The pointer is only captured once it has moved: captured from the press,
+  // a plain click would land on the pane instead of a linked box.
+  let drag = null, dragged = false;
   preview.addEventListener('pointerdown', ev => {
     if (ev.pointerType === 'touch' || ev.button !== 0 || !svgOf()) return;
     drag = { x: ev.clientX, y: ev.clientY, left: preview.scrollLeft, top: preview.scrollTop, id: ev.pointerId };
-    preview.setPointerCapture(ev.pointerId);
-    preview.classList.add('dragging');
-    ev.preventDefault();
+    dragged = false;
+    ev.preventDefault(); // no text selection while dragging
   });
   preview.addEventListener('pointermove', ev => {
     if (!drag || ev.pointerId !== drag.id) return;
+    if (!dragged && Math.abs(ev.clientX - drag.x) + Math.abs(ev.clientY - drag.y) > 4) {
+      dragged = true;
+      preview.setPointerCapture(ev.pointerId);
+      preview.classList.add('dragging');
+    }
+    if (!dragged) return;
     preview.scrollLeft = drag.left - (ev.clientX - drag.x);
     preview.scrollTop = drag.top - (ev.clientY - drag.y);
   });
+  // a drag that ends over a linked box moved the drawing; it isn't a click
+  preview.addEventListener('click', ev => {
+    if (dragged) { ev.preventDefault(); ev.stopPropagation(); dragged = false; }
+  }, true);
   const endDrag = () => { drag = null; preview.classList.remove('dragging'); };
   preview.addEventListener('pointerup', endDrag);
   preview.addEventListener('pointercancel', endDrag);
@@ -306,16 +344,20 @@
 
   fetch('examples.json')
     .then(r => r.json())
-    .then(list => {
+    .then(async list => {
       examples = list;
       picker.innerHTML = '<option value="">— your own —</option>' +
         list.map(e => `<option value="${e.file}">${pretty(e.file)}</option>`).join('');
-      const src = fromHash('src');
+      const src = fromHash('src'), z = fromHash('z');
       const exFile = fromHash('example') && decodeURIComponent(fromHash('example'));
       const ex = list.find(e => e.file === exFile);
-      let own = null;
+      let own = null, note = null;
+      // a broken link: start as if there were none
+      if (z && canCompress) {
+        try { own = await unzip(z); } catch { /* broken */ }
+      } else if (z) note = 'This browser can’t open compressed links; update it to see this diagram';
       if (src) {
-        try { own = decode(src); } catch { /* a broken link: start as if there were none */ }
+        try { own = decode(src); } catch { /* broken */ }
       }
       if (own == null && !ex && standalone) own = loadDraft() || STARTER;
       if (own != null) {
@@ -326,8 +368,9 @@
         picker.value = (ex || list[0]).file;
       }
       draw();
+      if (note) say(note, true);
       // a shared link opens on the landing page's editor
-      if (!standalone && (src || exFile)) $('workbench').scrollIntoView({ behavior: 'instant' });
+      if (!standalone && (src || z || exFile)) $('workbench').scrollIntoView({ behavior: 'instant' });
     })
     .catch(err => say('Could not load examples: ' + err.message, true));
 })();

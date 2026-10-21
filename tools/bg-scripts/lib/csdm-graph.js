@@ -24,6 +24,7 @@
  * @property {string} [number]      e.g. a service offering's "SO0001234"
  * @property {number} [count]       CIs only: stands in for this many CIs of the class, e.g. a
  *                                  group's members; then id is made up and name is empty
+ * @property {string} [url]         where the record opens on the instance; the box links there
  * @property {Object<string, *>} [attrs]  anything else a script wants to keep
  */
 
@@ -43,8 +44,9 @@
  * @typedef {Object} CsdmGraph
  * @property {'csdm-graph'} format
  * @property {1} version
- * @property {{script: string, instance?: string, generatedAt?: string, root?: string}} source
- *           which script wrote it, where and when; root is the sys_id it started from
+ * @property {{script: string, instance?: string, baseUrl?: string, generatedAt?: string, root?: string}} source
+ *           which script wrote it, where and when; root is the sys_id it started from;
+ *           baseUrl the instance's address, for links to several records at once
  * @property {GraphNode[]} nodes
  * @property {GraphEdge[]} edges
  * @property {string[]} warnings    what the script could not read or chose to leave out
@@ -117,6 +119,7 @@ var CsdmGraph = (function () {
       if (!has(TYPES, n.type)) errs.push(at + ': type must be one of ' + TYPES.join(', ') + ', not ' + n.type);
       if (typeof n.name !== 'string') errs.push(at + ': name is missing');
       if (n.count != null && !(n.type === 'CI' && n.count > 0 && n.count % 1 === 0)) errs.push(at + ': count must be a positive whole number, on a CI');
+      if (n.url != null && !/^https?:\/\/\S+$/i.test(n.url)) errs.push(at + ': url must be an http or https address');
     });
     g.edges.forEach(function (e, i) {
       var at = 'edges[' + i + ']';
@@ -192,19 +195,20 @@ var CsdmGraph = (function () {
     g.nodes.forEach(function (n) {
       if (n.type === 'CI' && n.count) {
         // CIs counted, not read: a box of their own, "Windows Server" / "1'250 CIs"
-        boxOf[n.id] = { type: 'CI', ciClass: n.className || n.table || '', names: [count(n.count) + (n.count === 1 ? ' CI' : ' CIs')], counted: true };
+        boxOf[n.id] = { type: 'CI', ciClass: n.className || n.table || '', names: [count(n.count) + (n.count === 1 ? ' CI' : ' CIs')], counted: true, nodes: [n] };
         boxes.push(boxOf[n.id]);
       } else if (n.type === 'CI') {
         var key = (n.className || n.table || '') + '|' + uniq(nbrs[n.id].up).sort().join(',') + '|' + uniq(nbrs[n.id].down).sort().join(',');
         var b = ciBox[key];
         if (!b) {
-          b = ciBox[key] = { type: 'CI', ciClass: n.className || n.table || '', names: [] };
+          b = ciBox[key] = { type: 'CI', ciClass: n.className || n.table || '', names: [], nodes: [] };
           boxes.push(b);
         }
         b.names.push(n.name);
+        b.nodes.push(n);
         boxOf[n.id] = b;
       } else {
-        boxOf[n.id] = { type: n.type, names: [n.name] };
+        boxOf[n.id] = { type: n.type, names: [n.name], nodes: [n] };
         boxes.push(boxOf[n.id]);
       }
     });
@@ -247,6 +251,20 @@ var CsdmGraph = (function () {
     });
     lines.push('');
 
+    // Each box links to its record; a stack of several CIs to a list of them
+    // (on the instance the graph came from, when it says which).
+    var listBase = /^https?:\/\/\S+\/$/i.test(g.source.baseUrl || '') ? g.source.baseUrl : '';
+    var linked = 0;
+    boxes.forEach(function (b) {
+      var nodes = b.nodes;
+      var url = nodes.length === 1 ? nodes[0].url : '';
+      if (nodes.length > 1 && listBase) {
+        url = listBase + 'cmdb_ci_list.do?sysparm_query=' + encodeURIComponent('sys_idIN' + nodes.map(function (n) { return n.id; }).join(','));
+      }
+      if (url) { lines.push('link ' + b.id + ' ' + quote(url)); linked++; }
+    });
+    if (linked) lines.push('');
+
     var seen = {};
     g.edges.forEach(function (e) {
       var a = boxOf[e.from].id, z = boxOf[e.to].id;
@@ -269,8 +287,8 @@ var CsdmGraph = (function () {
 
   var B64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
-  // UTF-8 then base64, without btoa or Buffer (neither exists on the instance)
-  function base64(s) {
+  // Text as UTF-8 bytes, without TextEncoder (the instance has none)
+  function utf8(s) {
     var bytes = [], i, c;
     for (i = 0; i < s.length; i++) {
       c = s.charCodeAt(i);
@@ -280,19 +298,105 @@ var CsdmGraph = (function () {
       else if (c < 0x10000) bytes.push(0xe0 | c >> 12, 0x80 | c >> 6 & 63, 0x80 | c & 63);
       else bytes.push(0xf0 | c >> 18, 0x80 | c >> 12 & 63, 0x80 | c >> 6 & 63, 0x80 | c & 63);
     }
+    return bytes;
+  }
+
+  // Bytes as base64, without btoa or Buffer; url: the URL-safe alphabet, unpadded
+  function bytesToBase64(bytes, url) {
     var out = '';
-    for (i = 0; i < bytes.length; i += 3) {
+    for (var i = 0; i < bytes.length; i += 3) {
       var n = bytes[i] << 16 | (bytes[i + 1] || 0) << 8 | (bytes[i + 2] || 0);
       out += B64.charAt(n >> 18 & 63) + B64.charAt(n >> 12 & 63) +
         (i + 1 < bytes.length ? B64.charAt(n >> 6 & 63) : '=') +
         (i + 2 < bytes.length ? B64.charAt(n & 63) : '=');
     }
+    return url ? out.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '') : out;
+  }
+
+  /** Text as UTF-8, then base64. */
+  function base64(s) { return bytesToBase64(utf8(s)); }
+
+  // --- deflate -----------------------------------------------------------------
+  // A raw deflate stream (RFC 1951) in one block with the fixed Huffman codes:
+  // LZ77 matches over hash chains, no dynamic code tables. Any inflater reads
+  // it, including the browser's DecompressionStream('deflate-raw'), which the
+  // editor uses to open a link. It exists because the instance has no zlib.
+
+  var LEN_BASE = [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258];
+  var LEN_EXTRA = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0];
+  var DIST_BASE = [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577];
+  var DIST_EXTRA = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13];
+
+  /** Bytes compressed as raw deflate. */
+  function deflateRaw(bytes) {
+    var out = [], buf = 0, nbits = 0;
+    // values go in least significant bit first, Huffman codes most significant first
+    function put(v, n) {
+      buf |= v << nbits;
+      nbits += n;
+      while (nbits >= 8) { out.push(buf & 255); buf >>>= 8; nbits -= 8; }
+    }
+    function code(c, n) {
+      var r = 0;
+      for (var k = 0; k < n; k++) { r = r << 1 | c & 1; c >>= 1; }
+      put(r, n);
+    }
+    function symbol(sym) {
+      if (sym < 144) code(0x30 + sym, 8);
+      else if (sym < 256) code(0x190 + sym - 144, 9);
+      else if (sym < 280) code(sym - 256, 7);
+      else code(0xc0 + sym - 280, 8);
+    }
+    function lastAtMost(table, v) {
+      var k = table.length - 1;
+      while (table[k] > v) k--;
+      return k;
+    }
+    var n = bytes.length, head = {}, prev = [];
+    function remember(p) {
+      if (p + 2 >= n) return;
+      var key = bytes[p] << 16 | bytes[p + 1] << 8 | bytes[p + 2];
+      prev[p] = head[key];
+      head[key] = p;
+    }
+    put(1, 1); // the last block
+    put(1, 2); // with fixed codes
+    var i = 0;
+    while (i < n) {
+      var best = 0, dist = 0;
+      if (i + 2 < n) {
+        var j = head[bytes[i] << 16 | bytes[i + 1] << 8 | bytes[i + 2]];
+        for (var tries = 0; j !== undefined && i - j <= 32768 && tries < 128; tries++, j = prev[j]) {
+          var len = 0;
+          while (len < 258 && i + len < n && bytes[j + len] === bytes[i + len]) len++;
+          if (len > best) { best = len; dist = i - j; if (len === 258) break; }
+        }
+      }
+      if (best >= 3) {
+        var lk = lastAtMost(LEN_BASE, best), dk = lastAtMost(DIST_BASE, dist);
+        symbol(257 + lk);
+        put(best - LEN_BASE[lk], LEN_EXTRA[lk]);
+        code(dk, 5);
+        put(dist - DIST_BASE[dk], DIST_EXTRA[dk]);
+        for (var e = 0; e < best; e++) remember(i + e);
+        i += best;
+      } else {
+        symbol(bytes[i]);
+        remember(i);
+        i++;
+      }
+    }
+    symbol(256); // end of block
+    if (nbits) out.push(buf & 255);
     return out;
   }
 
-  /** A playground link that opens with this csdmflow source. */
+  /**
+   * An editor link that opens with this csdmflow source: `#z=` and the source
+   * deflated and base64url-encoded, about a quarter of its plain length.
+   */
   function playgroundUrl(source) {
-    return PLAYGROUND + '#src=' + encodeURIComponent(base64(source));
+    return PLAYGROUND + '#z=' + bytesToBase64(deflateRaw(utf8(source)), true);
   }
 
   /**
@@ -315,7 +419,7 @@ var CsdmGraph = (function () {
   return {
     FORMAT: FORMAT, VERSION: VERSION, TYPES: TYPES,
     create: create, builder: builder, validate: validate, toCsdm: toCsdm, parse: parse,
-    playgroundUrl: playgroundUrl, base64: base64
+    playgroundUrl: playgroundUrl, base64: base64, utf8: utf8, deflateRaw: deflateRaw
   };
 })();
 

@@ -35,7 +35,7 @@ var DEBUG = false;        // also print the offering's relationships and every l
       (kind ? 'a ' + kind : 'an offering of neither a business nor a technology management service') + ', not a BSO. Please provide a BSO.');
   }
 
-  var b = CsdmGraph.builder({ script: 'bso-cluster', instance: Cmdb.instance(), generatedAt: new Date().toISOString(), root: rootId });
+  var b = CsdmGraph.builder({ script: 'bso-cluster', instance: Cmdb.instance(), baseUrl: Cmdb.baseUrl(), generatedAt: new Date().toISOString(), root: rootId });
   var started = new Date().getTime();
   var skipped = [];
   var g = CsdmWalk.walk(root, Cmdb.links, b, {

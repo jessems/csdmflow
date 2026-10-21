@@ -107,12 +107,13 @@
             <h4>What it prints</h4>
             <ul>
               <li><b>csdmflow source</b>, to paste into the editor or save as a <code>.csdm</code> file.</li>
-              <li><b>An editor link</b> that opens the diagram directly.</li>
+              <li><b>An editor link</b> that opens the diagram directly. It's compressed, so it stays short enough to paste into a chat or a ticket.</li>
               <li><b>The data as JSON</b> on one line (the <code>csdm-graph</code> format), for other tools.</li>
             </ul>
             <h4>Safe to run</h4>
             <p>It only reads: plain queries, no inserts, updates or deletes. Group members are counted per class, not read one by one, so even large groups stay quick.</p>
-            <p>The diagram travels in the link after the <code>#</code>, which browsers never send to a server. The CI and service names can still be read by anyone who has the link.</p>
+            <p><b>Every box links back to its record</b> on your instance: a click on a service or group opens its form, a stack of CIs or a member count opens the list of those CIs. Opening a record still needs a login.</p>
+            <p>The diagram travels in the link after the <code>#</code>, which browsers never send to a server. The names, your instance's address and the records' sys_ids can still be read by anyone who has the link.</p>
           </section>
           <section>
             <h4>Settings</h4>

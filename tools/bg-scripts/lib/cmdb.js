@@ -45,6 +45,19 @@ var Cmdb = (function () {
     return hierarchy[cls];
   }
 
+  // The instance's own address, as its users reach it (custom domains too);
+  // '' when the property is unset or not a web address: then boxes get no links
+  var base = null;
+  function baseUrl() {
+    if (base === null) {
+      base = str(gs.getProperty('glide.servlet.uri'));
+      if (base && base.charAt(base.length - 1) !== '/') base += '/';
+      if (!/^https?:\/\/[^\s\/]+\/\S*$/i.test(base)) base = '';
+    }
+    return base;
+  }
+  function recordUrl(table, id) { return baseUrl() ? baseUrl() + table + '.do?sys_id=' + id : ''; }
+
   var cache = {}; // sys_id -> Rec, or null when it could not be read
 
   /** The Recs with these sys_ids, keyed by sys_id; unreadable ids are left out. */
@@ -54,6 +67,7 @@ var Cmdb = (function () {
     eachIn('cmdb_ci', 'sys_id', todo, function (gr) {
       var cls = str(gr.getValue('sys_class_name'));
       var rec = { id: str(gr.getUniqueValue()), table: cls, ancestors: ancestors(cls), name: str(gr.getValue('name')), classLabel: str(gr.getClassDisplayValue()) || cls };
+      rec.url = recordUrl(cls, rec.id);
       cache[rec.id] = rec;
       if (rec.ancestors.indexOf('service_offering') >= 0) offerings.push(rec);
     });
@@ -83,14 +97,17 @@ var Cmdb = (function () {
       var gr = new GlideRecord(cls);
       labels[cls] = gr.isValid() ? str(gr.getClassDisplayValue()) || cls : cls;
     }
-    return { id: group + ':' + cls, table: cls, ancestors: ancestors(cls), name: '', classLabel: labels[cls], count: n };
+    // the members themselves aren't read, so the link opens the list behind the count
+    var url = baseUrl() ? baseUrl() + 'svc_ci_assoc_list.do?sysparm_query=' +
+      encodeURIComponent('service_id=' + group + '^ci_id.sys_class_name=' + cls) : '';
+    return { id: group + ':' + cls, table: cls, ancestors: ancestors(cls), name: '', classLabel: labels[cls], count: n, url: url };
   }
 
   function readPortfolios(ids) {
     var out = {};
     eachIn('spm_service_portfolio', 'sys_id', ids, function (gr) {
       var id = str(gr.getUniqueValue());
-      out[id] = { id: id, table: 'spm_service_portfolio', ancestors: ['spm_service_portfolio'], name: str(gr.getValue('name')) };
+      out[id] = { id: id, table: 'spm_service_portfolio', ancestors: ['spm_service_portfolio'], name: str(gr.getValue('name')), url: recordUrl('spm_service_portfolio', id) };
     });
     return out;
   }
@@ -222,5 +239,5 @@ var Cmdb = (function () {
 
   function instance() { return str(gs.getProperty('instance_name')); }
 
-  return { read: read, links: links, describeRelations: describeRelations, findOffering: findOffering, instance: instance };
+  return { read: read, links: links, describeRelations: describeRelations, findOffering: findOffering, instance: instance, baseUrl: baseUrl };
 })();

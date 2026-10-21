@@ -90,6 +90,16 @@ check('counted CIs: one box with the class and how many', () => {
   eq(CsdmGraph.validate(graph([{ id: 'x', type: 'SI', name: '', count: 3 }], [])), ['nodes[0]: count must be a positive whole number, on a CI']);
 });
 
+check('deflate round-trips through zlib, and the link is #z=', () => {
+  const zlib = require('node:zlib');
+  for (const s of ['', 'a', 'x'.repeat(1000), 'Prod · Zürich 🙂', ...fs.readdirSync(path.join(__dirname, '..', 'examples')).map(f => fs.readFileSync(path.join(__dirname, '..', 'examples', f), 'utf8'))]) {
+    eq(zlib.inflateRawSync(Buffer.from(CsdmGraph.deflateRaw(CsdmGraph.utf8(s)))).toString('utf8'), s);
+  }
+  const url = CsdmGraph.playgroundUrl('BA a: A\nSI b: B\na -> b\n');
+  ok(url.startsWith('https://jessems.github.io/csdmflow/editor.html#z='), url);
+  eq(zlib.inflateRawSync(Buffer.from(url.split('#z=')[1], 'base64url')).toString('utf8'), 'BA a: A\nSI b: B\na -> b\n');
+});
+
 check('base64 matches Node for any text', () => {
   for (const s of ['', 'a', 'ab', 'abc', 'Prod · Zürich', 'emoji 🙂 ok']) eq(CsdmGraph.base64(s), Buffer.from(s, 'utf8').toString('base64'));
 });
@@ -146,7 +156,7 @@ const HIER = {
 const LABEL = { cmdb_ci_appl: 'Application', cmdb_ci_win_server: 'Windows Server', cmdb_ci_db_mssql_instance: 'MSSQL Instance' };
 const tablesOf = cls => [cls, ...(HIER[cls] || ['cmdb_ci'])];
 
-function mockInstance() {
+function mockInstance(servletUri = 'https://dev12345.service-now.com/') {
   const ci = (sys_id, sys_class_name, name, extra) => ({ sys_id, sys_class_name, name, ...extra });
   const cmdb_ci = [
     ci('bs', 'cmdb_ci_service_business', 'Email', { spm_service_portfolio: 'sp' }),
@@ -248,14 +258,18 @@ function mockInstance() {
     GlideAggregate,
     // global scope: TableUtils, handing back a Java list
     TableUtils: function (cls) { const t = tablesOf(cls); this.getTables = () => ({ size: () => t.length, get: i => t[i] }); },
-    gs: { print: s => out.push(`*** Script: ${s}`), getProperty: () => 'dev12345' },
+    gs: {
+      print: s => out.push(`*** Script: ${s}`),
+      getProperty: k => ({ instance_name: 'dev12345', 'glide.servlet.uri': servletUri })[k],
+    },
   };
   return { context, out, queries };
 }
 
 // settings: {NAME: 'js value'} for the lines at the top of the script
-function runCluster(settings) {
-  const { context, out, queries } = mockInstance();
+// servletUri: the instance's glide.servlet.uri
+function runCluster(settings, servletUri) {
+  const { context, out, queries } = mockInstance(servletUri);
   let code = fs.readFileSync(path.join(pasteDir, 'bso-cluster.js'), 'utf8');
   for (const [k, v] of Object.entries(settings)) code = code.replace(new RegExp(`^var ${k} = .*?;`, 'm'), `var ${k} = ${v};`);
   vm.runInNewContext(code, context);
@@ -305,6 +319,30 @@ check('bso-cluster: a tech offering is refused', () => {
   const text = runCluster({ ROOT: "'SO0002'" });
   ok(/Windows Server Support \(SO0002\) is a TMSO, not a BSO\. Please provide a BSO\./.test(text), text);
   ok(!/--- csdmflow ---/.test(text), 'drew it anyway');
+});
+
+check('bso-cluster: every box links to its record on the instance', () => {
+  const text = runCluster({ ROOT: "'SO0001'" });
+  const src = /--- csdmflow ---\n([\s\S]*?)\n\*\*\* Script: --- playground/.exec(text)[1];
+  const { ents } = parseCsdm(src);
+  const href = name => [...ents.values()].find(e => e.instances.join(', ') === name).href;
+  const base = 'https://dev12345.service-now.com/';
+  eq(href('Exchange Prod'), base + 'cmdb_ci_service_discovered.do?sys_id=si-prod');
+  eq(href('Email "Standard", EU'), base + 'service_offering.do?sys_id=bso');
+  eq(href('Collaboration'), base + 'spm_service_portfolio.do?sys_id=sp');
+  // a stack of several CIs: the list of them
+  eq(href('ex01, ex02'), base + 'cmdb_ci_list.do?sysparm_query=' + encodeURIComponent('sys_idINex01,ex02'));
+  // counted members: the list behind the count
+  eq(href('4 CIs'), base + 'svc_ci_assoc_list.do?sysparm_query=' + encodeURIComponent('service_id=dcg-win^ci_id.sys_class_name=cmdb_ci_win_server'));
+  ok([...ents.values()].every(e => e.href), 'a box without a link');
+  eq(compileCsdm(src).warnings, []);
+});
+
+check('bso-cluster: no usable instance address, no links, no failure', () => {
+  for (const uri of [null, '', 'dev12345', 'javascript:alert(1)//']) {
+    const src = /--- csdmflow ---\n([\s\S]*?)\n\*\*\* Script: --- playground/.exec(runCluster({ ROOT: "'SO0001'" }, uri))[1];
+    ok(!/^link /m.test(src), `links with glide.servlet.uri ${JSON.stringify(uri)}`);
+  }
 });
 
 check('bso-cluster: an unknown offering says so', () => {
