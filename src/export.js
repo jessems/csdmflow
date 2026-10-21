@@ -99,9 +99,12 @@ function drawioCells(scene) {
   const id = () => 'c' + (++seq);
   const ids = new Map();
   const geo = (x, y, w, h) => `<mxGeometry x="${r1(x)}" y="${r1(y)}" width="${r1(w)}" height="${r1(h)}" as="geometry"/>`;
-  const vertex = (value, style, x, y, w, h) => {
+  const vertex = (value, style, x, y, w, h, href) => {
     const cid = id();
-    cells.push(`<mxCell id="${cid}" value="${xml(value)}" style="${style}" vertex="1" parent="1">${geo(x, y, w, h)}</mxCell>`);
+    // a box with a link is a UserObject, which holds the label and the link
+    cells.push(href
+      ? `<UserObject label="${xml(value)}" link="${xml(href)}" id="${cid}"><mxCell style="${style}" vertex="1" parent="1">${geo(x, y, w, h)}</mxCell></UserObject>`
+      : `<mxCell id="${cid}" value="${xml(value)}" style="${style}" vertex="1" parent="1">${geo(x, y, w, h)}</mxCell>`);
     return cid;
   };
   const color = c => (c === 'none' || !c ? 'none' : '#' + (hex(c) || '000000'));
@@ -115,7 +118,7 @@ function drawioCells(scene) {
     } else if (it.type === 'node') {
       const html = it.rows.map(r => r.weight >= 600 ? `<b>${xml(r.text)}</b>` : xml(r.text)).join('<br>');
       const style = `rounded=1;absoluteArcSize=1;arcSize=${it.rx * 2};whiteSpace=wrap;html=1;fillColor=${color(it.fill)};strokeColor=${color(it.stroke)};strokeWidth=${it.sw};fontColor=${color(it.textColor)};fontSize=${r1(it.size)};fontFamily=${FONT};spacing=2;`;
-      ids.set(it, vertex(html, style, it.x, it.y, it.w, it.h));
+      ids.set(it, vertex(html, style, it.x, it.y, it.w, it.h, it.href));
     } else if (it.type === 'text') {
       const b = textBox(it);
       const align = it.anchor === 'middle' ? 'center' : it.anchor === 'end' ? 'right' : 'left';
@@ -175,7 +178,17 @@ function solid(c) {
 function pptxShapes(scene) {
   const out = [];
   let seq = 2;
-  const nv = (name, txBox) => `<p:nvSpPr><p:cNvPr id="${++seq}" name="${xml(name)} ${seq}"/><p:cNvSpPr${txBox ? ' txBox="1"' : ''}/><p:nvPr/></p:nvSpPr>`;
+  // hyperlinks on shapes: each needs a relationship in the slide's .rels
+  const links = [];
+  const click = href => {
+    if (!href) return '';
+    links.push(href);
+    return `<a:hlinkClick r:id="rIdLink${links.length}"/>`;
+  };
+  const nv = (name, txBox, href) => {
+    const hl = click(href);
+    return `<p:nvSpPr><p:cNvPr id="${++seq}" name="${xml(name)} ${seq}"${hl ? `>${hl}</p:cNvPr>` : '/>'}<p:cNvSpPr${txBox ? ' txBox="1"' : ''}/><p:nvPr/></p:nvSpPr>`;
+  };
   const xfrm = (x, y, w, h, rot) => `<a:xfrm${rot ? ` rot="${rot * 60000}"` : ''}><a:off x="${e(x)}" y="${e(y)}"/><a:ext cx="${Math.max(1, e(w))}" cy="${Math.max(1, e(h))}"/></a:xfrm>`;
   const geom = (w, h, rx) => rx
     ? `<a:prstGeom prst="roundRect"><a:avLst><a:gd name="adj" fmla="val ${Math.round(rx / Math.min(w, h) * 100000)}"/></a:avLst></a:prstGeom>`
@@ -198,7 +211,7 @@ function pptxShapes(scene) {
       out.push(`<p:sp>${nv('Rectangle')}<p:spPr>${xfrm(it.x, it.y, it.w, it.h)}${geom(it.w, it.h, it.rx)}${it.fill === 'none' ? '<a:noFill/>' : solid(it.fill)}${line(it.stroke, it.sw)}</p:spPr></p:sp>`);
     } else if (it.type === 'node') {
       const paras = it.rows.map(r => run(r.text, it.size, r.weight, it.textColor));
-      out.push(`<p:sp>${nv(it.rows.map(r => r.text).join(' '))}<p:spPr>${xfrm(it.x, it.y, it.w, it.h)}${geom(it.w, it.h, it.rx)}${solid(it.fill)}${line(it.stroke, it.sw)}</p:spPr>` +
+      out.push(`<p:sp>${nv(it.rows.map(r => r.text).join(' '), false, it.href)}<p:spPr>${xfrm(it.x, it.y, it.w, it.h)}${geom(it.w, it.h, it.rx)}${solid(it.fill)}${line(it.stroke, it.sw)}</p:spPr>` +
         body(paras, 'ctr', 'ctr', it.lineH) + '</p:sp>');
     } else if (it.type === 'text') {
       const b = textBox(it);
@@ -222,6 +235,7 @@ function pptxShapes(scene) {
         `<a:noFill/><a:ln w="${e(it.sw)}">${solid(it.color)}${dash}<a:round/>${head}${tail}</a:ln></p:spPr></p:sp>`);
     }
   }
+  out.links = links;
   return out;
 }
 
@@ -258,7 +272,9 @@ function toPptx(scene, title = 'csdmflow diagram') {
       `<p:sldSz cx="${W}" cy="${H}"/><p:notesSz cx="6858000" cy="9144000"/></p:presentation>`,
     'ppt/_rels/presentation.xml.rels': rels([['rId1', 'slideMaster', 'slideMasters/slideMaster1.xml'], ['rId2', 'slide', 'slides/slide1.xml'], ['rId3', 'theme', 'theme/theme1.xml']]),
     'ppt/slides/slide1.xml': hdr + `<p:sld ${ns}><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr/>${group}</p:spTree></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sld>`,
-    'ppt/slides/_rels/slide1.xml.rels': rels([['rId1', 'slideLayout', '../slideLayouts/slideLayout1.xml']]),
+    'ppt/slides/_rels/slide1.xml.rels': rels([['rId1', 'slideLayout', '../slideLayouts/slideLayout1.xml']]).replace('</Relationships>',
+      shapes.links.map((href, i) => `<Relationship Id="rIdLink${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xml(href)}" TargetMode="External"/>`).join('') +
+      '</Relationships>'),
     'ppt/slideLayouts/slideLayout1.xml': hdr + `<p:sldLayout ${ns} preserve="1">${emptyTree.replace('<p:cSld>', '<p:cSld name="Blank">')}<p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:sldLayout>`,
     'ppt/slideLayouts/_rels/slideLayout1.xml.rels': rels([['rId1', 'slideMaster', '../slideMasters/slideMaster1.xml']]),
     'ppt/slideMasters/slideMaster1.xml': hdr + `<p:sldMaster ${ns}>${emptyTree}` +

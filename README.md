@@ -208,6 +208,23 @@ its decimal code (`#35;` is `#`). The same codes work in `title`, `subtitle`
 and a CI's class, e.g. `CI(Linux Server #40;2#41;)` for a box titled
 "Linux Server (2)". Names without quotes behave as before.
 
+### Links
+
+A `link` line makes a box clickable, for example to open the record it stands
+for:
+
+```
+SI crm-prod: Customer Portal Prod
+link crm-prod "https://example.service-now.com/cmdb_ci_service_discovered.do?sys_id=…"
+```
+
+- **SVG:** the box opens the URL in a new tab.
+- **PowerPoint and draw.io:** the shape carries the link too.
+
+Only `http` and `https` URLs are allowed. A model can arrive in a shared link,
+and any other kind of URL could run code on the page that draws it. Inside the
+quotes, `#35;` stands for `#`, as in names.
+
 ### Entity types
 
 | Type | Means | Domain colour |

@@ -118,5 +118,31 @@ wlan -> g3 : Depends On
   eq(arrowsInto(gf.replace(/ lane=offering/g, ''), 'g2'), 1); // what the lane prevents
 });
 
+// link <id> "<url>": the box becomes a link in the SVG, PowerPoint and draw.io
+check('a linked box opens its url, in every format', () => {
+  const browser = require('../src/browser');
+  const { toPptx, toDrawio } = require('../src/export');
+  const url = 'https://dev.service-now.com/cmdb_ci.do?sys_id=1&x=#y';
+  const src = `BA a: App\nSI b: Prod\na -> b\nlink b "${url.replace(/#/g, '#35;')}"\n`;
+  const { svg } = renderSvg(compileCsdm(src).gf);
+  eq(svg.match(/<a [^>]*>/g), ['<a href="https://dev.service-now.com/cmdb_ci.do?sys_id=1&amp;x=#y" target="_blank" rel="noopener noreferrer">']);
+  if (!/<a [^>]*>\n<g data-id="b">/.test(svg)) throw new Error('the link does not wrap box b');
+  const sc = browser.scene(src);
+  if (!toDrawio(sc).includes('link="https://dev.service-now.com/cmdb_ci.do?sys_id=1&amp;x=#y"')) throw new Error('no link in draw.io');
+  const pptx = Buffer.from(toPptx(sc)).toString('latin1');
+  if (!/hlinkClick r:id="rIdLink1"/.test(pptx) || !/Id="rIdLink1"[^>]*TargetMode="External"/.test(pptx)) throw new Error('no hyperlink in PowerPoint');
+});
+
+check('only web links, and only to boxes that exist', () => {
+  for (const bad of ['javascript:alert(1)', 'data:text/html,x', 'ftp://x', 'https://a b']) {
+    let err = null;
+    try { compileCsdm(`SI b: B\nlink b "${bad}"\n`); } catch (e) { err = e; }
+    if (!err || !/only http and https/.test(err.message)) throw new Error(`accepted ${bad}`);
+  }
+  let err = null;
+  try { compileCsdm('SI b: B\nlink nope "https://x"\n'); } catch (e) { err = e; }
+  if (!err || !/unknown entity "nope"/.test(err.message)) throw new Error('accepted an unknown box');
+});
+
 if (failed) process.exit(1);
 console.log('relations: ok');

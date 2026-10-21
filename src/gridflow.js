@@ -71,6 +71,7 @@ function parse(source) {
   const classes = new Map();
   const linkClasses = new Map();
   const shifts = [];
+  const links = [];
   const meta = { background: null, title: null, subtitle: null, box: null, gap: null, legend: [], legendTitle: null, key: [], notes: [], stacks: [], variants: [] };
 
   const kvs = (parts, ln) => {
@@ -163,6 +164,17 @@ function parse(source) {
     m = /^background\s+(\S+)(?:\s+(\S+))?$/.exec(line);
     if (m) { meta.background = [m[1], m[2] || m[1]]; return; }
 
+    // link <id> "<url>": clicking the box opens the url
+    m = /^link\s+([A-Za-z0-9][\w-]*)\s+"([^"]*)"$/.exec(line);
+    if (m) {
+      const url = unescapeText(m[2]);
+      // only web links: a model can arrive in a shared link, and a javascript:
+      // url would run on whatever page draws it
+      if (!/^https?:\/\/[^\s]+$/i.test(url)) throw parseError(`link: only http and https urls, not "${url}"`, ln);
+      links.push({ id: m[1], url, line: ln });
+      return;
+    }
+
     m = /^shift\s+([A-Za-z0-9][\w-]*)\s+(-?[\d.]+)(?:\s+(-?[\d.]+))?$/.exec(line);
     if (m) { shifts.push({ id: m[1], dx: +m[2], dy: m[3] ? +m[3] : 0, line: ln }); return; }
 
@@ -232,6 +244,11 @@ function parse(source) {
     const n = nodes.get(sh.id);
     if (!n) throw parseError(`shift: unknown node "${sh.id}" (known: ${known()})`, sh.line);
     n.dx = sh.dx; n.dy = sh.dy;
+  }
+  for (const l of links) {
+    const n = nodes.get(l.id);
+    if (!n) throw parseError(`link: unknown node "${l.id}" (known: ${known()})`, l.line);
+    n.href = l.url;
   }
   return { nodes, grid, edges, classes, meta };
 }
@@ -1337,8 +1354,9 @@ function setFont(px) {
 //   path        { points, d, color, sw, dash, arrowEnd, arrowStart }
 //               d is the SVG path (with hops over crossings); points the corners
 //   circle      { cx, cy, r, fill }
-//   node        { id, x, y, w, h, stack, rx, fill, stroke, sw, textColor, size, rows }
+//   node        { id, href, x, y, w, h, stack, rx, fill, stroke, sw, textColor, size, rows }
 //               one box with its own text; rows: [{ text, weight, x, y }];
+//               href: where clicking the box leads (a `link` line), if anywhere;
 //               stack: depth of the back cards, where lines below/right end
 //
 // Items carry `role` (title, legend, key, subtitle, variant, stack, note,
@@ -1469,7 +1487,7 @@ function buildScene(source) {
     ];
     const y0 = n.cy - ((rows.length - 1) * LINE_H) / 2 + 5;
     rows.forEach((r, i) => { r.x = n.cx; r.y = y0 + i * LINE_H; });
-    items.push({ type: 'node', id: n.id, x: n.x, y: n.y, w: n.w, h: n.h, ...(n.stack ? { stack: STACK_D } : {}), rx: 6, fill, stroke, sw: STROKE_W, textColor, size: FONT_SIZE, lineH: LINE_H, rows });
+    items.push({ type: 'node', id: n.id, ...(n.href ? { href: n.href } : {}), x: n.x, y: n.y, w: n.w, h: n.h, ...(n.stack ? { stack: STACK_D } : {}), rx: 6, fill, stroke, sw: STROKE_W, textColor, size: FONT_SIZE, lineH: LINE_H, rows });
   }
 
   for (const nt of model.meta.notes) {
@@ -1539,11 +1557,13 @@ function sceneToSvg(scene) {
     } else if (it.type === 'circle') {
       out.push(`<circle cx="${fmt(it.cx)}" cy="${fmt(it.cy)}" r="${it.r}" fill="${esc(it.fill)}"/>`);
     } else if (it.type === 'node') {
+      if (it.href) out.push(`<a href="${esc(it.href)}" target="_blank" rel="noopener noreferrer">`);
       out.push(tag(it.id), rect(it));
       for (const r of it.rows) {
         out.push(text({ anchor: 'middle', size: it.size, weight: r.weight, fill: it.textColor }, r.x, r.y, esc(r.text)));
       }
       out.push('</g>');
+      if (it.href) out.push('</a>');
     }
     if (owned(it)) out.push('</g>');
   }

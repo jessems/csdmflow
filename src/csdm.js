@@ -19,6 +19,7 @@
 //                                         the quotes are text; #quot; is a `"`
 //                                         and #<code>; any character
 //   a -> b [: label override]
+//   link <id> "<url>"                    clicking the box opens the url (http/https)
 
 const TYPES = {
   BC: { title: 'Business Capability', domain: 'design' },
@@ -153,6 +154,7 @@ function parseCsdm(source) {
   const opts = { reach: PRESETS.cross, lanes: false, theme: 'dark', linecolors: 'domain', title: null, subtitle: null, warnings: [] };
   const ents = new Map();
   const rels = [];
+  const links = [];
   const typeAlt = Object.keys(TYPES).join('|');
   const entRe = new RegExp(`^(${typeAlt})(?:\\(([^)]*)\\))?\\s+(?:([a-z0-9][a-z0-9-]*):\\s*)?(.+)$`);
 
@@ -176,6 +178,14 @@ function parseCsdm(source) {
     if ((m = /^(title|subtitle)\s+"([^"]*)"$/.exec(line))) { opts[m[1]] = unescapeText(m[2]); return; }
     if ((m = /^([a-z0-9][a-z0-9-]*)\s*->\s*([a-z0-9][a-z0-9-]*)\s*(?::\s*(.+))?$/.exec(line))) {
       rels.push({ from: m[1], to: m[2], label: m[3] ? m[3].trim() : null, ln });
+      return;
+    }
+    if ((m = /^link\s+([a-z0-9][a-z0-9-]*)\s+"([^"]*)"$/.exec(line))) {
+      const url = unescapeText(m[2]);
+      // only web links: a model can arrive in a shared link, and a javascript:
+      // url would run on whatever page draws it
+      if (!/^https?:\/\/[^\s]+$/i.test(url)) throw csdmError(`link: only http and https urls, not "${url}"`, ln);
+      links.push({ id: m[1], url, ln });
       return;
     }
     if ((m = entRe.exec(line))) {
@@ -216,6 +226,10 @@ function parseCsdm(source) {
     // data flows ("Sends data to::Receives data from") have their own line
     // style on the reference slides, whatever the two types are
     if (r.label && DATA_FLOW.test(r.label)) r.sem = { label: r.label, kind: 'data' };
+  }
+  for (const l of links) {
+    if (!ents.has(l.id)) throw csdmError(`unknown entity "${l.id}"`, l.ln);
+    ents.get(l.id).href = l.url;
   }
   return { opts, ents, rels };
 }
@@ -618,6 +632,8 @@ function compileCsdm(source) {
     if (ents.get(a).type === 'TMSO' && instanceGroup(b)) attrs += ' lane=offering';
     out.push(`${a} ${op} ${b}${lab} {${attrs}}`);
   }
+
+  for (const e of ents.values()) if (e.href) out.push(`link ${e.id} "${q(e.href)}"`);
 
   // variants: labelled back cards (environments, locations)
   for (const e of ents.values()) {
