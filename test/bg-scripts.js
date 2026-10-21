@@ -156,7 +156,7 @@ const HIER = {
 const LABEL = { cmdb_ci_appl: 'Application', cmdb_ci_win_server: 'Windows Server', cmdb_ci_db_mssql_instance: 'MSSQL Instance' };
 const tablesOf = cls => [cls, ...(HIER[cls] || ['cmdb_ci'])];
 
-function mockInstance(servletUri = 'https://dev12345.service-now.com/') {
+function mockInstance(instanceName = 'dev12345') {
   const ci = (sys_id, sys_class_name, name, extra) => ({ sys_id, sys_class_name, name, ...extra });
   const cmdb_ci = [
     ci('bs', 'cmdb_ci_service_business', 'Email', { spm_service_portfolio: 'sp' }),
@@ -260,16 +260,17 @@ function mockInstance(servletUri = 'https://dev12345.service-now.com/') {
     TableUtils: function (cls) { const t = tablesOf(cls); this.getTables = () => ({ size: () => t.length, get: i => t[i] }); },
     gs: {
       print: s => out.push(`*** Script: ${s}`),
-      getProperty: k => ({ instance_name: 'dev12345', 'glide.servlet.uri': servletUri })[k],
+      // glide.servlet.uri differs on purpose: links come from instance_name
+      getProperty: k => ({ instance_name: instanceName, 'glide.servlet.uri': 'https://wrong.example.com/' })[k],
     },
   };
   return { context, out, queries };
 }
 
 // settings: {NAME: 'js value'} for the lines at the top of the script
-// servletUri: the instance's glide.servlet.uri
-function runCluster(settings, servletUri) {
-  const { context, out, queries } = mockInstance(servletUri);
+// instanceName: the instance's instance_name property
+function runCluster(settings, instanceName) {
+  const { context, out, queries } = mockInstance(instanceName);
   let code = fs.readFileSync(path.join(pasteDir, 'bso-cluster.js'), 'utf8');
   for (const [k, v] of Object.entries(settings)) code = code.replace(new RegExp(`^var ${k} = .*?;`, 'm'), `var ${k} = ${v};`);
   vm.runInNewContext(code, context);
@@ -339,9 +340,9 @@ check('bso-cluster: every box links to its record on the instance', () => {
 });
 
 check('bso-cluster: no usable instance address, no links, no failure', () => {
-  for (const uri of [null, '', 'dev12345', 'javascript:alert(1)//']) {
-    const src = /--- csdmflow ---\n([\s\S]*?)\n\*\*\* Script: --- playground/.exec(runCluster({ ROOT: "'SO0001'" }, uri))[1];
-    ok(!/^link /m.test(src), `links with glide.servlet.uri ${JSON.stringify(uri)}`);
+  for (const name of [null, '', 'dev 1', 'evil.com/x', 'javascript:alert(1)//']) {
+    const src = /--- csdmflow ---\n([\s\S]*?)\n\*\*\* Script: --- playground/.exec(runCluster({ ROOT: "'SO0001'" }, name))[1];
+    ok(!/^link /m.test(src), `links with instance_name ${JSON.stringify(name)}`);
   }
 });
 

@@ -50,7 +50,8 @@ Each script prints three things:
 2. **An editor link** that opens the diagram directly. The source in it is
    compressed (`#z=`, deflate then base64url), so it stays a few hundred
    characters for a typical cluster. Every box in the diagram links to its
-   record on the instance (`glide.servlet.uri`); a stack of CIs or a member
+   record on the instance (`https://<instance_name>.service-now.com/`, from the
+   `instance_name` property); a stack of CIs or a member
    count links to the list of those CIs.
 3. **The csdm-graph JSON** on one line. This is the data behind the diagram.
    To turn copied output back into source, maybe with another layout, run:

@@ -699,14 +699,14 @@ var Cmdb = (function () {
     return hierarchy[cls];
   }
 
-  // The instance's own address, as its users reach it (custom domains too);
-  // '' when the property is unset or not a web address: then boxes get no links
+  // The instance's address, from the instance_name property (the same name the
+  // diagram's subtitle shows): https://<instance_name>.service-now.com/; '' when
+  // the property is unset or not a plain instance name: then boxes get no links
   var base = null;
   function baseUrl() {
     if (base === null) {
-      base = str(gs.getProperty('glide.servlet.uri'));
-      if (base && base.charAt(base.length - 1) !== '/') base += '/';
-      if (!/^https?:\/\/[^\s\/]+\/\S*$/i.test(base)) base = '';
+      var name = instance();
+      base = /^[a-z0-9][a-z0-9-]*$/i.test(name) ? 'https://' + name + '.service-now.com/' : '';
     }
     return base;
   }
