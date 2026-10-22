@@ -15,6 +15,7 @@ script with its `//#include`d libraries inlined.
 | Script | Starts from | Draws |
 |---|---|---|
 | [`bso-cluster.js`](bso-cluster.js) | a business service offering's sys_id or number (`ROOT`); a tech offering is refused | the offering, its business service and portfolio, its service instances, their applications, tech offerings and dynamic CI groups, the groups' tech offerings and members, and each instance's service map |
+| [`bso-transport.js`](bso-transport.js) | business services and the offerings of each (`SERVICES`: an array of `{name, number, offerings: [{name, number}]}`); a tech offering is left out | no diagram: what to move to carry the offerings' modelling to another instance. One link per table to a list filtered to the records to export as XML (CMDB groups, their encoded queries, dynamic CI groups, service instances, relationships), the import order, and for each service instance the dynamic CI groups to add back by hand on the target (`TARGET_INSTANCE`) |
 
 ## What gets walked
 
@@ -43,7 +44,7 @@ script and the inspector draw the same cluster:
 ring of records at a time, so a ring of 200 CIs takes a few queries, not
 hundreds.
 
-Each script prints three things:
+`bso-cluster` prints three things (`bso-transport` prints its own steps instead):
 
 1. **The csdmflow source.** Paste it into the
    [playground](https://jessems.github.io/csdmflow/) or save it as a `.csdm` file.

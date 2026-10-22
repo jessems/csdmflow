@@ -159,17 +159,24 @@ const tablesOf = cls => [cls, ...(HIER[cls] || ['cmdb_ci'])];
 function mockInstance(instanceName = 'dev12345') {
   const ci = (sys_id, sys_class_name, name, extra) => ({ sys_id, sys_class_name, name, ...extra });
   const cmdb_ci = [
-    ci('bs', 'cmdb_ci_service_business', 'Email', { spm_service_portfolio: 'sp' }),
+    ci('bs', 'cmdb_ci_service_business', 'Email', { number: 'BSN0001', spm_service_portfolio: 'sp' }),
     ci('bso', 'service_offering', 'Email "Standard", EU', { number: 'SO0001', parent: 'bs' }),
     ci('bso-other', 'service_offering', 'Email Premium', { number: 'SO0009', parent: 'bs' }),
     ci('si-prod', 'cmdb_ci_service_discovered', 'Exchange Prod'),
     ci('si-dr', 'cmdb_ci_service_calculated', 'Exchange DR'),
+    // a manually populated instance with dynamic CI groups as its entry points (bso-transport)
+    ci('bso2', 'service_offering', 'Network Access', { number: 'SO0004', parent: 'bs' }),
+    ci('si-man', 'cmdb_ci_service_discovered', 'VPN Prod'),
+    ci('dcg-man1', 'cmdb_ci_query_based_service', 'VPN gateways', { cmdb_group: 'grp-1' }),
+    ci('dcg-man2', 'cmdb_ci_query_based_service', 'VPN databases', { cmdb_group: 'grp-2' }),
+    ci('tms-net', 'cmdb_ci_service_technical', 'Network Management'),
+    ci('tmso-net', 'service_offering', 'VPN Support', { number: 'SO0005', parent: 'tms-net' }),
     ci('si-other', 'cmdb_ci_service_discovered', 'Other App'),
-    ci('dcg-dr', 'cmdb_ci_query_based_service', 'Exchange DR servers'),
+    ci('dcg-dr', 'cmdb_ci_query_based_service', 'Exchange DR servers', { cmdb_group: 'grp-dr' }),
     // an application service populated by the Dynamic CI Group method: stored as a group
-    ci('si-q', 'cmdb_ci_query_based_service', 'Exchange Archive'),
+    ci('si-q', 'cmdb_ci_query_based_service', 'Exchange Archive', { cmdb_group: 'grp-q' }),
     ci('dcg-win', 'cmdb_ci_query_based_service', 'All Windows servers'),
-    ci('tms-win', 'cmdb_ci_service_technical', 'Windows Server Management'),
+    ci('tms-win', 'cmdb_ci_service_technical', 'Windows Server Management', { number: 'BSN0002' }),
     ci('tmso-win', 'service_offering', 'Windows Server Support', { number: 'SO0002', parent: 'tms-win' }),
     ci('tms-app', 'cmdb_ci_service_technical', 'Messaging Management'),
     ci('tmso-app', 'service_offering', 'Exchange App Support', { number: 'SO0003', parent: 'tms-app' }),
@@ -206,11 +213,21 @@ function mockInstance(instanceName = 'dev12345') {
       rel('app', 'Depends on::Used by', 'exdb'),
       rel('other-app', 'Runs on::Runs', 'ex01'), // above a shared server: not followed
       rel('ex01', 'Connects to::Connected by', 'exdb'), // a type the walk does not follow
+      rel('bso2', 'Depends on::Used by', 'si-man'),
+      rel('si-man', 'Depends on::Used by', 'dcg-man1'),
+      rel('tmso-net', 'Contains::Contained by', 'dcg-man1'),
+      rel('tmso-net', 'Contains::Contained by', 'si-man'),
     ],
-    svc_ci_assoc: [['dcg-dr', 'dr01'], ['dcg-dr', 'dr02'], ['dcg-win', 'ex01'], ['dcg-win', 'ex02'], ['dcg-win', 'dr01'], ['dcg-win', 'other99'], ['dcg-win', 'exdb'], ['si-q', 'dr02']]
+    svc_ci_assoc: [['dcg-dr', 'dr01'], ['dcg-dr', 'dr02'], ['dcg-win', 'ex01'], ['dcg-win', 'ex02'], ['dcg-win', 'dr01'], ['dcg-win', 'other99'], ['dcg-win', 'exdb'], ['si-q', 'dr02'], ['si-man', 'dcg-man2'], ['si-man', 'dr01']]
       .map(([service_id, ci_id], i) => ({ sys_id: `a${i}`, service_id, ci_id })),
     spm_service_portfolio: [{ sys_id: 'sp', name: 'Collaboration' }],
     spm_taxonomy_node: [],
+    cmdb_group: [['grp-1', 'VPN gateways'], ['grp-2', 'VPN databases'], ['grp-dr', 'Exchange DR servers'], ['grp-q', 'Exchange Archive'], ['grp-x', 'Unrelated']]
+      .map(([sys_id, group_name]) => ({ sys_id, group_name })),
+    cmdb_group_contains_encoded_query: [['eq1', 'grp-1'], ['eq2', 'grp-2'], ['eq3', 'grp-dr'], ['eq4', 'grp-q'], ['eq5', 'grp-x']]
+      .map(([sys_id, group]) => ({ sys_id, group })),
+    cmdb_group_contains_qb_query: [{ sys_id: 'qb1', group: 'grp-2' }],
+    cmdb_group_contains_ci: [],
   };
 
   const queries = [];
@@ -264,18 +281,19 @@ function mockInstance(instanceName = 'dev12345') {
       getProperty: k => ({ instance_name: instanceName, 'glide.servlet.uri': 'https://wrong.example.com/' })[k],
     },
   };
-  return { context, out, queries };
+  return { context, out, queries, db };
 }
 
 // settings: {NAME: 'js value'} for the lines at the top of the script
 // instanceName: the instance's instance_name property
-function runCluster(settings, instanceName) {
-  const { context, out, queries } = mockInstance(instanceName);
-  let code = fs.readFileSync(path.join(pasteDir, 'bso-cluster.js'), 'utf8');
-  for (const [k, v] of Object.entries(settings)) code = code.replace(new RegExp(`^var ${k} = .*?;`, 'm'), `var ${k} = ${v};`);
+function runScript(file, settings, instanceName) {
+  const { context, out, queries, db } = mockInstance(instanceName);
+  let code = fs.readFileSync(path.join(pasteDir, file), 'utf8');
+  for (const [k, v] of Object.entries(settings)) code = code.replace(new RegExp(`^var ${k} = [\\s\\S]*?;`, 'm'), `var ${k} = ${v};`);
   vm.runInNewContext(code, context);
-  return Object.assign(out.join('\n'), { queries });
+  return Object.assign(out.join('\n'), { queries, db });
 }
+const runCluster = (settings, instanceName) => runScript('bso-cluster.js', settings, instanceName);
 
 check('bso-cluster: walks the cluster around an offering', () => {
   const text = runCluster({ ROOT: "'SO0001'" });
@@ -362,6 +380,102 @@ check('bso-cluster: the printed source compiles and renders', () => {
   eq(c.warnings, []);
   ok(renderSvg(c.gf).svg.startsWith('<svg'), 'no svg');
   ok(/^title "Email #quot;Standard#quot;, EU"$/m.test(src), 'title');
+});
+
+// --- bso-transport on the same mocked instance --------------------------------
+
+const runTransport = (settings, instanceName) => runScript('bso-transport.js', settings, instanceName);
+// SERVICES as a script would have it: [[service number, name, [[offering number, name], …]], …]
+const services = list => JSON.stringify(list.map(([number, name, offerings]) =>
+  ({ name, number, offerings: offerings.map(([n, nm]) => ({ name: nm, number: n })) })), null, 2);
+const EMAIL = ['BSN0001', 'Email', [['SO0001', 'Email "Standard", EU'], ['SO0004', 'Network Access']]];
+// the printed lists: [[table, ids or null]]; ids from the link's sysparm_query
+function exportLists(text) {
+  const lines = text.split('\n').map(l => l.replace(/^\*\*\* Script: /, ''));
+  const out = [];
+  lines.forEach((l, i) => {
+    const m = /^\d+\. (\w+) \((\d+)\)$/.exec(l);
+    if (!m) return;
+    const link = lines[i + 1].trim();
+    const q = /sysparm_query=(.*)$/.exec(link);
+    out.push([m[1], q ? decodeURIComponent(q[1]).replace(/^sys_idIN/, '').split(',') : null, link]);
+  });
+  return out;
+}
+
+check('bso-transport: lists every record to export, per table, in import order', () => {
+  const text = runTransport({ SERVICES: services([EMAIL]) });
+  const relId = (p, c) => text.db.cmdb_rel_ci.find(r => r.parent === p && r.child === c).sys_id;
+  const lists = exportLists(text);
+  eq(lists.map(l => l[0]), ['cmdb_group', 'cmdb_group_contains_encoded_query', 'cmdb_ci_query_based_service',
+    'cmdb_ci_service_discovered', 'cmdb_ci_service_calculated', 'cmdb_rel_ci']);
+  eq(lists.slice(0, 5).map(l => l[1]), [['grp-1', 'grp-2', 'grp-dr', 'grp-q'], ['eq1', 'eq2', 'eq3', 'eq4'],
+    ['dcg-dr', 'dcg-man1', 'dcg-man2', 'si-q'], ['si-man', 'si-prod'], ['si-dr']]);
+  // offering -> instance and tech offering Contains instance or group; never instance -> its groups
+  eq(lists[5][1], [['bso', 'si-prod'], ['bso', 'si-dr'], ['bso', 'si-q'], ['bso2', 'si-man'], ['tmso-win', 'si-q'],
+    ['tmso-win', 'dcg-dr'], ['tmso-net', 'dcg-man1'], ['tmso-net', 'si-man']].map(([p, c]) => relId(p, c)).sort());
+  ok(lists.every(l => l[2].startsWith('https://dev12345.service-now.com/' + l[0] + '_list.do?sysparm_query=')), 'a link that is not a filtered list');
+  ok(!/\?XML|EXPORT/.test(text), 'a direct export link');
+  ok(/warning: VPN databases also has saved queries \(cmdb_group_contains_qb_query\)/.test(text), 'no warning about the saved query');
+});
+
+check('bso-transport: says which groups to add to each instance, linking to the target', () => {
+  const text = runTransport({ SERVICES: services([EMAIL]), TARGET_INSTANCE: "'acmeprod'" });
+  const t = text.replace(/\*\*\* Script: /g, '');
+  ok(t.includes('- VPN Prod https://acmeprod.service-now.com/cmdb_ci_service_discovered.do?sys_id=si-man\n' +
+    '    Choose Manual, Class "Dynamic CI Group", CI "VPN databases".\n' +
+    '    Then Add Method and do the same for: "VPN gateways".\n    Save.'), t);
+  ok(t.includes('- Exchange Archive: populated by the Dynamic CI Group method'), 'group-populated instance');
+  ok(t.includes('- Exchange Prod https://acmeprod.service-now.com/cmdb_ci_service_discovered.do?sys_id=si-prod: no dynamic CI groups found'), 'instance without groups');
+  ok(/- Exchange DR \S+: a cmdb_ci_service_calculated \(cmdb_ci_service_calculated\), not a manually populated instance/.test(t), 'other class');
+  // the exports still come from this instance
+  ok(exportLists(text).every(l => l[2].startsWith('https://dev12345.service-now.com/')), 'export from the target');
+  ok(/--- 4\. Then import file 6 \(cmdb_rel_ci\) on acmeprod ---/.test(t), 'relationships last');
+});
+
+check('bso-transport: an empty table gets no link, never an unfiltered list', () => {
+  const lists = exportLists(runTransport({ SERVICES: services([['BSN0001', 'Email', [['SO0009', 'Email Premium']]]]) }));
+  eq(lists.map(l => [l[0], l[1] && l[1].length]), [['cmdb_group', null], ['cmdb_group_contains_encoded_query', null],
+    ['cmdb_ci_query_based_service', null], ['cmdb_ci_service_discovered', 1], ['cmdb_rel_ci', 1]]);
+  eq(lists[0][2], 'nothing to export');
+});
+
+check('bso-transport: loops through services and their offerings, summing up per service', () => {
+  const text = runTransport({ SERVICES: services([['BSN0001', 'Email', [['SO0001', 'Email "Standard", EU']]], ['BSN0001', 'Email', [['SO0004', 'Network Access'], ['SO0001', 'Email "Standard", EU']]]]) });
+  const t = text.replace(/\*\*\* Script: /g, '');
+  ok(t.includes('Transport of 2 offerings: 4 service instances,'), t);
+  ok(t.includes('  Email (BSN0001): Email "Standard", EU (SO0001)\n  Email (BSN0001): Network Access (SO0004), Email "Standard", EU (SO0001)'), t);
+  ok(!/warning: (?!VPN databases)/.test(t), t);
+});
+
+check('bso-transport: checks each offering against its service, by number', () => {
+  const t = runTransport({ SERVICES: services([
+    ['BSN0001', 'E-mail', [['SO0002', 'Windows Server Support'], ['SO9999', 'Ghost'], ['SO0004', 'Network Acces']]],
+    ['BSN0002', 'Windows Server Management', [['SO0001', 'Email "Standard", EU']]],
+    ['BSN9999', 'Nowhere', [['SO0004', 'Network Access']]],
+  ]) }).replace(/\*\*\* Script: /g, '');
+  ok(t.includes('warning: The service BSN0001 is called "Email" here, not "E-mail".'), t);
+  ok(t.includes('warning: Windows Server Support (SO0002) is a TMSO, not a BSO; left out.'), t);
+  ok(t.includes('warning: No service offering with sys_id or number "SO9999" (Ghost); left out.'), t);
+  ok(t.includes('warning: The offering SO0004 is called "Network Access" here, not "Network Acces".'), t);
+  ok(t.includes('warning: Email "Standard", EU (SO0001) is not an offering of Windows Server Management (BSN0002); transported anyway.'), t);
+  ok(t.includes('warning: No service with number Nowhere (BSN9999), so its offerings are not checked against it.'), t);
+  ok(t.includes('Transport of 2 offerings:'), t);
+});
+
+check('bso-transport: an unusable SERVICES says what is wrong', () => {
+  ok(/Fill in SERVICES first/.test(runTransport({})), 'empty');
+  ok(/Fill in SERVICES first/.test(runTransport({ SERVICES: "'SO0001'" })), 'not an array');
+  const t = runTransport({ SERVICES: JSON.stringify([7, { name: 'Email', number: 'BSN0001' }, { name: 'Email', number: 'BSN0001', offerings: [{ name: 'x' }] }]) });
+  ok(/SERVICES\[0\] is not a service object/.test(t), t);
+  ok(/The service Email \(BSN0001\) has no offerings/.test(t), t);
+  ok(/Offering 1 of Email \(BSN0001\) has no number/.test(t), t);
+  ok(/No business service offerings to transport/.test(t), t);
+});
+
+check('bso-transport: a run says first which version of the script it is', () => {
+  const version = /^var SCRIPT_VERSION = '(\w{8})';$/m.exec(fs.readFileSync(path.join(pasteDir, 'bso-transport.js'), 'utf8'))[1];
+  eq(runTransport({}).split('\n')[0], `*** Script: bso-transport version ${version}`);
 });
 
 console.log(`${failed ? 'FAILED' : 'ok'} — bg-scripts`);

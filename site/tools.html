@@ -34,6 +34,7 @@
     .settings th { font: 600 13px var(--mono); white-space: nowrap; }
     .settings td { color: var(--ink-soft); line-height: 1.5; }
     .settings code { color: var(--ink); }
+    .settings-example { margin: 8px 0; padding: 10px 12px; overflow-x: auto; background: var(--paper-deep); border-radius: 6px; font: 12px/1.55 var(--mono); color: var(--ink); }
     .source { border-top: 1px solid var(--rule); }
     .source summary { cursor: pointer; padding: 14px 24px; font-size: 14px; color: var(--ink-soft); }
     .source summary:hover { color: var(--ink); }
@@ -132,6 +133,66 @@
         <details class="source">
           <summary>Show the script</summary>
           <pre data-source="tools/bg-scripts/bso-cluster.js">Loading…</pre>
+        </details>
+      </article>
+
+      <article class="tool-card" id="bso-transport">
+        <div class="tool-head">
+          <div>
+            <span class="tool-kind">Background script · read-only</span>
+            <h3>BSO transport</h3>
+            <p>Lists what to move to carry the modelling around business service offerings to another instance: a filtered list per table to export as XML, the order to import them in, and the steps to do by hand on each service instance.</p>
+          </div>
+          <div class="tool-actions">
+            <button class="btn btn-primary" type="button" data-copy="tools/bg-scripts/bso-transport.js" disabled>Copy script</button>
+            <a class="btn" href="tools/bg-scripts/bso-transport.js" download="bso-transport.js">Download .js</a>
+            <a class="btn" href="https://github.com/jessems/csdmflow/blob/main/tools/bg-scripts/bso-transport.js">Source ↗</a>
+            <span class="tool-status" role="status" aria-live="polite"></span>
+          </div>
+        </div>
+        <div class="tool-body">
+          <section>
+            <h4>How to run it</h4>
+            <ol>
+              <li>On the <b>source</b> instance, open <b>System Definition › Scripts - Background</b>, in the <b>global</b> scope.</li>
+              <li>Paste the script and fill in <code>SERVICES</code> with the business services and the offerings of each to transport (see Settings). Set <code>TARGET_INSTANCE</code> to the target's instance name.</li>
+              <li>Select <b>Run script</b>.</li>
+              <li>Open each list it prints, right-click a column header and select <b>Export › XML</b>.</li>
+              <li>On the target, import the files in the order printed (right-click a column header in any list › <b>Import XML</b>), do the manual steps on each service instance, then import the relationships last.</li>
+            </ol>
+            <h4>What it prints</h4>
+            <ul>
+              <li><b>One link per table</b>, in import order: <code>cmdb_group</code>, <code>cmdb_group_contains_encoded_query</code>, <code>cmdb_ci_query_based_service</code>, the service instances per class (<code>cmdb_ci_service_discovered</code>, …) and <code>cmdb_rel_ci</code>. Each opens the list filtered to those records by sys_id. A table with nothing to export gets no link.</li>
+              <li><b>For each service instance</b>, a link to it on the target and the dynamic CI groups to add with the Manual population method, one <b>Add Method</b> per group.</li>
+              <li><b>Warnings</b> for anything the lists leave out, such as a group that also uses saved queries.</li>
+            </ul>
+            <h4>Safe to run</h4>
+            <p>It only reads: plain queries, no inserts, updates or deletes. Exporting and importing is left to you.</p>
+          </section>
+          <section>
+            <h4>Settings</h4>
+            <table class="settings">
+              <tbody>
+                <tr><th>SERVICES</th><td>An array of business services, each with a <code>name</code>, a <code>number</code> and its <code>offerings</code>, each with a <code>name</code> and a <code>number</code>:
+<pre class="settings-example">[
+  { "name": "Email", "number": "BSN0001001", "offerings": [
+    { "name": "Email Standard", "number": "SO0001234" },
+    { "name": "Email Premium", "number": "SO0001235" }
+  ] }
+]</pre>
+The names are there to read; the numbers decide. A warning says when a name differs from the instance's, or an offering isn't one of its service's. Tech offerings and unknown ones are left out with a warning.</td></tr>
+                <tr><th>TARGET_INSTANCE</th><td>The target's instance name (e.g. <code>acmeprod</code>), for the links in the manual steps. Empty links to the source instance. The export lists always open on the source.</td></tr>
+              </tbody>
+            </table>
+            <h4>What it collects</h4>
+            <p>From the offerings: the service instances they depend on, the dynamic CI groups that populate them (related to them or on their maps), the CMDB groups behind those and their encoded queries. It exports the relationships offering → instance and tech offering <i>Contains</i> instance or group.</p>
+            <p><b>An instance's own relationships to its groups are left out</b>: they belong to its population, which the platform rebuilds when you add the groups by hand. Importing them as XML would skip the business rules that keep a service's map together.</p>
+            <p>The offerings and tech offerings themselves aren't exported: they must already exist on the target, with the same sys_ids.</p>
+          </section>
+        </div>
+        <details class="source">
+          <summary>Show the script</summary>
+          <pre data-source="tools/bg-scripts/bso-transport.js">Loading…</pre>
         </details>
       </article>
 
